@@ -1,0 +1,47 @@
+{
+  "test_rows": 214255,
+  "attack_rows": 106436,
+  "benign_rows": 107819,
+  "models": {
+    "baseline": {
+      "total": 214255,
+      "tp": 106286,
+      "tn": 106803,
+      "fp": 1016,
+      "fn": 150,
+      "accuracy": 0.994557886630417,
+      "fpr_percent": 0.9423199992580157,
+      "fnr_percent": 0.14092976060731333
+    },
+    "v1": {
+      "total": 214255,
+      "tp": 106256,
+      "tn": 106803,
+      "fp": 1016,
+      "fn": 180,
+      "accuracy": 0.9944178665608737,
+      "fpr_percent": 0.9423199992580157,
+      "fnr_percent": 0.16911571272877599
+    },
+    "v2": {
+      "total": 214255,
+      "tp": 106202,
+      "tn": 106844,
+      "fp": 975,
+      "fn": 234,
+      "accuracy": 0.994357191197405,
+      "fpr_percent": 0.9042933063745722,
+      "fnr_percent": 0.21985042654740877
+    }
+  },
+  "important_transition_counts": {
+    "persistent_fn": 135,
+    "v1_repaired_v2_regressed_fn": 3,
+    "v2_only_fn": 71,
+    "fn_repaired_and_kept": 5,
+    "persistent_fp": 930,
+    "v1_repaired_v2_regressed_fp": 11,
+    "v2_only_fp": 12,
+    "fp_repaired_and_kept": 30
+  }
+}

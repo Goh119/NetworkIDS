@@ -1,0 +1,69 @@
+{
+  "model_name": "v2",
+  "model_path": "C:\\FYP\\NetworkIDS\\models\\random_forest_robust_v2.pkl",
+  "test_dataset": "C:\\FYP\\NetworkIDS\\data\\processed\\split\\test_dataset.csv",
+  "test_rows": 214255,
+  "threshold_reference": 0.5,
+  "feature_count": 42,
+  "confusion_matrix": {
+    "true_positive": 106202,
+    "true_negative": 106844,
+    "false_positive": 975,
+    "false_negative": 234
+  },
+  "prediction_percentages": {
+    "true_positive": 49.568038085458916,
+    "true_negative": 49.86768103428158,
+    "false_positive": 0.45506522601572896,
+    "false_negative": 0.10921565424377494
+  },
+  "probability_statistics": {
+    "true_positive": {
+      "count": 106202,
+      "mean": 0.9888436371074337,
+      "median": 1.0,
+      "min": 0.505,
+      "max": 1.0,
+      "within_0_45_0_55": 47,
+      "within_0_40_0_60": 131
+    },
+    "true_negative": {
+      "count": 106844,
+      "mean": 0.0014049455280596011,
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.495,
+      "within_0_45_0_55": 33,
+      "within_0_40_0_60": 59
+    },
+    "false_positive": {
+      "count": 975,
+      "mean": 0.8795936885886665,
+      "median": 0.97,
+      "min": 0.505,
+      "max": 1.0,
+      "within_0_45_0_55": 42,
+      "within_0_40_0_60": 89
+    },
+    "false_negative": {
+      "count": 234,
+      "mean": 0.30788446884499515,
+      "median": 0.345,
+      "min": 0.0,
+      "max": 0.5,
+      "within_0_45_0_55": 51,
+      "within_0_40_0_60": 87
+    }
+  },
+  "error_cases": {
+    "false_positive_count": 975,
+    "false_negative_count": 234,
+    "total_errors": 1209,
+    "overall_error_rate": 0.5642808802595038
+  },
+  "output_files": {
+    "prediction_results": "C:\\FYP\\NetworkIDS\\models\\error_analysis\\v2\\prediction_results.csv",
+    "false_positive_flows": "C:\\FYP\\NetworkIDS\\models\\error_analysis\\v2\\false_positive_flows.csv",
+    "false_negative_flows": "C:\\FYP\\NetworkIDS\\models\\error_analysis\\v2\\false_negative_flows.csv"
+  }
+}

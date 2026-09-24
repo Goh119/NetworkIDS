@@ -1,0 +1,12 @@
+flow_id,baseline_label,baseline_original_label,baseline_predicted_label,baseline_attack_probability,baseline_status,baseline_correct,v1_label,v1_original_label,v1_predicted_label,v1_attack_probability,v1_status,v1_correct,v2_label,v2_original_label,v2_predicted_label,v2_attack_probability,v2_status,v2_correct,transition,baseline_result,v1_result,v2_result,traffic_class,persistent_fn,v1_repaired_v2_regressed_fn,v2_only_fn,fn_repaired_and_kept,persistent_fp,v1_repaired_v2_regressed_fp,v2_only_fp,fp_repaired_and_kept
+FLOW_169872,0,BENIGN,1,0.525,FP,False,0,BENIGN,0,0.495,TN,True,0,BENIGN,1,0.58,FP,False,FP -> TN -> FP,FP,TN,FP,Benign,False,False,False,False,False,True,False,False
+FLOW_310567,0,BENIGN,1,0.585,FP,False,0,BENIGN,0,0.495,TN,True,0,BENIGN,1,0.575,FP,False,FP -> TN -> FP,FP,TN,FP,Benign,False,False,False,False,False,True,False,False
+FLOW_314455,0,BENIGN,1,0.61,FP,False,0,BENIGN,0,0.45,TN,True,0,BENIGN,1,0.58,FP,False,FP -> TN -> FP,FP,TN,FP,Benign,False,False,False,False,False,True,False,False
+FLOW_462654,0,BENIGN,1,0.565,FP,False,0,BENIGN,0,0.475,TN,True,0,BENIGN,1,0.585,FP,False,FP -> TN -> FP,FP,TN,FP,Benign,False,False,False,False,False,True,False,False
+FLOW_474080,0,BENIGN,1,0.545,FP,False,0,BENIGN,0,0.495,TN,True,0,BENIGN,1,0.515,FP,False,FP -> TN -> FP,FP,TN,FP,Benign,False,False,False,False,False,True,False,False
+FLOW_488765,0,BENIGN,1,0.52,FP,False,0,BENIGN,0,0.495,TN,True,0,BENIGN,1,0.635,FP,False,FP -> TN -> FP,FP,TN,FP,Benign,False,False,False,False,False,True,False,False
+FLOW_504616,0,BENIGN,1,0.6,FP,False,0,BENIGN,0,0.495,TN,True,0,BENIGN,1,0.535,FP,False,FP -> TN -> FP,FP,TN,FP,Benign,False,False,False,False,False,True,False,False
+FLOW_522101,0,BENIGN,1,0.59,FP,False,0,BENIGN,0,0.485,TN,True,0,BENIGN,1,0.585,FP,False,FP -> TN -> FP,FP,TN,FP,Benign,False,False,False,False,False,True,False,False
+FLOW_526124,0,BENIGN,1,0.565,FP,False,0,BENIGN,0,0.485,TN,True,0,BENIGN,1,0.54,FP,False,FP -> TN -> FP,FP,TN,FP,Benign,False,False,False,False,False,True,False,False
+FLOW_568276,0,BENIGN,1,0.595,FP,False,0,BENIGN,0,0.495,TN,True,0,BENIGN,1,0.505,FP,False,FP -> TN -> FP,FP,TN,FP,Benign,False,False,False,False,False,True,False,False
+FLOW_671453,0,BENIGN,1,0.545,FP,False,0,BENIGN,0,0.475,TN,True,0,BENIGN,1,0.525,FP,False,FP -> TN -> FP,FP,TN,FP,Benign,False,False,False,False,False,True,False,False
