@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.log
+
+.vscode/
+
+data/raw/*
+data/processed/*
+data/test/*
+
+models/*.pkl
+models/*.joblib
+
+*.pcap
+*.pcapng

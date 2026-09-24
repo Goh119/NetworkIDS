@@ -1,0 +1,69 @@
+{
+  "model": "RandomForestClassifier",
+  "model_path": "C:\\FYP\\NetworkIDS\\models\\random_forest.pkl",
+  "test_dataset": "C:\\FYP\\NetworkIDS\\data\\processed\\split\\test_dataset.csv",
+  "test_rows": 214255,
+  "threshold": 0.5,
+  "feature_count": 42,
+  "confusion_matrix": {
+    "true_positive": 106286,
+    "true_negative": 106803,
+    "false_positive": 1016,
+    "false_negative": 150
+  },
+  "prediction_percentages": {
+    "true_positive": 49.607243704931044,
+    "true_negative": 49.848544958110665,
+    "false_positive": 0.47420130218664674,
+    "false_negative": 0.0700100347716506
+  },
+  "probability_statistics": {
+    "true_positive": {
+      "count": 106286,
+      "mean": 0.9912458369822215,
+      "median": 1.0,
+      "min": 0.505,
+      "max": 1.0,
+      "within_0_45_0_55": 39,
+      "within_0_40_0_60": 77
+    },
+    "true_negative": {
+      "count": 106803,
+      "mean": 0.001187560274524124,
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.5,
+      "within_0_45_0_55": 29,
+      "within_0_40_0_60": 67
+    },
+    "false_positive": {
+      "count": 1016,
+      "mean": 0.8839320260901442,
+      "median": 0.97,
+      "min": 0.505,
+      "max": 1.0,
+      "within_0_45_0_55": 38,
+      "within_0_40_0_60": 75
+    },
+    "false_negative": {
+      "count": 150,
+      "mean": 0.3312666666666667,
+      "median": 0.3775,
+      "min": 0.0,
+      "max": 0.5,
+      "within_0_45_0_55": 40,
+      "within_0_40_0_60": 65
+    }
+  },
+  "error_cases": {
+    "false_positive_count": 1016,
+    "false_negative_count": 150,
+    "total_errors": 1166,
+    "overall_error_rate": 0.5442113369582974
+  },
+  "output_files": [
+    "prediction_results.csv",
+    "false_positive_flows.csv",
+    "false_negative_flows.csv"
+  ]
+}

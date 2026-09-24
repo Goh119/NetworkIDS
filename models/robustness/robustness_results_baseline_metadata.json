@@ -1,0 +1,12 @@
+{
+  "model_path": "models\\random_forest.pkl",
+  "test_dataset": "C:\\FYP\\NetworkIDS\\data\\processed\\split\\test_dataset.csv",
+  "output_file": "C:\\FYP\\NetworkIDS\\models\\robustness\\robustness_results_baseline.csv",
+  "random_state": 42,
+  "sample_size_per_class": 2000,
+  "n_ml_features": 42,
+  "n_scenarios": 8,
+  "attack_ground_truth_preserved": true,
+  "benign_ground_truth_preserved": true,
+  "baseline_model_reused_without_retraining": true
+}

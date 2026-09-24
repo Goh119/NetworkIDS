@@ -1,0 +1,60 @@
+{
+  "model": "RandomForestClassifier",
+  "model_type": "robust_ttl_augmented",
+  "random_state": 42,
+  "n_estimators": 200,
+  "class_weight": "balanced",
+  "n_original_train": 857013,
+  "n_augmented": 212870,
+  "n_robust_train": 1069883,
+  "n_test": 214255,
+  "n_features": 42,
+  "augmentation": {
+    "ttl_small_ratio": 0.3,
+    "ttl_large_ratio": 0.15,
+    "ttl_forced_ratio": 0.05,
+    "ttl_small_samples": 127722,
+    "ttl_large_samples": 63861,
+    "ttl_forced_samples": 21287
+  },
+  "label_train": {
+    "0": 431273,
+    "1": 638610
+  },
+  "label_test": {
+    "0": 107819,
+    "1": 106436
+  },
+  "accuracy": 0.9944178665608737,
+  "precision": 0.9905287493474532,
+  "recall": 0.9983088428727123,
+  "f1": 0.9944035787148819,
+  "auc_roc": 0.9980203807749812,
+  "confusion_matrix": [
+    [
+      106803,
+      1016
+    ],
+    [
+      180,
+      106256
+    ]
+  ],
+  "top_15_importances": {
+    "ttl_mean": 0.1431029428147506,
+    "dst_port": 0.1370820981912002,
+    "tcp_window_mean": 0.11150424480825315,
+    "tcp_header_length_mean": 0.07387672287395629,
+    "rst_count": 0.06593446145677427,
+    "src_port": 0.04813588545631132,
+    "frame_length_mean": 0.04010512926912016,
+    "ip_total_length_mean": 0.038847088688343065,
+    "ack_count": 0.03620619974438928,
+    "flow_byte_count": 0.03315465897403888,
+    "ip_protocol": 0.027519107599313256,
+    "iat_max": 0.025370924147320402,
+    "byte_rate": 0.025185446078327796,
+    "iat_mean": 0.02173861653061897,
+    "reverse_byte_count": 0.019987107271899958
+  }
+}

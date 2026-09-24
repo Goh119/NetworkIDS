@@ -1,0 +1,77 @@
+{
+  "model": "RandomForestClassifier",
+  "model_path": "C:\\FYP\\NetworkIDS\\models\\random_forest.pkl",
+  "shap_version": "0.52.0",
+  "sample_size": 5000,
+  "random_state": 42,
+  "n_features": 42,
+  "class_explained": "Attack",
+  "attack_class_index": 1,
+  "nan_cells_in_sample": 18621,
+  "nan_policy": "NaN retained as-is; no imputation",
+  "imputation_used": false,
+  "shap_matrix_shape": [
+    5000,
+    42
+  ],
+  "additivity_check": {
+    "passed": true,
+    "tolerance": 0.001,
+    "max_discrepancy": 1.3123080400134768e-10,
+    "mean_discrepancy": 1.8592413787363317e-12
+  },
+  "top_10_features": {
+    "ttl_mean": 0.1494128354224903,
+    "dst_port": 0.06622847741669248,
+    "tcp_header_length_mean": 0.04305239698062334,
+    "rst_count": 0.03438929902278276,
+    "tcp_window_mean": 0.03216471982955456,
+    "src_port": 0.021315654441755368,
+    "frame_length_mean": 0.02117345705931535,
+    "ip_total_length_mean": 0.019106265560295637,
+    "flow_byte_count": 0.014325333245776827,
+    "ip_protocol": 0.013775015034362443
+  },
+  "case_examples": {
+    "true_positive": {
+      "sample_position": 0,
+      "flow_id": "FLOW_106166",
+      "actual_label": 1,
+      "predicted_label": 1,
+      "attack_probability": 0.985
+    },
+    "true_negative": {
+      "sample_position": 1,
+      "flow_id": "FLOW_016293",
+      "actual_label": 0,
+      "predicted_label": 0,
+      "attack_probability": 0.0
+    },
+    "false_positive": {
+      "sample_position": 877,
+      "flow_id": "FLOW_506836",
+      "actual_label": 0,
+      "predicted_label": 1,
+      "attack_probability": 0.925
+    },
+    "false_negative": {
+      "sample_position": 658,
+      "flow_id": "FLOW_671801",
+      "actual_label": 1,
+      "predicted_label": 0,
+      "attack_probability": 0.495
+    }
+  },
+  "output_files": [
+    "global_beeswarm.png",
+    "global_importance.csv",
+    "global_importance_bar.png",
+    "shap_sample_features.csv",
+    "shap_sample_metadata.csv",
+    "shap_values_attack.npy",
+    "waterfall_false_negative.png",
+    "waterfall_false_positive.png",
+    "waterfall_true_negative.png",
+    "waterfall_true_positive.png"
+  ]
+}
