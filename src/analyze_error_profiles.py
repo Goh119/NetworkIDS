@@ -782,14 +782,14 @@ def main():
 
         return df
 
-    comparison_df = (
-        comparison_df
-        .groupby("group", group_keys=False)
-        .apply(
-            add_relative_difference,
-            include_groups=False,
-        )
-        .reset_index(drop=True)
+    comparison_df["relative_mean_difference"] = np.where(
+        comparison_df["reference_mean"].abs() > 1e-12,
+        (
+            comparison_df["mean_difference"].abs()
+            / comparison_df["reference_mean"].abs()
+            * 100
+        ),
+        np.nan,
     )
 
     comparison_df.to_csv(
