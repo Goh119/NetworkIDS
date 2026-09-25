@@ -1,83 +1,78 @@
 {
-  "model_type": "RandomForestClassifier (v2 hybrid: TTL jitter + OOF hard-example oversampling)",
+  "model_type": "RandomForestClassifier (v1 base + attack-only OOF hard-example oversampling)",
   "random_state": 42,
   "n_estimators": 200,
-  "n_features": 42,
-  "strategy": {
-    "part1_ttl_jitter": {
-      "fraction_per_class": 0.2,
-      "ttl_jitter_range": [
-        -30,
-        30
-      ],
-      "benign_augmented": 86254,
-      "attack_augmented": 85148
-    },
-    "part2_hard_example_mining": {
-      "method": "5_fold_oof",
-      "oof_folds": 5,
-      "oof_estimators": 100,
-      "uncertain_probability_range": [
-        0.4,
-        0.6
-      ],
-      "extra_copies_per_hard_row": 2,
-      "n_misclassified_oof": 4709,
-      "n_uncertain_oof": 1179,
-      "n_hard_examples_union": 5381,
-      "hard_examples_by_class": {
-        "benign": 4375,
-        "attack": 1006
-      },
-      "oversampled_rows_added": 10762
-    }
+  "class_weight": "balanced",
+  "part1_ttl_augmentation": {
+    "small_ratio": 0.3,
+    "large_ratio": 0.15,
+    "forced_ratio": 0.05,
+    "small_range": [
+      -5,
+      5
+    ],
+    "large_range": [
+      -30,
+      30
+    ],
+    "forced_value": 128
   },
-  "dataset": {
-    "n_train_original": 857013,
-    "n_train_augmented": 1039177,
-    "augmentation_multiplier": 1.212556869032325,
-    "n_test": 214255,
-    "final_benign": 526277,
-    "final_attack": 512900
+  "part2_hard_mining": {
+    "oof_folds": 5,
+    "oof_estimators": 100,
+    "uncertain_range": [
+      0.4,
+      0.6
+    ],
+    "n_hard_attack": 1006,
+    "n_hard_benign_not_oversampled": 4375,
+    "extra_copies_attack": 4,
+    "n_hard_total": 5381,
+    "n_oof_misclassified": 4709,
+    "n_oof_uncertain": 1179
   },
+  "n_train_original": 857013,
+  "n_ttl_augmented": 212870,
+  "n_attack_hard_augmented": 4024,
+  "n_train_augmented": 1073907,
   "test_metrics": {
-    "accuracy": 0.994357191197405,
-    "precision": 0.9909028989428702,
-    "recall": 0.9978014957345259,
-    "f1": 0.9943402321019789,
-    "auc_roc": 0.9980501857395138,
-    "true_negative": 106844,
-    "false_positive": 975,
-    "false_negative": 234,
-    "true_positive": 106202,
-    "false_positive_rate": 0.009042933063745722,
-    "false_negative_rate": 0.0021985042654740876,
+    "accuracy": 0.994441203239131,
+    "precision": 0.9903189437492429,
+    "recall": 0.9985719117591793,
+    "f1": 0.9944283047731324,
+    "auc_roc": 0.9980127801001223,
+    "true_negative": 106780,
+    "false_positive": 1039,
+    "false_negative": 152,
+    "true_positive": 106284,
+    "fpr": 0.009636520464853134,
+    "fnr": 0.0014280882408207749,
     "confusion_matrix": [
       [
-        106844,
-        975
+        106780,
+        1039
       ],
       [
-        234,
-        106202
+        152,
+        106284
       ]
     ]
   },
   "top_15_importances": {
-    "ttl_mean": 0.18132147388515674,
-    "dst_port": 0.12112314813571715,
-    "tcp_window_mean": 0.10422557563414085,
-    "tcp_header_length_mean": 0.06774459777980373,
-    "src_port": 0.05881220730094969,
-    "rst_count": 0.057199070513617854,
-    "frame_length_mean": 0.041925356297870385,
-    "ip_total_length_mean": 0.036443903146435024,
-    "ack_count": 0.03314340471031306,
-    "flow_byte_count": 0.027882289824473,
-    "byte_rate": 0.026264844955054573,
-    "ip_protocol": 0.025095160403559483,
-    "iat_max": 0.02344332137886744,
-    "iat_mean": 0.023300406875982213,
-    "reverse_byte_count": 0.020113940320003302
+    "ttl_mean": 0.13674641593251566,
+    "dst_port": 0.1351141297303291,
+    "tcp_window_mean": 0.10954526022745635,
+    "tcp_header_length_mean": 0.07909205175700419,
+    "rst_count": 0.07028695532143402,
+    "src_port": 0.05159893691187749,
+    "frame_length_mean": 0.04215323069937078,
+    "ip_total_length_mean": 0.04050497191372717,
+    "ack_count": 0.033299444138739046,
+    "flow_byte_count": 0.03191350104394249,
+    "iat_max": 0.02643746082687088,
+    "ip_protocol": 0.02576443650045331,
+    "byte_rate": 0.025010265237456586,
+    "iat_mean": 0.0231961584452924,
+    "reverse_byte_count": 0.020478565423550026
   }
 }
