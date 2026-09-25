@@ -1,0 +1,19 @@
+group,original_label,count,percentage
+Persistent FN,DoS Hulk,89,70.07874015748031
+Persistent FN,DoS slowloris,30,23.62204724409449
+Persistent FN,DoS Slowhttptest,6,4.724409448818897
+Persistent FN,DoS GoldenEye,2,1.574803149606299
+Baseline FN Repaired,DoS Hulk,20,86.95652173913044
+Baseline FN Repaired,DoS Slowhttptest,2,8.695652173913043
+Baseline FN Repaired,DoS slowloris,1,4.3478260869565215
+Current-only FN,DoS Hulk,21,84.0
+Current-only FN,DoS GoldenEye,3,12.0
+Current-only FN,DoS slowloris,1,4.0
+Persistent FP,BENIGN,979,100.0
+Baseline FP Repaired,BENIGN,37,100.0
+Current-only FP,BENIGN,60,100.0
+All Attack,DoS Hulk,101258,95.13510466383555
+All Attack,DoS GoldenEye,2958,2.7791348791762185
+All Attack,DoS Slowhttptest,1186,1.1142846405351574
+All Attack,DoS slowloris,1034,0.9714758164530798
+All Benign,BENIGN,107819,100.0

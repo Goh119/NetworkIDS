@@ -1,0 +1,2008 @@
+{
+  "analysis_name": "baseline_vs_v2_final",
+  "transition_directory": "models\\error_analysis\\baseline_vs_v2_final",
+  "test_rows": 214255,
+  "all_attack_rows": 106436,
+  "all_benign_rows": 107819,
+  "groups": {
+    "Persistent FN": {
+      "count": 127,
+      "original_label_counts": {
+        "DoS Hulk": 89,
+        "DoS slowloris": 30,
+        "DoS Slowhttptest": 6,
+        "DoS GoldenEye": 2
+      },
+      "probabilities": {
+        "baseline_attack_probability": {
+          "mean": 0.30751968503937,
+          "median": 0.35,
+          "std": 0.145091437387085,
+          "min": 0.0,
+          "max": 0.5,
+          "near_threshold_count": 23
+        },
+        "current_attack_probability": {
+          "mean": 0.2903937007874017,
+          "median": 0.325,
+          "std": 0.1411072723941776,
+          "min": 0.0,
+          "max": 0.495,
+          "near_threshold_count": 22
+        }
+      },
+      "numeric_features": {
+        "ip_protocol": {
+          "count": 127,
+          "missing": 0,
+          "mean": 6.0,
+          "median": 6.0,
+          "std": 0.0,
+          "min": 6.0,
+          "max": 6.0
+        },
+        "ttl_mean": {
+          "count": 127,
+          "missing": 0,
+          "mean": 62.63318751822688,
+          "median": 62.0,
+          "std": 0.8876603254694734,
+          "min": 62.0,
+          "max": 64.0
+        },
+        "tcp_window_mean": {
+          "count": 127,
+          "missing": 0,
+          "mean": 523.948848060659,
+          "median": 0.0,
+          "std": 2269.9931161375034,
+          "min": 0.0,
+          "max": 17563.6
+        },
+        "tcp_header_length_mean": {
+          "count": 127,
+          "missing": 0,
+          "mean": 25.03143773694955,
+          "median": 20.0,
+          "std": 6.025935306949929,
+          "min": 20.0,
+          "max": 36.8
+        },
+        "syn_count": {
+          "count": 127,
+          "missing": 0,
+          "mean": 0.09448818897637795,
+          "median": 0.0,
+          "std": 0.4424888604166022,
+          "min": 0.0,
+          "max": 3.0
+        },
+        "ack_count": {
+          "count": 127,
+          "missing": 0,
+          "mean": 1.0393700787401574,
+          "median": 0.0,
+          "std": 2.6868052474723347,
+          "min": 0.0,
+          "max": 26.0
+        },
+        "fin_count": {
+          "count": 127,
+          "missing": 0,
+          "mean": 0.3858267716535433,
+          "median": 0.0,
+          "std": 0.4867899690101963,
+          "min": 0.0,
+          "max": 1.0
+        },
+        "rst_count": {
+          "count": 127,
+          "missing": 0,
+          "mean": 0.6062992125984252,
+          "median": 1.0,
+          "std": 0.48856982858231734,
+          "min": 0.0,
+          "max": 1.0
+        },
+        "psh_count": {
+          "count": 127,
+          "missing": 0,
+          "mean": 0.47244094488188976,
+          "median": 0.0,
+          "std": 1.5564282331471915,
+          "min": 0.0,
+          "max": 16.0
+        },
+        "syn_seen": {
+          "count": 127,
+          "missing": 0,
+          "mean": 0.03937007874015748,
+          "median": 0.0,
+          "std": 0.19447384307446408,
+          "min": 0.0,
+          "max": 1.0
+        },
+        "syn_ack_seen": {
+          "count": 127,
+          "missing": 0,
+          "mean": 0.047244094488188976,
+          "median": 0.0,
+          "std": 0.21216052890248002,
+          "min": 0.0,
+          "max": 1.0
+        },
+        "ack_after_syn_ack": {
+          "count": 127,
+          "missing": 0,
+          "mean": 0.047244094488188976,
+          "median": 0.0,
+          "std": 0.21216052890248002,
+          "min": 0.0,
+          "max": 1.0
+        },
+        "flow_duration": {
+          "count": 127,
+          "missing": 0,
+          "mean": 0.32915651516651545,
+          "median": 0.0,
+          "std": 2.0671949395592817,
+          "min": 0.0,
+          "max": 20.839598178863525
+        },
+        "flow_packet_count": {
+          "count": 127,
+          "missing": 0,
+          "mean": 1.68503937007874,
+          "median": 1.0,
+          "std": 2.6493225620562084,
+          "min": 1.0,
+          "max": 27.0
+        },
+        "flow_byte_count": {
+          "count": 127,
+          "missing": 0,
+          "mean": 493.03937007874015,
+          "median": 60.0,
+          "std": 1928.4140944594449,
+          "min": 60.0,
+          "max": 14268.0
+        },
+        "forward_packet_count": {
+          "count": 127,
+          "missing": 0,
+          "mean": 1.4251968503937007,
+          "median": 1.0,
+          "std": 1.5138192042965923,
+          "min": 1.0,
+          "max": 16.0
+        },
+        "reverse_packet_count": {
+          "count": 127,
+          "missing": 0,
+          "mean": 0.25984251968503935,
+          "median": 0.0,
+          "std": 1.2245043890578742,
+          "min": 0.0,
+          "max": 11.0
+        },
+        "forward_byte_count": {
+          "count": 127,
+          "missing": 0,
+          "mean": 247.84251968503938,
+          "median": 60.0,
+          "std": 546.1996321786352,
+          "min": 60.0,
+          "max": 4553.0
+        },
+        "reverse_byte_count": {
+          "count": 127,
+          "missing": 0,
+          "mean": 245.1968503937008,
+          "median": 0.0,
+          "std": 1577.753256755529,
+          "min": 0.0,
+          "max": 11999.0
+        },
+        "iat_min": {
+          "count": 32,
+          "missing": 95,
+          "mean": 0.000811956822872153,
+          "median": 2.0265579223632812e-06,
+          "std": 0.0027668264283112537,
+          "min": 0.0,
+          "max": 0.0119960308074951
+        },
+        "iat_mean": {
+          "count": 32,
+          "missing": 95,
+          "mean": 0.4484460481327453,
+          "median": 2.1457672119140625e-06,
+          "std": 1.8384731382388548,
+          "min": 4.76837158203125e-07,
+          "max": 10.419799089431764
+        },
+        "iat_max": {
+          "count": 32,
+          "missing": 95,
+          "mean": 1.1774551570415497,
+          "median": 3.337860107421875e-06,
+          "std": 3.846103218218397,
+          "min": 9.5367431640625e-07,
+          "max": 20.83904600143433
+        },
+        "iat_std": {
+          "count": 32,
+          "missing": 95,
+          "mean": 0.5164773998916834,
+          "median": 0.0,
+          "std": 1.876347205605506,
+          "min": 0.0,
+          "max": 10.419246912002563
+        },
+        "byte_rate": {
+          "count": 32,
+          "missing": 95,
+          "mean": 211545767.60102654,
+          "median": 110470565.64705883,
+          "std": 235629275.27939367,
+          "min": 28.551414230408543,
+          "max": 644874240.0
+        },
+        "frame_length_mean": {
+          "count": 127,
+          "missing": 0,
+          "mean": 139.16442111402742,
+          "median": 60.0,
+          "std": 196.17452033802388,
+          "min": 60.0,
+          "max": 1292.1
+        },
+        "ip_total_length_mean": {
+          "count": 127,
+          "missing": 0,
+          "mean": 121.62111402741326,
+          "median": 40.0,
+          "std": 197.5336048238011,
+          "min": 40.0,
+          "max": 1278.1
+        },
+        "src_port": {
+          "count": 127,
+          "missing": 0,
+          "mean": 31913.858267716536,
+          "median": 40224.0,
+          "std": 22976.49174947668,
+          "min": 80.0,
+          "max": 60746.0
+        },
+        "dst_port": {
+          "count": 127,
+          "missing": 0,
+          "mean": 15342.818897637795,
+          "median": 80.0,
+          "std": 22592.5937224776,
+          "min": 80.0,
+          "max": 60488.0
+        },
+        "ip_dscp": {
+          "count": 127,
+          "missing": 0,
+          "mean": 0.0,
+          "median": 0.0,
+          "std": 0.0,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "ip_ecn": {
+          "count": 127,
+          "missing": 0,
+          "mean": 0.0,
+          "median": 0.0,
+          "std": 0.0,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "ip_header_length": {
+          "count": 127,
+          "missing": 0,
+          "mean": 20.0,
+          "median": 20.0,
+          "std": 0.0,
+          "min": 20.0,
+          "max": 20.0
+        },
+        "ip_checksum_valid": {
+          "count": 127,
+          "missing": 0,
+          "mean": 1.0,
+          "median": 1.0,
+          "std": 0.0,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "l4_checksum_valid": {
+          "count": 127,
+          "missing": 0,
+          "mean": 0.968503937007874,
+          "median": 1.0,
+          "std": 0.17465411821117197,
+          "min": 0.0,
+          "max": 1.0
+        },
+        "flow_direction": {
+          "count": 127,
+          "missing": 0,
+          "mean": 0.08661417322834646,
+          "median": 0.0,
+          "std": 0.2812688362124686,
+          "min": 0.0,
+          "max": 1.0
+        }
+      }
+    },
+    "Baseline FN Repaired": {
+      "count": 23,
+      "original_label_counts": {
+        "DoS Hulk": 20,
+        "DoS Slowhttptest": 2,
+        "DoS slowloris": 1
+      },
+      "probabilities": {
+        "baseline_attack_probability": {
+          "mean": 0.4623913043478261,
+          "median": 0.47,
+          "std": 0.03939403964013138,
+          "min": 0.345,
+          "max": 0.5,
+          "near_threshold_count": 17
+        },
+        "current_attack_probability": {
+          "mean": 0.6136956521739131,
+          "median": 0.61,
+          "std": 0.08448330670334342,
+          "min": 0.505,
+          "max": 0.795,
+          "near_threshold_count": 9
+        }
+      },
+      "numeric_features": {
+        "ip_protocol": {
+          "count": 23,
+          "missing": 0,
+          "mean": 6.0,
+          "median": 6.0,
+          "std": 0.0,
+          "min": 6.0,
+          "max": 6.0
+        },
+        "ttl_mean": {
+          "count": 23,
+          "missing": 0,
+          "mean": 63.130434782608695,
+          "median": 63.5,
+          "std": 0.9350353551133289,
+          "min": 62.0,
+          "max": 64.0
+        },
+        "tcp_window_mean": {
+          "count": 23,
+          "missing": 0,
+          "mean": 1999.0496894409937,
+          "median": 235.0,
+          "std": 6011.074052313232,
+          "min": 0.0,
+          "max": 29200.0
+        },
+        "tcp_header_length_mean": {
+          "count": 23,
+          "missing": 0,
+          "mean": 27.817805383022776,
+          "median": 32.0,
+          "std": 6.469239543631108,
+          "min": 20.0,
+          "max": 40.0
+        },
+        "syn_count": {
+          "count": 23,
+          "missing": 0,
+          "mean": 0.391304347826087,
+          "median": 0.0,
+          "std": 0.8717364198158011,
+          "min": 0.0,
+          "max": 3.0
+        },
+        "ack_count": {
+          "count": 23,
+          "missing": 0,
+          "mean": 2.0,
+          "median": 1.0,
+          "std": 3.799313439122344,
+          "min": 0.0,
+          "max": 13.0
+        },
+        "fin_count": {
+          "count": 23,
+          "missing": 0,
+          "mean": 0.5652173913043478,
+          "median": 1.0,
+          "std": 0.49572844569527735,
+          "min": 0.0,
+          "max": 1.0
+        },
+        "rst_count": {
+          "count": 23,
+          "missing": 0,
+          "mean": 0.391304347826087,
+          "median": 0.0,
+          "std": 0.4880422678400793,
+          "min": 0.0,
+          "max": 1.0
+        },
+        "psh_count": {
+          "count": 23,
+          "missing": 0,
+          "mean": 0.8260869565217391,
+          "median": 1.0,
+          "std": 1.2735494361632007,
+          "min": 0.0,
+          "max": 6.0
+        },
+        "syn_seen": {
+          "count": 23,
+          "missing": 0,
+          "mean": 0.17391304347826086,
+          "median": 0.0,
+          "std": 0.3790346907426672,
+          "min": 0.0,
+          "max": 1.0
+        },
+        "syn_ack_seen": {
+          "count": 23,
+          "missing": 0,
+          "mean": 0.13043478260869565,
+          "median": 0.0,
+          "std": 0.33678116053977536,
+          "min": 0.0,
+          "max": 1.0
+        },
+        "ack_after_syn_ack": {
+          "count": 23,
+          "missing": 0,
+          "mean": 0.13043478260869565,
+          "median": 0.0,
+          "std": 0.33678116053977536,
+          "min": 0.0,
+          "max": 1.0
+        },
+        "flow_duration": {
+          "count": 23,
+          "missing": 0,
+          "mean": 2.1810523116070293,
+          "median": 0.0,
+          "std": 9.788809752633004,
+          "min": 0.0,
+          "max": 48.06550097465515
+        },
+        "flow_packet_count": {
+          "count": 23,
+          "missing": 0,
+          "mean": 2.652173913043478,
+          "median": 1.0,
+          "std": 3.9188362919108695,
+          "min": 1.0,
+          "max": 14.0
+        },
+        "flow_byte_count": {
+          "count": 23,
+          "missing": 0,
+          "mean": 1886.304347826087,
+          "median": 77.0,
+          "std": 4439.616566236153,
+          "min": 60.0,
+          "max": 14260.0
+        },
+        "forward_packet_count": {
+          "count": 23,
+          "missing": 0,
+          "mean": 1.565217391304348,
+          "median": 1.0,
+          "std": 1.3457206556993182,
+          "min": 1.0,
+          "max": 7.0
+        },
+        "reverse_packet_count": {
+          "count": 23,
+          "missing": 0,
+          "mean": 1.0869565217391304,
+          "median": 0.0,
+          "std": 2.827090122958062,
+          "min": 0.0,
+          "max": 9.0
+        },
+        "forward_byte_count": {
+          "count": 23,
+          "missing": 0,
+          "mean": 301.1304347826087,
+          "median": 77.0,
+          "std": 588.6509487875703,
+          "min": 60.0,
+          "max": 2195.0
+        },
+        "reverse_byte_count": {
+          "count": 23,
+          "missing": 0,
+          "mean": 1585.1739130434783,
+          "median": 0.0,
+          "std": 4092.9631410632182,
+          "min": 0.0,
+          "max": 12197.0
+        },
+        "iat_min": {
+          "count": 5,
+          "missing": 18,
+          "mean": 3.2065165519714354,
+          "median": 4.696846008300781e-05,
+          "std": 6.412977194831775,
+          "min": 0.0,
+          "max": 16.03247094154358
+        },
+        "iat_mean": {
+          "count": 5,
+          "missing": 18,
+          "mean": 4.839940465080154,
+          "median": 0.0202171802520751,
+          "std": 9.596519071362266,
+          "min": 6.198883056640625e-05,
+          "max": 24.032750487327576
+        },
+        "iat_max": {
+          "count": 5,
+          "missing": 18,
+          "mean": 6.649138784408569,
+          "median": 0.2105801105499267,
+          "std": 12.695240526904426,
+          "min": 6.198883056640625e-05,
+          "max": 32.03303003311157
+        },
+        "iat_std": {
+          "count": 5,
+          "missing": 18,
+          "mean": 1.6694188637326057,
+          "median": 0.0602784397562867,
+          "std": 3.16651060087362,
+          "min": 0.0,
+          "max": 8.000279545783997
+        },
+        "byte_rate": {
+          "count": 5,
+          "missing": 18,
+          "mean": 6790930.764421903,
+          "median": 57642.24396446272,
+          "std": 13510836.747686867,
+          "min": 4.61869730884653,
+          "max": 33812543.015384614
+        },
+        "frame_length_mean": {
+          "count": 23,
+          "missing": 0,
+          "mean": 238.89803312629397,
+          "median": 77.0,
+          "std": 372.1671529198113,
+          "min": 60.0,
+          "max": 1068.25
+        },
+        "ip_total_length_mean": {
+          "count": 23,
+          "missing": 0,
+          "mean": 222.55020703933747,
+          "median": 63.0,
+          "std": 373.30551471922246,
+          "min": 40.0,
+          "max": 1054.25
+        },
+        "src_port": {
+          "count": 23,
+          "missing": 0,
+          "mean": 25219.130434782608,
+          "median": 32816.0,
+          "std": 24937.184191840293,
+          "min": 80.0,
+          "max": 58516.0
+        },
+        "dst_port": {
+          "count": 23,
+          "missing": 0,
+          "mean": 21271.565217391304,
+          "median": 80.0,
+          "std": 22628.457143175478,
+          "min": 80.0,
+          "max": 52272.0
+        },
+        "ip_dscp": {
+          "count": 23,
+          "missing": 0,
+          "mean": 0.0,
+          "median": 0.0,
+          "std": 0.0,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "ip_ecn": {
+          "count": 23,
+          "missing": 0,
+          "mean": 0.0,
+          "median": 0.0,
+          "std": 0.0,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "ip_header_length": {
+          "count": 23,
+          "missing": 0,
+          "mean": 20.0,
+          "median": 20.0,
+          "std": 0.0,
+          "min": 20.0,
+          "max": 20.0
+        },
+        "ip_checksum_valid": {
+          "count": 23,
+          "missing": 0,
+          "mean": 1.0,
+          "median": 1.0,
+          "std": 0.0,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "l4_checksum_valid": {
+          "count": 23,
+          "missing": 0,
+          "mean": 0.8260869565217391,
+          "median": 1.0,
+          "std": 0.3790346907426672,
+          "min": 0.0,
+          "max": 1.0
+        },
+        "flow_direction": {
+          "count": 23,
+          "missing": 0,
+          "mean": 0.13043478260869565,
+          "median": 0.0,
+          "std": 0.33678116053977536,
+          "min": 0.0,
+          "max": 1.0
+        }
+      }
+    },
+    "Current-only FN": {
+      "count": 25,
+      "original_label_counts": {
+        "DoS Hulk": 21,
+        "DoS GoldenEye": 3,
+        "DoS slowloris": 1
+      },
+      "probabilities": {
+        "baseline_attack_probability": {
+          "mean": 0.5624,
+          "median": 0.55,
+          "std": 0.05079606283955479,
+          "min": 0.505,
+          "max": 0.72,
+          "near_threshold_count": 13
+        },
+        "current_attack_probability": {
+          "mean": 0.4673999999999999,
+          "median": 0.48,
+          "std": 0.03452882853500825,
+          "min": 0.36,
+          "max": 0.5,
+          "near_threshold_count": 21
+        }
+      },
+      "numeric_features": {
+        "ip_protocol": {
+          "count": 25,
+          "missing": 0,
+          "mean": 6.0,
+          "median": 6.0,
+          "std": 0.0,
+          "min": 6.0,
+          "max": 6.0
+        },
+        "ttl_mean": {
+          "count": 25,
+          "missing": 0,
+          "mean": 62.73866666666667,
+          "median": 62.0,
+          "std": 0.8616098627311295,
+          "min": 62.0,
+          "max": 64.0
+        },
+        "tcp_window_mean": {
+          "count": 25,
+          "missing": 0,
+          "mean": 536.5026666666666,
+          "median": 235.0,
+          "std": 1362.1542006336874,
+          "min": 0.0,
+          "max": 6002.2
+        },
+        "tcp_header_length_mean": {
+          "count": 25,
+          "missing": 0,
+          "mean": 27.066666666666666,
+          "median": 32.0,
+          "std": 5.903400150195931,
+          "min": 20.0,
+          "max": 33.6
+        },
+        "syn_count": {
+          "count": 25,
+          "missing": 0,
+          "mean": 0.16,
+          "median": 0.0,
+          "std": 0.5425863986500215,
+          "min": 0.0,
+          "max": 2.0
+        },
+        "ack_count": {
+          "count": 25,
+          "missing": 0,
+          "mean": 1.68,
+          "median": 1.0,
+          "std": 3.1076679359288053,
+          "min": 0.0,
+          "max": 14.0
+        },
+        "fin_count": {
+          "count": 25,
+          "missing": 0,
+          "mean": 0.48,
+          "median": 0.0,
+          "std": 0.4995998398718719,
+          "min": 0.0,
+          "max": 1.0
+        },
+        "rst_count": {
+          "count": 25,
+          "missing": 0,
+          "mean": 0.44,
+          "median": 0.0,
+          "std": 0.4963869458396343,
+          "min": 0.0,
+          "max": 1.0
+        },
+        "psh_count": {
+          "count": 25,
+          "missing": 0,
+          "mean": 0.6,
+          "median": 0.0,
+          "std": 1.469693845669907,
+          "min": 0.0,
+          "max": 7.0
+        },
+        "syn_seen": {
+          "count": 25,
+          "missing": 0,
+          "mean": 0.08,
+          "median": 0.0,
+          "std": 0.2712931993250107,
+          "min": 0.0,
+          "max": 1.0
+        },
+        "syn_ack_seen": {
+          "count": 25,
+          "missing": 0,
+          "mean": 0.08,
+          "median": 0.0,
+          "std": 0.2712931993250107,
+          "min": 0.0,
+          "max": 1.0
+        },
+        "ack_after_syn_ack": {
+          "count": 25,
+          "missing": 0,
+          "mean": 0.08,
+          "median": 0.0,
+          "std": 0.2712931993250107,
+          "min": 0.0,
+          "max": 1.0
+        },
+        "flow_duration": {
+          "count": 25,
+          "missing": 0,
+          "mean": 0.15079235076904296,
+          "median": 0.0,
+          "std": 0.6684358715966943,
+          "min": 0.0,
+          "max": 3.40700101852417
+        },
+        "flow_packet_count": {
+          "count": 25,
+          "missing": 0,
+          "mean": 2.2,
+          "median": 1.0,
+          "std": 3.174901573277509,
+          "min": 1.0,
+          "max": 15.0
+        },
+        "flow_byte_count": {
+          "count": 25,
+          "missing": 0,
+          "mean": 1191.0,
+          "median": 66.0,
+          "std": 3685.7564650964123,
+          "min": 60.0,
+          "max": 14353.0
+        },
+        "forward_packet_count": {
+          "count": 25,
+          "missing": 0,
+          "mean": 1.56,
+          "median": 1.0,
+          "std": 1.4718695594379279,
+          "min": 1.0,
+          "max": 8.0
+        },
+        "reverse_packet_count": {
+          "count": 25,
+          "missing": 0,
+          "mean": 0.64,
+          "median": 0.0,
+          "std": 1.7636326148038883,
+          "min": 0.0,
+          "max": 7.0
+        },
+        "forward_byte_count": {
+          "count": 25,
+          "missing": 0,
+          "mean": 220.76,
+          "median": 66.0,
+          "std": 468.7381597437955,
+          "min": 60.0,
+          "max": 2288.0
+        },
+        "reverse_byte_count": {
+          "count": 25,
+          "missing": 0,
+          "mean": 970.24,
+          "median": 0.0,
+          "std": 3262.0140806563054,
+          "min": 0.0,
+          "max": 12065.0
+        },
+        "iat_min": {
+          "count": 7,
+          "missing": 18,
+          "mean": 0.00014335768563406384,
+          "median": 3.814697265625e-06,
+          "std": 0.000312266809500461,
+          "min": 9.5367431640625e-07,
+          "max": 0.0009047985076904
+        },
+        "iat_mean": {
+          "count": 7,
+          "missing": 18,
+          "mean": 0.040640137633498816,
+          "median": 4.0531158447265625e-06,
+          "std": 0.08390390111784646,
+          "min": 9.5367431640625e-07,
+          "max": 0.2433572156088692
+        },
+        "iat_max": {
+          "count": 7,
+          "missing": 18,
+          "mean": 0.27240426199776785,
+          "median": 4.0531158447265625e-06,
+          "std": 0.5871051993619294,
+          "min": 9.5367431640625e-07,
+          "max": 1.699958086013794
+        },
+        "iat_std": {
+          "count": 7,
+          "missing": 18,
+          "mean": 0.07707029889073516,
+          "median": 9.5367431640625e-07,
+          "std": 0.16089357403591067,
+          "min": 0.0,
+          "max": 0.4662917785199206
+        },
+        "byte_rate": {
+          "count": 7,
+          "missing": 18,
+          "mean": 111196704.95443353,
+          "median": 32567536.94117647,
+          "std": 218909971.2642437,
+          "min": 4212.795922854572,
+          "max": 644874240.0
+        },
+        "frame_length_mean": {
+          "count": 25,
+          "missing": 0,
+          "mean": 159.81866666666667,
+          "median": 66.0,
+          "std": 293.3148835228107,
+          "min": 60.0,
+          "max": 1298.1
+        },
+        "ip_total_length_mean": {
+          "count": 25,
+          "missing": 0,
+          "mean": 143.29866666666666,
+          "median": 52.0,
+          "std": 294.1842901583971,
+          "min": 40.0,
+          "max": 1284.1
+        },
+        "src_port": {
+          "count": 25,
+          "missing": 0,
+          "mean": 30047.84,
+          "median": 34630.0,
+          "std": 21840.93238244192,
+          "min": 80.0,
+          "max": 59006.0
+        },
+        "dst_port": {
+          "count": 25,
+          "missing": 0,
+          "mean": 14606.56,
+          "median": 80.0,
+          "std": 21826.54032517293,
+          "min": 80.0,
+          "max": 58474.0
+        },
+        "ip_dscp": {
+          "count": 25,
+          "missing": 0,
+          "mean": 0.0,
+          "median": 0.0,
+          "std": 0.0,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "ip_ecn": {
+          "count": 25,
+          "missing": 0,
+          "mean": 0.0,
+          "median": 0.0,
+          "std": 0.0,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "ip_header_length": {
+          "count": 25,
+          "missing": 0,
+          "mean": 20.0,
+          "median": 20.0,
+          "std": 0.0,
+          "min": 20.0,
+          "max": 20.0
+        },
+        "ip_checksum_valid": {
+          "count": 25,
+          "missing": 0,
+          "mean": 1.0,
+          "median": 1.0,
+          "std": 0.0,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "l4_checksum_valid": {
+          "count": 25,
+          "missing": 0,
+          "mean": 0.92,
+          "median": 1.0,
+          "std": 0.2712931993250107,
+          "min": 0.0,
+          "max": 1.0
+        },
+        "flow_direction": {
+          "count": 25,
+          "missing": 0,
+          "mean": 0.2,
+          "median": 0.0,
+          "std": 0.4,
+          "min": 0.0,
+          "max": 1.0
+        }
+      }
+    },
+    "Persistent FP": {
+      "count": 979,
+      "original_label_counts": {
+        "BENIGN": 979
+      },
+      "probabilities": {
+        "baseline_attack_probability": {
+          "mean": 0.8965576491395163,
+          "median": 0.974954954954955,
+          "std": 0.1355976029675009,
+          "min": 0.515,
+          "max": 1.0,
+          "near_threshold_count": 13
+        },
+        "current_attack_probability": {
+          "mean": 0.8886004878957953,
+          "median": 0.97,
+          "std": 0.1448027301439141,
+          "min": 0.505,
+          "max": 1.0,
+          "near_threshold_count": 33
+        }
+      },
+      "numeric_features": {
+        "ip_protocol": {
+          "count": 979,
+          "missing": 0,
+          "mean": 6.0,
+          "median": 6.0,
+          "std": 0.0,
+          "min": 6.0,
+          "max": 6.0
+        },
+        "ttl_mean": {
+          "count": 979,
+          "missing": 0,
+          "mean": 62.76895347489971,
+          "median": 63.0,
+          "std": 0.6966042838593993,
+          "min": 62.0,
+          "max": 64.0
+        },
+        "tcp_window_mean": {
+          "count": 979,
+          "missing": 0,
+          "mean": 3309.3087679487694,
+          "median": 310.0,
+          "std": 3751.5445553857185,
+          "min": 0.0,
+          "max": 29200.0
+        },
+        "tcp_header_length_mean": {
+          "count": 979,
+          "missing": 0,
+          "mean": 29.83989722029359,
+          "median": 32.0,
+          "std": 5.642106956721478,
+          "min": 20.0,
+          "max": 40.0
+        },
+        "syn_count": {
+          "count": 979,
+          "missing": 0,
+          "mean": 1.0102145045965272,
+          "median": 0.0,
+          "std": 1.1733758492093214,
+          "min": 0.0,
+          "max": 5.0
+        },
+        "ack_count": {
+          "count": 979,
+          "missing": 0,
+          "mean": 4.379979570990807,
+          "median": 3.0,
+          "std": 3.866337739703819,
+          "min": 0.0,
+          "max": 21.0
+        },
+        "fin_count": {
+          "count": 979,
+          "missing": 0,
+          "mean": 0.6077630234933605,
+          "median": 1.0,
+          "std": 0.48824904584399287,
+          "min": 0.0,
+          "max": 1.0
+        },
+        "rst_count": {
+          "count": 979,
+          "missing": 0,
+          "mean": 0.3626149131767109,
+          "median": 0.0,
+          "std": 0.48075496660831013,
+          "min": 0.0,
+          "max": 1.0
+        },
+        "psh_count": {
+          "count": 979,
+          "missing": 0,
+          "mean": 1.0561797752808988,
+          "median": 1.0,
+          "std": 1.19152185172812,
+          "min": 0.0,
+          "max": 11.0
+        },
+        "syn_seen": {
+          "count": 979,
+          "missing": 0,
+          "mean": 0.4473953013278856,
+          "median": 0.0,
+          "std": 0.49722504530405154,
+          "min": 0.0,
+          "max": 1.0
+        },
+        "syn_ack_seen": {
+          "count": 979,
+          "missing": 0,
+          "mean": 0.4463738508682329,
+          "median": 0.0,
+          "std": 0.4971159182014769,
+          "min": 0.0,
+          "max": 1.0
+        },
+        "ack_after_syn_ack": {
+          "count": 979,
+          "missing": 0,
+          "mean": 0.4463738508682329,
+          "median": 0.0,
+          "std": 0.4971159182014769,
+          "min": 0.0,
+          "max": 1.0
+        },
+        "flow_duration": {
+          "count": 979,
+          "missing": 0,
+          "mean": 1.000037157499023,
+          "median": 0.0009970664978027,
+          "std": 5.249992528540517,
+          "min": 0.0,
+          "max": 104.68344497680664
+        },
+        "flow_packet_count": {
+          "count": 979,
+          "missing": 0,
+          "mean": 5.216547497446374,
+          "median": 3.0,
+          "std": 4.164406296998096,
+          "min": 1.0,
+          "max": 22.0
+        },
+        "flow_byte_count": {
+          "count": 979,
+          "missing": 0,
+          "mean": 5573.3718079673135,
+          "median": 264.0,
+          "std": 6164.081981183215,
+          "min": 60.0,
+          "max": 15980.0
+        },
+        "forward_packet_count": {
+          "count": 979,
+          "missing": 0,
+          "mean": 2.6506639427987744,
+          "median": 3.0,
+          "std": 1.8126011840833967,
+          "min": 1.0,
+          "max": 16.0
+        },
+        "reverse_packet_count": {
+          "count": 979,
+          "missing": 0,
+          "mean": 2.5658835546475998,
+          "median": 0.0,
+          "std": 2.848668758980491,
+          "min": 0.0,
+          "max": 8.0
+        },
+        "forward_byte_count": {
+          "count": 979,
+          "missing": 0,
+          "mean": 657.214504596527,
+          "median": 264.0,
+          "std": 1840.9924470086328,
+          "min": 60.0,
+          "max": 12065.0
+        },
+        "reverse_byte_count": {
+          "count": 979,
+          "missing": 0,
+          "mean": 4916.157303370786,
+          "median": 0.0,
+          "std": 5838.831346172386,
+          "min": 0.0,
+          "max": 12168.0
+        },
+        "iat_min": {
+          "count": 631,
+          "missing": 348,
+          "mean": 0.025786634481463303,
+          "median": 4.0531158447265625e-06,
+          "std": 0.6383536893802698,
+          "min": 0.0,
+          "max": 16.04826807975769
+        },
+        "iat_mean": {
+          "count": 631,
+          "missing": 348,
+          "mean": 0.19675245089514606,
+          "median": 0.0180635154247283,
+          "std": 1.2000222541108407,
+          "min": 6.357828776041666e-07,
+          "max": 24.056071519851685
+        },
+        "iat_max": {
+          "count": 631,
+          "missing": 348,
+          "mean": 1.0507120980324722,
+          "median": 0.132051944732666,
+          "std": 3.7754137168805353,
+          "min": 9.5367431640625e-07,
+          "max": 52.35155916213989
+        },
+        "iat_std": {
+          "count": 631,
+          "missing": 348,
+          "mean": 0.3447764940290705,
+          "median": 0.0432250799694643,
+          "std": 1.2357504242493234,
+          "min": 0.0,
+          "max": 14.275869056011093
+        },
+        "byte_rate": {
+          "count": 631,
+          "missing": 348,
+          "mean": 14971740.375248566,
+          "median": 85112.17815600452,
+          "std": 62820220.926252864,
+          "min": 4.614219736934186,
+          "max": 644874240.0
+        },
+        "frame_length_mean": {
+          "count": 979,
+          "missing": 0,
+          "mean": 629.4850952804496,
+          "median": 77.0,
+          "std": 639.1696184752556,
+          "min": 60.0,
+          "max": 1781.0
+        },
+        "ip_total_length_mean": {
+          "count": 979,
+          "missing": 0,
+          "mean": 613.971966637777,
+          "median": 63.0,
+          "std": 640.5184545904074,
+          "min": 40.0,
+          "max": 1767.0
+        },
+        "src_port": {
+          "count": 979,
+          "missing": 0,
+          "mean": 38425.42594484168,
+          "median": 42754.0,
+          "std": 17838.50836922751,
+          "min": 80.0,
+          "max": 60918.0
+        },
+        "dst_port": {
+          "count": 979,
+          "missing": 0,
+          "mean": 7123.656792645556,
+          "median": 80.0,
+          "std": 16861.441590667982,
+          "min": 80.0,
+          "max": 60122.0
+        },
+        "ip_dscp": {
+          "count": 979,
+          "missing": 0,
+          "mean": 0.0,
+          "median": 0.0,
+          "std": 0.0,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "ip_ecn": {
+          "count": 979,
+          "missing": 0,
+          "mean": 0.0,
+          "median": 0.0,
+          "std": 0.0,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "ip_header_length": {
+          "count": 979,
+          "missing": 0,
+          "mean": 20.0,
+          "median": 20.0,
+          "std": 0.0,
+          "min": 20.0,
+          "max": 20.0
+        },
+        "ip_checksum_valid": {
+          "count": 979,
+          "missing": 0,
+          "mean": 1.0,
+          "median": 1.0,
+          "std": 0.0,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "l4_checksum_valid": {
+          "count": 979,
+          "missing": 0,
+          "mean": 0.5536261491317671,
+          "median": 1.0,
+          "std": 0.4971159182014769,
+          "min": 0.0,
+          "max": 1.0
+        },
+        "flow_direction": {
+          "count": 979,
+          "missing": 0,
+          "mean": 0.4974463738508682,
+          "median": 0.0,
+          "std": 0.49999347895096635,
+          "min": 0.0,
+          "max": 1.0
+        }
+      }
+    },
+    "Baseline FP Repaired": {
+      "count": 37,
+      "original_label_counts": {
+        "BENIGN": 37
+      },
+      "probabilities": {
+        "baseline_attack_probability": {
+          "mean": 0.549864864864865,
+          "median": 0.54,
+          "std": 0.03580137560558264,
+          "min": 0.505,
+          "max": 0.655,
+          "near_threshold_count": 25
+        },
+        "current_attack_probability": {
+          "mean": 0.4563513513513514,
+          "median": 0.46,
+          "std": 0.037301703617508467,
+          "min": 0.335,
+          "max": 0.5,
+          "near_threshold_count": 25
+        }
+      },
+      "numeric_features": {
+        "ip_protocol": {
+          "count": 37,
+          "missing": 0,
+          "mean": 6.0,
+          "median": 6.0,
+          "std": 0.0,
+          "min": 6.0,
+          "max": 6.0
+        },
+        "ttl_mean": {
+          "count": 37,
+          "missing": 0,
+          "mean": 62.37837837837838,
+          "median": 62.0,
+          "std": 0.7833176619561858,
+          "min": 62.0,
+          "max": 64.0
+        },
+        "tcp_window_mean": {
+          "count": 37,
+          "missing": 0,
+          "mean": 56.83783783783784,
+          "median": 0.0,
+          "std": 100.26007087341038,
+          "min": 0.0,
+          "max": 235.0
+        },
+        "tcp_header_length_mean": {
+          "count": 37,
+          "missing": 0,
+          "mean": 22.91891891891892,
+          "median": 20.0,
+          "std": 5.1484890377473125,
+          "min": 20.0,
+          "max": 32.0
+        },
+        "syn_count": {
+          "count": 37,
+          "missing": 0,
+          "mean": 0.0,
+          "median": 0.0,
+          "std": 0.0,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "ack_count": {
+          "count": 37,
+          "missing": 0,
+          "mean": 0.35135135135135137,
+          "median": 0.0,
+          "std": 0.7786410968047531,
+          "min": 0.0,
+          "max": 4.0
+        },
+        "fin_count": {
+          "count": 37,
+          "missing": 0,
+          "mean": 0.1891891891891892,
+          "median": 0.0,
+          "std": 0.3916588309780929,
+          "min": 0.0,
+          "max": 1.0
+        },
+        "rst_count": {
+          "count": 37,
+          "missing": 0,
+          "mean": 0.7567567567567568,
+          "median": 1.0,
+          "std": 0.4290407531456092,
+          "min": 0.0,
+          "max": 1.0
+        },
+        "psh_count": {
+          "count": 37,
+          "missing": 0,
+          "mean": 0.1891891891891892,
+          "median": 0.0,
+          "std": 0.3916588309780929,
+          "min": 0.0,
+          "max": 1.0
+        },
+        "syn_seen": {
+          "count": 37,
+          "missing": 0,
+          "mean": 0.0,
+          "median": 0.0,
+          "std": 0.0,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "syn_ack_seen": {
+          "count": 37,
+          "missing": 0,
+          "mean": 0.0,
+          "median": 0.0,
+          "std": 0.0,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "ack_after_syn_ack": {
+          "count": 37,
+          "missing": 0,
+          "mean": 0.0,
+          "median": 0.0,
+          "std": 0.0,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "flow_duration": {
+          "count": 37,
+          "missing": 0,
+          "mean": 0.00013951353124670013,
+          "median": 0.0,
+          "std": 0.0008344228643891575,
+          "min": 0.0,
+          "max": 0.0051460266113281
+        },
+        "flow_packet_count": {
+          "count": 37,
+          "missing": 0,
+          "mean": 1.1081081081081081,
+          "median": 1.0,
+          "std": 0.5085104789791021,
+          "min": 1.0,
+          "max": 4.0
+        },
+        "flow_byte_count": {
+          "count": 37,
+          "missing": 0,
+          "mean": 177.27027027027026,
+          "median": 60.0,
+          "std": 479.2639428894907,
+          "min": 60.0,
+          "max": 2247.0
+        },
+        "forward_packet_count": {
+          "count": 37,
+          "missing": 0,
+          "mean": 1.1081081081081081,
+          "median": 1.0,
+          "std": 0.5085104789791021,
+          "min": 1.0,
+          "max": 4.0
+        },
+        "reverse_packet_count": {
+          "count": 37,
+          "missing": 0,
+          "mean": 0.0,
+          "median": 0.0,
+          "std": 0.0,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "forward_byte_count": {
+          "count": 37,
+          "missing": 0,
+          "mean": 177.27027027027026,
+          "median": 60.0,
+          "std": 479.2639428894907,
+          "min": 60.0,
+          "max": 2247.0
+        },
+        "reverse_byte_count": {
+          "count": 37,
+          "missing": 0,
+          "mean": 0.0,
+          "median": 0.0,
+          "std": 0.0,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "iat_min": {
+          "count": 2,
+          "missing": 35,
+          "mean": 8.463859558105469e-06,
+          "median": 8.463859558105469e-06,
+          "std": 7.510185241699219e-06,
+          "min": 9.5367431640625e-07,
+          "max": 1.5974044799804688e-05
+        },
+        "iat_mean": {
+          "count": 2,
+          "missing": 35,
+          "mean": 0.0008656581242879024,
+          "median": 0.0008656581242879024,
+          "std": 0.0008496840794880977,
+          "min": 1.5974044799804688e-05,
+          "max": 0.001715342203776
+        },
+        "iat_max": {
+          "count": 2,
+          "missing": 35,
+          "mean": 0.0025495290756225525,
+          "median": 0.0025495290756225525,
+          "std": 0.002533555030822748,
+          "min": 1.5974044799804688e-05,
+          "max": 0.0050830841064453
+        },
+        "iat_std": {
+          "count": 2,
+          "missing": 35,
+          "mean": 0.00119074174815675,
+          "median": 0.00119074174815675,
+          "std": 0.00119074174815675,
+          "min": 0.0,
+          "max": 0.0023814834963135
+        },
+        "byte_rate": {
+          "count": 2,
+          "missing": 35,
+          "mean": 66419465.276080675,
+          "median": 66419465.276080675,
+          "std": 65982817.70899395,
+          "min": 436647.5670867309,
+          "max": 132402282.98507462
+        },
+        "frame_length_mean": {
+          "count": 37,
+          "missing": 0,
+          "mean": 103.14189189189189,
+          "median": 60.0,
+          "std": 178.53844067629652,
+          "min": 60.0,
+          "max": 1057.5
+        },
+        "ip_total_length_mean": {
+          "count": 37,
+          "missing": 0,
+          "mean": 84.60135135135135,
+          "median": 40.0,
+          "std": 179.65070707411064,
+          "min": 40.0,
+          "max": 1043.5
+        },
+        "src_port": {
+          "count": 37,
+          "missing": 0,
+          "mean": 38963.72972972973,
+          "median": 48506.0,
+          "std": 19587.888807295032,
+          "min": 80.0,
+          "max": 58472.0
+        },
+        "dst_port": {
+          "count": 37,
+          "missing": 0,
+          "mean": 9380.054054054053,
+          "median": 80.0,
+          "std": 19386.489296422948,
+          "min": 80.0,
+          "max": 55282.0
+        },
+        "ip_dscp": {
+          "count": 37,
+          "missing": 0,
+          "mean": 0.0,
+          "median": 0.0,
+          "std": 0.0,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "ip_ecn": {
+          "count": 37,
+          "missing": 0,
+          "mean": 0.0,
+          "median": 0.0,
+          "std": 0.0,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "ip_header_length": {
+          "count": 37,
+          "missing": 0,
+          "mean": 20.0,
+          "median": 20.0,
+          "std": 0.0,
+          "min": 20.0,
+          "max": 20.0
+        },
+        "ip_checksum_valid": {
+          "count": 37,
+          "missing": 0,
+          "mean": 1.0,
+          "median": 1.0,
+          "std": 0.0,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "l4_checksum_valid": {
+          "count": 37,
+          "missing": 0,
+          "mean": 0.972972972972973,
+          "median": 1.0,
+          "std": 0.16216216216216214,
+          "min": 0.0,
+          "max": 1.0
+        },
+        "flow_direction": {
+          "count": 37,
+          "missing": 0,
+          "mean": 0.0,
+          "median": 0.0,
+          "std": 0.0,
+          "min": 0.0,
+          "max": 0.0
+        }
+      }
+    },
+    "Current-only FP": {
+      "count": 60,
+      "original_label_counts": {
+        "BENIGN": 60
+      },
+      "probabilities": {
+        "baseline_attack_probability": {
+          "mean": 0.17141666666666663,
+          "median": 0.035,
+          "std": 0.20383835848261947,
+          "min": 0.0,
+          "max": 0.5,
+          "near_threshold_count": 10
+        },
+        "current_attack_probability": {
+          "mean": 0.7114999999999999,
+          "median": 0.6425000000000001,
+          "std": 0.1915991910212567,
+          "min": 0.505,
+          "max": 1.0,
+          "near_threshold_count": 23
+        }
+      },
+      "numeric_features": {
+        "ip_protocol": {
+          "count": 60,
+          "missing": 0,
+          "mean": 6.0,
+          "median": 6.0,
+          "std": 0.0,
+          "min": 6.0,
+          "max": 6.0
+        },
+        "ttl_mean": {
+          "count": 60,
+          "missing": 0,
+          "mean": 63.261111111111106,
+          "median": 64.0,
+          "std": 2.387538377947638,
+          "min": 46.0,
+          "max": 64.0
+        },
+        "tcp_window_mean": {
+          "count": 60,
+          "missing": 0,
+          "mean": 606.1916666666667,
+          "median": 0.0,
+          "std": 3725.0211342707694,
+          "min": 0.0,
+          "max": 29200.0
+        },
+        "tcp_header_length_mean": {
+          "count": 60,
+          "missing": 0,
+          "mean": 25.733333333333334,
+          "median": 20.0,
+          "std": 6.2125321371849305,
+          "min": 20.0,
+          "max": 40.0
+        },
+        "syn_count": {
+          "count": 60,
+          "missing": 0,
+          "mean": 0.03333333333333333,
+          "median": 0.0,
+          "std": 0.25603819159562025,
+          "min": 0.0,
+          "max": 2.0
+        },
+        "ack_count": {
+          "count": 60,
+          "missing": 0,
+          "mean": 0.7833333333333333,
+          "median": 0.0,
+          "std": 0.9325889889025187,
+          "min": 0.0,
+          "max": 3.0
+        },
+        "fin_count": {
+          "count": 60,
+          "missing": 0,
+          "mean": 0.4166666666666667,
+          "median": 0.0,
+          "std": 0.4930066485916346,
+          "min": 0.0,
+          "max": 1.0
+        },
+        "rst_count": {
+          "count": 60,
+          "missing": 0,
+          "mean": 0.5333333333333333,
+          "median": 1.0,
+          "std": 0.49888765156985887,
+          "min": 0.0,
+          "max": 1.0
+        },
+        "psh_count": {
+          "count": 60,
+          "missing": 0,
+          "mean": 0.11666666666666667,
+          "median": 0.0,
+          "std": 0.32102267140430374,
+          "min": 0.0,
+          "max": 1.0
+        },
+        "syn_seen": {
+          "count": 60,
+          "missing": 0,
+          "mean": 0.016666666666666666,
+          "median": 0.0,
+          "std": 0.12801909579781012,
+          "min": 0.0,
+          "max": 1.0
+        },
+        "syn_ack_seen": {
+          "count": 60,
+          "missing": 0,
+          "mean": 0.0,
+          "median": 0.0,
+          "std": 0.0,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "ack_after_syn_ack": {
+          "count": 60,
+          "missing": 0,
+          "mean": 0.0,
+          "median": 0.0,
+          "std": 0.0,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "flow_duration": {
+          "count": 60,
+          "missing": 0,
+          "mean": 0.016923534870147697,
+          "median": 0.0,
+          "std": 0.1291837952766341,
+          "min": 0.0,
+          "max": 1.0092008113861084
+        },
+        "flow_packet_count": {
+          "count": 60,
+          "missing": 0,
+          "mean": 1.35,
+          "median": 1.0,
+          "std": 0.5107184482014855,
+          "min": 1.0,
+          "max": 3.0
+        },
+        "flow_byte_count": {
+          "count": 60,
+          "missing": 0,
+          "mean": 126.78333333333333,
+          "median": 60.0,
+          "std": 150.9689914813267,
+          "min": 60.0,
+          "max": 615.0
+        },
+        "forward_packet_count": {
+          "count": 60,
+          "missing": 0,
+          "mean": 1.3166666666666667,
+          "median": 1.0,
+          "std": 0.4651761912317621,
+          "min": 1.0,
+          "max": 2.0
+        },
+        "reverse_packet_count": {
+          "count": 60,
+          "missing": 0,
+          "mean": 0.03333333333333333,
+          "median": 0.0,
+          "std": 0.17950549357115012,
+          "min": 0.0,
+          "max": 1.0
+        },
+        "forward_byte_count": {
+          "count": 60,
+          "missing": 0,
+          "mean": 124.58333333333333,
+          "median": 60.0,
+          "std": 150.87691359368256,
+          "min": 60.0,
+          "max": 615.0
+        },
+        "reverse_byte_count": {
+          "count": 60,
+          "missing": 0,
+          "mean": 2.2,
+          "median": 0.0,
+          "std": 11.84736257569591,
+          "min": 0.0,
+          "max": 66.0
+        },
+        "iat_min": {
+          "count": 20,
+          "missing": 40,
+          "mean": 0.050770449638366674,
+          "median": 0.0001864433288574,
+          "std": 0.219879372444909,
+          "min": 0.0,
+          "max": 1.0092008113861084
+        },
+        "iat_mean": {
+          "count": 20,
+          "missing": 40,
+          "mean": 0.050770527124404885,
+          "median": 0.0001864433288574,
+          "std": 0.21987935455353483,
+          "min": 0.0,
+          "max": 1.0092008113861084
+        },
+        "iat_max": {
+          "count": 20,
+          "missing": 40,
+          "mean": 0.050770604610443096,
+          "median": 0.0001864433288574,
+          "std": 0.21987933666267803,
+          "min": 0.0,
+          "max": 1.0092008113861084
+        },
+        "iat_std": {
+          "count": 20,
+          "missing": 40,
+          "mean": 7.748603820800782e-08,
+          "median": 0.0,
+          "std": 3.3775381008403755e-07,
+          "min": 0.0,
+          "max": 1.5497207641601562e-06
+        },
+        "byte_rate": {
+          "count": 19,
+          "missing": 41,
+          "mean": 141107499.60317183,
+          "median": 608404.5362637363,
+          "std": 237526655.57675558,
+          "min": 146.65069461916727,
+          "max": 644874240.0
+        },
+        "frame_length_mean": {
+          "count": 60,
+          "missing": 0,
+          "mean": 83.425,
+          "median": 60.0,
+          "std": 67.68202771046387,
+          "min": 60.0,
+          "max": 307.5
+        },
+        "ip_total_length_mean": {
+          "count": 60,
+          "missing": 0,
+          "mean": 66.225,
+          "median": 40.0,
+          "std": 68.84574696377402,
+          "min": 40.0,
+          "max": 293.5
+        },
+        "src_port": {
+          "count": 60,
+          "missing": 0,
+          "mean": 41206.4,
+          "median": 48663.0,
+          "std": 18938.84329730831,
+          "min": 80.0,
+          "max": 60823.0
+        },
+        "dst_port": {
+          "count": 60,
+          "missing": 0,
+          "mean": 7963.783333333334,
+          "median": 80.0,
+          "std": 18831.575879438653,
+          "min": 80.0,
+          "max": 59323.0
+        },
+        "ip_dscp": {
+          "count": 60,
+          "missing": 0,
+          "mean": 0.36666666666666664,
+          "median": 0.0,
+          "std": 1.8070848224573066,
+          "min": 0.0,
+          "max": 10.0
+        },
+        "ip_ecn": {
+          "count": 60,
+          "missing": 0,
+          "mean": 0.0,
+          "median": 0.0,
+          "std": 0.0,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "ip_header_length": {
+          "count": 60,
+          "missing": 0,
+          "mean": 20.0,
+          "median": 20.0,
+          "std": 0.0,
+          "min": 20.0,
+          "max": 20.0
+        },
+        "ip_checksum_valid": {
+          "count": 60,
+          "missing": 0,
+          "mean": 1.0,
+          "median": 1.0,
+          "std": 0.0,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "l4_checksum_valid": {
+          "count": 60,
+          "missing": 0,
+          "mean": 1.0,
+          "median": 1.0,
+          "std": 0.0,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "flow_direction": {
+          "count": 60,
+          "missing": 0,
+          "mean": 0.03333333333333333,
+          "median": 0.0,
+          "std": 0.17950549357115012,
+          "min": 0.0,
+          "max": 1.0
+        }
+      }
+    }
+  }
+}

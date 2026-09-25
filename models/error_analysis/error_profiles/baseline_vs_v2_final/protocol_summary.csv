@@ -1,0 +1,10 @@
+group,ip_protocol,count,percentage
+Persistent FN,6.0,127,100.0
+Baseline FN Repaired,6.0,23,100.0
+Current-only FN,6.0,25,100.0
+Persistent FP,6.0,979,100.0
+Baseline FP Repaired,6.0,37,100.0
+Current-only FP,6.0,60,100.0
+All Attack,6.0,106436,100.0
+All Benign,6.0,67252,62.37490609261819
+All Benign,17.0,40567,37.62509390738182

@@ -1,0 +1,24 @@
+flow_id,baseline_label,baseline_original_label,baseline_predicted_label,baseline_attack_probability,baseline_status,baseline_correct,current_label,current_original_label,current_predicted_label,current_attack_probability,current_status,current_correct,transition,baseline_result,current_result,traffic_class,persistent_fn,baseline_fn_repaired,current_only_fn,persistent_fp,baseline_fp_repaired,current_only_fp
+FLOW_097949,1,DoS slowloris,0,0.49,FN,False,1,DoS slowloris,1,0.735,TP,True,FN -> TP,FN,TP,Attack,False,True,False,False,False,False
+FLOW_115953,1,DoS Slowhttptest,0,0.43,FN,False,1,DoS Slowhttptest,1,0.66,TP,True,FN -> TP,FN,TP,Attack,False,True,False,False,False,False
+FLOW_141726,1,DoS Slowhttptest,0,0.495,FN,False,1,DoS Slowhttptest,1,0.665,TP,True,FN -> TP,FN,TP,Attack,False,True,False,False,False,False
+FLOW_172881,1,DoS Hulk,0,0.445,FN,False,1,DoS Hulk,1,0.52,TP,True,FN -> TP,FN,TP,Attack,False,True,False,False,False,False
+FLOW_202776,1,DoS Hulk,0,0.49,FN,False,1,DoS Hulk,1,0.545,TP,True,FN -> TP,FN,TP,Attack,False,True,False,False,False,False
+FLOW_203694,1,DoS Hulk,0,0.5,FN,False,1,DoS Hulk,1,0.755,TP,True,FN -> TP,FN,TP,Attack,False,True,False,False,False,False
+FLOW_211122,1,DoS Hulk,0,0.385,FN,False,1,DoS Hulk,1,0.505,TP,True,FN -> TP,FN,TP,Attack,False,True,False,False,False,False
+FLOW_264088,1,DoS Hulk,0,0.345,FN,False,1,DoS Hulk,1,0.515,TP,True,FN -> TP,FN,TP,Attack,False,True,False,False,False,False
+FLOW_345651,1,DoS Hulk,0,0.47,FN,False,1,DoS Hulk,1,0.685,TP,True,FN -> TP,FN,TP,Attack,False,True,False,False,False,False
+FLOW_370136,1,DoS Hulk,0,0.465,FN,False,1,DoS Hulk,1,0.545,TP,True,FN -> TP,FN,TP,Attack,False,True,False,False,False,False
+FLOW_395866,1,DoS Hulk,0,0.47,FN,False,1,DoS Hulk,1,0.61,TP,True,FN -> TP,FN,TP,Attack,False,True,False,False,False,False
+FLOW_411188,1,DoS Hulk,0,0.47,FN,False,1,DoS Hulk,1,0.65,TP,True,FN -> TP,FN,TP,Attack,False,True,False,False,False,False
+FLOW_411286,1,DoS Hulk,0,0.43,FN,False,1,DoS Hulk,1,0.615,TP,True,FN -> TP,FN,TP,Attack,False,True,False,False,False,False
+FLOW_490040,1,DoS Hulk,0,0.485,FN,False,1,DoS Hulk,1,0.655,TP,True,FN -> TP,FN,TP,Attack,False,True,False,False,False,False
+FLOW_524374,1,DoS Hulk,0,0.405,FN,False,1,DoS Hulk,1,0.73,TP,True,FN -> TP,FN,TP,Attack,False,True,False,False,False,False
+FLOW_525251,1,DoS Hulk,0,0.49,FN,False,1,DoS Hulk,1,0.54,TP,True,FN -> TP,FN,TP,Attack,False,True,False,False,False,False
+FLOW_554870,1,DoS Hulk,0,0.48,FN,False,1,DoS Hulk,1,0.63,TP,True,FN -> TP,FN,TP,Attack,False,True,False,False,False,False
+FLOW_605531,1,DoS Hulk,0,0.455,FN,False,1,DoS Hulk,1,0.795,TP,True,FN -> TP,FN,TP,Attack,False,True,False,False,False,False
+FLOW_625973,1,DoS Hulk,0,0.46,FN,False,1,DoS Hulk,1,0.51,TP,True,FN -> TP,FN,TP,Attack,False,True,False,False,False,False
+FLOW_628971,1,DoS Hulk,0,0.5,FN,False,1,DoS Hulk,1,0.55,TP,True,FN -> TP,FN,TP,Attack,False,True,False,False,False,False
+FLOW_665300,1,DoS Hulk,0,0.5,FN,False,1,DoS Hulk,1,0.59,TP,True,FN -> TP,FN,TP,Attack,False,True,False,False,False,False
+FLOW_671660,1,DoS Hulk,0,0.5,FN,False,1,DoS Hulk,1,0.59,TP,True,FN -> TP,FN,TP,Attack,False,True,False,False,False,False
+FLOW_685668,1,DoS Hulk,0,0.475,FN,False,1,DoS Hulk,1,0.52,TP,True,FN -> TP,FN,TP,Attack,False,True,False,False,False,False

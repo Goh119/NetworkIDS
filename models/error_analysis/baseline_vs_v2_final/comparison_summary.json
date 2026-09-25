@@ -1,0 +1,38 @@
+{
+  "analysis_name": "baseline_vs_v2_final",
+  "baseline_prediction_file": "models\\error_analysis\\prediction_results.csv",
+  "current_prediction_file": "models\\error_analysis\\v2_test1\\prediction_results.csv",
+  "test_rows": 214255,
+  "attack_rows": 106436,
+  "benign_rows": 107819,
+  "models": {
+    "baseline": {
+      "total": 214255,
+      "tp": 106286,
+      "tn": 106803,
+      "fp": 1016,
+      "fn": 150,
+      "accuracy": 0.994557886630417,
+      "fpr_percent": 0.9423199992580157,
+      "fnr_percent": 0.14092976060731333
+    },
+    "current": {
+      "total": 214255,
+      "tp": 106284,
+      "tn": 106780,
+      "fp": 1039,
+      "fn": 152,
+      "accuracy": 0.994441203239131,
+      "fpr_percent": 0.9636520464853134,
+      "fnr_percent": 0.14280882408207748
+    }
+  },
+  "important_transition_counts": {
+    "persistent_fn": 127,
+    "baseline_fn_repaired": 23,
+    "current_only_fn": 25,
+    "persistent_fp": 979,
+    "baseline_fp_repaired": 37,
+    "current_only_fp": 60
+  }
+}

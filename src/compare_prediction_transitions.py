@@ -1,4 +1,5 @@
 from pathlib import Path
+import argparse
 import json
 
 import pandas as pd
@@ -7,40 +8,46 @@ import config
 
 
 # ============================================================
-# Configuration
+# Argument Parser
 # ============================================================
 
-TEST_FILE = config.PROCESSED_DIR / "split" / "test_dataset.csv"
+def parse_arguments():
+    parser = argparse.ArgumentParser(
+        description=(
+            "Compare prediction transitions between a baseline "
+            "model and a current model."
+        )
+    )
 
-ERROR_ANALYSIS_DIR = config.MODELS_DIR / "error_analysis"
+    parser.add_argument(
+        "--baseline",
+        required=True,
+        help=(
+            "Path to baseline prediction_results.csv"
+        ),
+    )
 
-MODEL_DIRS = {
-    "baseline": ERROR_ANALYSIS_DIR,
-    "v1": ERROR_ANALYSIS_DIR / "v1",
-    "v2": ERROR_ANALYSIS_DIR / "v2",
-}
+    parser.add_argument(
+        "--current",
+        required=True,
+        help=(
+            "Path to current model prediction_results.csv"
+        ),
+    )
 
-OUTPUT_DIR = ERROR_ANALYSIS_DIR / "comparison"
+    parser.add_argument(
+        "--name",
+        required=True,
+        help=(
+            "Output analysis name, e.g. baseline_vs_v2_final"
+        ),
+    )
 
-TRANSITION_FILE = OUTPUT_DIR / "prediction_transitions.csv"
-TRANSITION_SUMMARY_FILE = OUTPUT_DIR / "transition_summary.csv"
-ATTACK_SUMMARY_FILE = OUTPUT_DIR / "attack_transition_summary.csv"
-BENIGN_SUMMARY_FILE = OUTPUT_DIR / "benign_transition_summary.csv"
-PERSISTENT_FN_FILE = OUTPUT_DIR / "persistent_fn.csv"
-PERSISTENT_FP_FILE = OUTPUT_DIR / "persistent_fp.csv"
-V2_ONLY_FN_FILE = OUTPUT_DIR / "v2_only_fn.csv"
-V2_ONLY_FP_FILE = OUTPUT_DIR / "v2_only_fp.csv"
-V1_REPAIRED_V2_REGRESSED_FN_FILE = (
-    OUTPUT_DIR / "v1_repaired_v2_regressed_fn.csv"
-)
-V1_REPAIRED_V2_REGRESSED_FP_FILE = (
-    OUTPUT_DIR / "v1_repaired_v2_regressed_fp.csv"
-)
-SUMMARY_JSON_FILE = OUTPUT_DIR / "comparison_summary.json"
+    return parser.parse_args()
 
 
 # ============================================================
-# Helper functions
+# Helper Functions
 # ============================================================
 
 def prediction_status(y_true, y_pred):
@@ -50,10 +57,13 @@ def prediction_status(y_true, y_pred):
     """
     if y_true == 1 and y_pred == 1:
         return "TP"
+
     if y_true == 0 and y_pred == 0:
         return "TN"
+
     if y_true == 0 and y_pred == 1:
         return "FP"
+
     if y_true == 1 and y_pred == 0:
         return "FN"
 
@@ -62,11 +72,12 @@ def prediction_status(y_true, y_pred):
     )
 
 
-def load_prediction_file(name, directory):
+def load_prediction_file(name, file_path):
     """
     Load one model's prediction_results.csv.
     """
-    file_path = directory / "prediction_results.csv"
+
+    file_path = Path(file_path)
 
     if not file_path.exists():
         raise FileNotFoundError(
@@ -90,7 +101,8 @@ def load_prediction_file(name, directory):
 
     if missing:
         raise ValueError(
-            f"{name}: missing required columns: {sorted(missing)}"
+            f"{name}: missing required columns: "
+            f"{sorted(missing)}"
         )
 
     df = df[
@@ -107,10 +119,13 @@ def load_prediction_file(name, directory):
 
     # Make sure flow_id is unique.
     if df["flow_id"].duplicated().any():
-        duplicate_count = int(df["flow_id"].duplicated().sum())
+        duplicate_count = int(
+            df["flow_id"].duplicated().sum()
+        )
 
         raise ValueError(
-            f"{name}: duplicate flow_id detected: {duplicate_count}"
+            f"{name}: duplicate flow_id detected: "
+            f"{duplicate_count}"
         )
 
     # Rename model-specific columns.
@@ -128,26 +143,128 @@ def load_prediction_file(name, directory):
     return df
 
 
-def check_same_test_set(dfs):
+def check_same_test_set(baseline_df, current_df):
     """
-    Confirm all three models evaluated exactly the same flow IDs.
+    Confirm baseline and current model evaluated
+    exactly the same flow IDs.
     """
-    names = list(dfs.keys())
 
-    base_ids = set(dfs[names[0]]["flow_id"])
+    baseline_ids = set(
+        baseline_df["flow_id"]
+    )
 
-    for name in names[1:]:
-        current_ids = set(dfs[name]["flow_id"])
+    current_ids = set(
+        current_df["flow_id"]
+    )
 
-        if current_ids != base_ids:
-            missing = len(base_ids - current_ids)
-            extra = len(current_ids - base_ids)
+    if baseline_ids != current_ids:
 
-            raise ValueError(
-                f"Test-set mismatch between {names[0]} and {name}.\n"
-                f"  Missing flow IDs: {missing}\n"
-                f"  Extra flow IDs   : {extra}"
-            )
+        missing = len(
+            baseline_ids - current_ids
+        )
+
+        extra = len(
+            current_ids - baseline_ids
+        )
+
+        raise ValueError(
+            "Test-set mismatch between baseline and current model.\n"
+            f"  Missing flow IDs in current: {missing}\n"
+            f"  Extra flow IDs in current   : {extra}"
+        )
+
+
+def calculate_model_summary(
+    merged,
+    model_name,
+):
+    """
+    Calculate TP/TN/FP/FN, accuracy, FPR and FNR.
+    """
+
+    status_counts = (
+        merged[f"{model_name}_status"]
+        .value_counts()
+        .to_dict()
+    )
+
+    tp = int(
+        status_counts.get("TP", 0)
+    )
+
+    tn = int(
+        status_counts.get("TN", 0)
+    )
+
+    fp = int(
+        status_counts.get("FP", 0)
+    )
+
+    fn = int(
+        status_counts.get("FN", 0)
+    )
+
+    total = (
+        tp + tn + fp + fn
+    )
+
+    return {
+        "total": total,
+        "tp": tp,
+        "tn": tn,
+        "fp": fp,
+        "fn": fn,
+        "accuracy": (
+            (tp + tn) / total
+            if total > 0
+            else 0
+        ),
+        "fpr_percent": (
+            fp / (fp + tn) * 100
+            if (fp + tn) > 0
+            else 0
+        ),
+        "fnr_percent": (
+            fn / (fn + tp) * 100
+            if (fn + tp) > 0
+            else 0
+        ),
+    }
+
+
+def print_original_label_distribution(
+    df,
+    title,
+    original_label_column,
+):
+    """
+    Print original CIC label distribution
+    for an error group.
+    """
+
+    print(f"\n{title}")
+
+    if len(df) == 0:
+        print("  None")
+        return
+
+    counts = (
+        df[original_label_column]
+        .fillna("<NA>")
+        .value_counts()
+    )
+
+    for label, count in counts.items():
+
+        percentage = (
+            count / len(df) * 100
+        )
+
+        print(
+            f"  {label}: "
+            f"{count:,} "
+            f"({percentage:.2f}%)"
+        )
 
 
 # ============================================================
@@ -156,275 +273,390 @@ def check_same_test_set(dfs):
 
 def main():
 
+    args = parse_arguments()
+
+    baseline_file = Path(
+        args.baseline
+    )
+
+    current_file = Path(
+        args.current
+    )
+
+    analysis_name = args.name
+
+    output_dir = (
+        config.MODELS_DIR
+        / "error_analysis"
+        / analysis_name
+    )
+
+    output_dir.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    transition_file = (
+        output_dir
+        / "prediction_transitions.csv"
+    )
+
+    transition_summary_file = (
+        output_dir
+        / "transition_summary.csv"
+    )
+
+    attack_summary_file = (
+        output_dir
+        / "attack_transition_summary.csv"
+    )
+
+    benign_summary_file = (
+        output_dir
+        / "benign_transition_summary.csv"
+    )
+
+    persistent_fn_file = (
+        output_dir
+        / "persistent_fn.csv"
+    )
+
+    persistent_fp_file = (
+        output_dir
+        / "persistent_fp.csv"
+    )
+
+    baseline_fn_repaired_file = (
+        output_dir
+        / "baseline_fn_repaired.csv"
+    )
+
+    baseline_fp_repaired_file = (
+        output_dir
+        / "baseline_fp_repaired.csv"
+    )
+
+    current_only_fn_file = (
+        output_dir
+        / "current_only_fn.csv"
+    )
+
+    current_only_fp_file = (
+        output_dir
+        / "current_only_fp.csv"
+    )
+
+    summary_json_file = (
+        output_dir
+        / "comparison_summary.json"
+    )
+
+    # ========================================================
+    # Header
+    # ========================================================
+
     print("=" * 70)
-    print("NetworkIDS - Baseline / V1 / V2 Prediction Transition Analysis")
+    print(
+        "NetworkIDS - Baseline / Current Prediction "
+        "Transition Analysis"
+    )
     print("=" * 70)
 
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    print("\nAnalysis:")
+    print(
+        f"  Name     : {analysis_name}"
+    )
 
-    # --------------------------------------------------------
+    print("\nPrediction files:")
+    print(
+        f"  Baseline : {baseline_file}"
+    )
+
+    print(
+        f"  Current  : {current_file}"
+    )
+
+    # ========================================================
     # 1. Load prediction results
-    # --------------------------------------------------------
+    # ========================================================
 
-    print("\n[1/7] Loading prediction results...")
+    print(
+        "\n[1/7] Loading prediction results..."
+    )
 
-    predictions = {}
+    print("  Loading baseline...")
 
-    for name, directory in MODEL_DIRS.items():
-        print(f"  Loading {name}...")
+    baseline = load_prediction_file(
+        "baseline",
+        baseline_file,
+    )
 
-        predictions[name] = load_prediction_file(
-            name,
-            directory
-        )
+    print(
+        f"    Rows: {len(baseline):,}"
+    )
 
-        print(
-            f"    Rows: {len(predictions[name]):,}"
-        )
+    print("  Loading current model...")
 
-    # --------------------------------------------------------
-    # 2. Verify same test set
-    # --------------------------------------------------------
+    current = load_prediction_file(
+        "current",
+        current_file,
+    )
 
-    print("\n[2/7] Checking test-set consistency...")
+    print(
+        f"    Rows: {len(current):,}"
+    )
 
-    check_same_test_set(predictions)
+    # ========================================================
+    # 2. Check same test set
+    # ========================================================
 
-    print("  Flow ID overlap check: PASS")
+    print(
+        "\n[2/7] Checking test-set consistency..."
+    )
+
+    check_same_test_set(
+        baseline,
+        current,
+    )
+
+    print(
+        "  Flow ID overlap check: PASS"
+    )
+
     print(
         f"  Common test flows: "
-        f"{len(predictions['baseline']):,}"
+        f"{len(baseline):,}"
     )
 
-    # --------------------------------------------------------
+    # ========================================================
     # 3. Merge predictions
-    # --------------------------------------------------------
+    # ========================================================
 
-    print("\n[3/7] Merging Baseline / V1 / V2 predictions...")
+    print(
+        "\n[3/7] Merging Baseline / Current predictions..."
+    )
 
-    merged = predictions["baseline"].copy()
-
-    merged = merged.merge(
-        predictions["v1"],
+    merged = baseline.merge(
+        current,
         on="flow_id",
         how="inner",
         validate="one_to_one",
     )
 
-    merged = merged.merge(
-        predictions["v2"],
-        on="flow_id",
-        how="inner",
-        validate="one_to_one",
-    )
-
-    if len(merged) != len(predictions["baseline"]):
+    if len(merged) != len(baseline):
         raise ValueError(
-            "Merged dataset row count does not match test set."
+            "Merged dataset row count does not match "
+            "the baseline test set."
         )
 
     print(
         f"  Merged rows: {len(merged):,}"
     )
 
-    # --------------------------------------------------------
-    # 4. Verify labels are identical
-    # --------------------------------------------------------
+    # ========================================================
+    # 4. Verify labels
+    # ========================================================
 
-    print("\n[4/7] Checking labels and prediction status...")
+    print(
+        "\n[4/7] Checking labels and prediction status..."
+    )
 
-    # Label must be the same across all models.
-    if not (
-        merged["baseline_label"].equals(
-            merged["v1_label"]
-        )
-        and
-        merged["baseline_label"].equals(
-            merged["v2_label"]
-        )
+    # Binary labels must match.
+    if not merged[
+        "baseline_label"
+    ].equals(
+        merged["current_label"]
     ):
+
         raise ValueError(
-            "Label mismatch detected between model outputs."
+            "Binary label mismatch detected "
+            "between baseline and current model."
         )
 
-    # Original labels should also normally match.
-    original_match_v1 = (
-        merged["baseline_original_label"].fillna("<NA>")
+    print(
+        "  Binary label consistency: PASS"
+    )
+
+    # Original labels should also match.
+    original_match = (
+        merged[
+            "baseline_original_label"
+        ].fillna("<NA>")
         ==
-        merged["v1_original_label"].fillna("<NA>")
+        merged[
+            "current_original_label"
+        ].fillna("<NA>")
     ).all()
 
-    original_match_v2 = (
-        merged["baseline_original_label"].fillna("<NA>")
-        ==
-        merged["v2_original_label"].fillna("<NA>")
-    ).all()
+    if not original_match:
 
-    if not original_match_v1 or not original_match_v2:
         print(
             "  WARNING: Original label mismatch detected."
         )
+
     else:
+
         print(
             "  Original label consistency: PASS"
         )
 
-    print("  Binary label consistency: PASS")
-
-    # --------------------------------------------------------
+    # ========================================================
     # 5. Create transition columns
-    # --------------------------------------------------------
+    # ========================================================
 
-    print("\n[5/7] Creating prediction transitions...")
+    print(
+        "\n[5/7] Creating prediction transitions..."
+    )
 
     merged["transition"] = (
         merged["baseline_status"]
         + " -> "
-        + merged["v1_status"]
-        + " -> "
-        + merged["v2_status"]
+        + merged["current_status"]
     )
 
-    # More readable transition fields.
-    merged["baseline_result"] = merged["baseline_status"]
-    merged["v1_result"] = merged["v1_status"]
-    merged["v2_result"] = merged["v2_status"]
+    merged["baseline_result"] = (
+        merged["baseline_status"]
+    )
 
-    # Attack / Benign category.
-    merged["traffic_class"] = merged["baseline_label"].map(
-        {
-            0: "Benign",
-            1: "Attack",
-        }
+    merged["current_result"] = (
+        merged["current_status"]
+    )
+
+    merged["traffic_class"] = (
+        merged["baseline_label"].map(
+            {
+                0: "Benign",
+                1: "Attack",
+            }
+        )
     )
 
     # --------------------------------------------------------
-    # Important transition flags
+    # Attack transitions
     # --------------------------------------------------------
 
-    # Attack:
-    # FN in all three models.
+    # FN in both models.
     merged["persistent_fn"] = (
         (merged["baseline_status"] == "FN")
         &
-        (merged["v1_status"] == "FN")
-        &
-        (merged["v2_status"] == "FN")
+        (merged["current_status"] == "FN")
     )
 
-    # Baseline FN -> V1 TP -> V2 FN
-    merged["v1_repaired_v2_regressed_fn"] = (
+    # Baseline FN -> Current TP.
+    merged["baseline_fn_repaired"] = (
         (merged["baseline_status"] == "FN")
         &
-        (merged["v1_status"] == "TP")
-        &
-        (merged["v2_status"] == "FN")
+        (merged["current_status"] == "TP")
     )
 
-    # Baseline TP -> V1 TP -> V2 FN
-    merged["v2_only_fn"] = (
+    # Baseline TP -> Current FN.
+    merged["current_only_fn"] = (
         (merged["baseline_status"] == "TP")
         &
-        (merged["v1_status"] == "TP")
-        &
-        (merged["v2_status"] == "FN")
+        (merged["current_status"] == "FN")
     )
 
-    # Baseline FN -> V1 TP -> V2 TP
-    merged["fn_repaired_and_kept"] = (
-        (merged["baseline_status"] == "FN")
-        &
-        (merged["v1_status"] == "TP")
-        &
-        (merged["v2_status"] == "TP")
-    )
+    # --------------------------------------------------------
+    # Benign transitions
+    # --------------------------------------------------------
 
-    # Benign:
-    # FP in all three models.
+    # FP in both models.
     merged["persistent_fp"] = (
         (merged["baseline_status"] == "FP")
         &
-        (merged["v1_status"] == "FP")
-        &
-        (merged["v2_status"] == "FP")
+        (merged["current_status"] == "FP")
     )
 
-    # Baseline FP -> V1 TN -> V2 FP
-    merged["v1_repaired_v2_regressed_fp"] = (
+    # Baseline FP -> Current TN.
+    merged["baseline_fp_repaired"] = (
         (merged["baseline_status"] == "FP")
         &
-        (merged["v1_status"] == "TN")
-        &
-        (merged["v2_status"] == "FP")
+        (merged["current_status"] == "TN")
     )
 
-    # Baseline TN -> V1 TN -> V2 FP
-    merged["v2_only_fp"] = (
+    # Baseline TN -> Current FP.
+    merged["current_only_fp"] = (
         (merged["baseline_status"] == "TN")
         &
-        (merged["v1_status"] == "TN")
-        &
-        (merged["v2_status"] == "FP")
+        (merged["current_status"] == "FP")
     )
 
-    # Baseline FP -> V1 TN -> V2 TN
-    merged["fp_repaired_and_kept"] = (
-        (merged["baseline_status"] == "FP")
-        &
-        (merged["v1_status"] == "TN")
-        &
-        (merged["v2_status"] == "TN")
-    )
-
-    # --------------------------------------------------------
+    # ========================================================
     # Save full transition dataset
-    # --------------------------------------------------------
+    # ========================================================
 
     merged.to_csv(
-        TRANSITION_FILE,
+        transition_file,
         index=False,
     )
 
     print(
-        f"  Full transition file saved:\n"
-        f"    {TRANSITION_FILE}"
+        "  Full transition file saved:"
     )
 
-    # --------------------------------------------------------
-    # 6. Transition summaries
-    # --------------------------------------------------------
+    print(
+        f"    {transition_file}"
+    )
 
-    print("\n[6/7] Generating transition summaries...")
+    # ========================================================
+    # 6. Generate summaries
+    # ========================================================
+
+    print(
+        "\n[6/7] Generating transition summaries..."
+    )
 
     transition_summary = (
         merged
         .groupby(
-            ["traffic_class", "transition"],
+            [
+                "traffic_class",
+                "transition",
+            ],
             dropna=False,
         )
         .size()
-        .reset_index(name="count")
-    )
-
-    transition_summary["percentage_within_class"] = (
-        transition_summary
-        .groupby("traffic_class")["count"]
-        .transform(
-            lambda x: x / x.sum() * 100
+        .reset_index(
+            name="count"
         )
     )
 
-    transition_summary = transition_summary.sort_values(
-        ["traffic_class", "count"],
-        ascending=[True, False],
+    transition_summary[
+        "percentage_within_class"
+    ] = (
+        transition_summary
+        .groupby(
+            "traffic_class"
+        )["count"]
+        .transform(
+            lambda x:
+            x / x.sum() * 100
+        )
+    )
+
+    transition_summary = (
+        transition_summary
+        .sort_values(
+            [
+                "traffic_class",
+                "count",
+            ],
+            ascending=[
+                True,
+                False,
+            ],
+        )
     )
 
     transition_summary.to_csv(
-        TRANSITION_SUMMARY_FILE,
+        transition_summary_file,
         index=False,
     )
 
-    # Attack-only transitions.
+    # --------------------------------------------------------
+    # Attack transitions
+    # --------------------------------------------------------
+
     attack_df = merged[
         merged["traffic_class"] == "Attack"
     ].copy()
@@ -433,22 +665,32 @@ def main():
         attack_df
         .groupby("transition")
         .size()
-        .reset_index(name="count")
-        .sort_values("count", ascending=False)
+        .reset_index(
+            name="count"
+        )
+        .sort_values(
+            "count",
+            ascending=False,
+        )
     )
 
-    attack_summary["percentage_of_attack_flows"] = (
+    attack_summary[
+        "percentage_of_attack_flows"
+    ] = (
         attack_summary["count"]
         / len(attack_df)
         * 100
     )
 
     attack_summary.to_csv(
-        ATTACK_SUMMARY_FILE,
+        attack_summary_file,
         index=False,
     )
 
-    # Benign-only transitions.
+    # --------------------------------------------------------
+    # Benign transitions
+    # --------------------------------------------------------
+
     benign_df = merged[
         merged["traffic_class"] == "Benign"
     ].copy()
@@ -457,23 +699,30 @@ def main():
         benign_df
         .groupby("transition")
         .size()
-        .reset_index(name="count")
-        .sort_values("count", ascending=False)
+        .reset_index(
+            name="count"
+        )
+        .sort_values(
+            "count",
+            ascending=False,
+        )
     )
 
-    benign_summary["percentage_of_benign_flows"] = (
+    benign_summary[
+        "percentage_of_benign_flows"
+    ] = (
         benign_summary["count"]
         / len(benign_df)
         * 100
     )
 
     benign_summary.to_csv(
-        BENIGN_SUMMARY_FILE,
+        benign_summary_file,
         index=False,
     )
 
     # --------------------------------------------------------
-    # Special groups
+    # Important groups
     # --------------------------------------------------------
 
     persistent_fn = merged[
@@ -484,303 +733,299 @@ def main():
         merged["persistent_fp"]
     ].copy()
 
-    v2_only_fn = merged[
-        merged["v2_only_fn"]
+    baseline_fn_repaired = merged[
+        merged["baseline_fn_repaired"]
     ].copy()
 
-    v2_only_fp = merged[
-        merged["v2_only_fp"]
+    baseline_fp_repaired = merged[
+        merged["baseline_fp_repaired"]
     ].copy()
 
-    v1_repaired_v2_regressed_fn = merged[
-        merged["v1_repaired_v2_regressed_fn"]
+    current_only_fn = merged[
+        merged["current_only_fn"]
     ].copy()
 
-    v1_repaired_v2_regressed_fp = merged[
-        merged["v1_repaired_v2_regressed_fp"]
+    current_only_fp = merged[
+        merged["current_only_fp"]
     ].copy()
 
     persistent_fn.to_csv(
-        PERSISTENT_FN_FILE,
+        persistent_fn_file,
         index=False,
     )
 
     persistent_fp.to_csv(
-        PERSISTENT_FP_FILE,
+        persistent_fp_file,
         index=False,
     )
 
-    v2_only_fn.to_csv(
-        V2_ONLY_FN_FILE,
+    baseline_fn_repaired.to_csv(
+        baseline_fn_repaired_file,
         index=False,
     )
 
-    v2_only_fp.to_csv(
-        V2_ONLY_FP_FILE,
+    baseline_fp_repaired.to_csv(
+        baseline_fp_repaired_file,
         index=False,
     )
 
-    v1_repaired_v2_regressed_fn.to_csv(
-        V1_REPAIRED_V2_REGRESSED_FN_FILE,
+    current_only_fn.to_csv(
+        current_only_fn_file,
         index=False,
     )
 
-    v1_repaired_v2_regressed_fp.to_csv(
-        V1_REPAIRED_V2_REGRESSED_FP_FILE,
+    current_only_fp.to_csv(
+        current_only_fp_file,
         index=False,
     )
 
-    # --------------------------------------------------------
+    # ========================================================
     # 7. Detailed summary
-    # --------------------------------------------------------
+    # ========================================================
 
-    print("\n" + "=" * 70)
-    print("PREDICTION TRANSITION ANALYSIS")
-    print("=" * 70)
+    print(
+        "\n" + "=" * 70
+    )
+
+    print(
+        "PREDICTION TRANSITION ANALYSIS"
+    )
+
+    print(
+        "=" * 70
+    )
 
     print("\nTest set:")
+
     print(
         f"  Total flows: {len(merged):,}"
     )
 
     print(
-        f"  Attack: "
-        f"{len(attack_df):,}"
+        f"  Attack: {len(attack_df):,}"
     )
 
     print(
-        f"  Benign: "
-        f"{len(benign_df):,}"
+        f"  Benign: {len(benign_df):,}"
     )
 
-    # --------------------------------------------------------
-    # Attack transitions
-    # --------------------------------------------------------
-
-    print("\n" + "-" * 70)
-    print("ATTACK FLOW ANALYSIS")
-    print("-" * 70)
+    # ========================================================
+    # Attack analysis
+    # ========================================================
 
     print(
-        f"\n  Persistent FN "
-        f"(FN -> FN -> FN): "
+        "\n" + "-" * 70
+    )
+
+    print(
+        "ATTACK FLOW ANALYSIS"
+    )
+
+    print(
+        "-" * 70
+    )
+
+    print(
+        "\n  Persistent FN "
+        "(FN -> FN): "
         f"{len(persistent_fn):,}"
     )
 
     print(
-        f"  V1 repaired, V2 regressed "
-        f"(FN -> TP -> FN): "
-        f"{len(v1_repaired_v2_regressed_fn):,}"
+        "  Baseline FN repaired "
+        "(FN -> TP): "
+        f"{len(baseline_fn_repaired):,}"
     )
 
     print(
-        f"  V2-only FN "
-        f"(TP -> TP -> FN): "
-        f"{len(v2_only_fn):,}"
+        "  Current-only FN "
+        "(TP -> FN): "
+        f"{len(current_only_fn):,}"
+    )
+
+    # ========================================================
+    # Benign analysis
+    # ========================================================
+
+    print(
+        "\n" + "-" * 70
     )
 
     print(
-        f"  FN repaired and kept "
-        f"(FN -> TP -> TP): "
-        f"{len(merged[merged['fn_repaired_and_kept']]):,}"
+        "BENIGN FLOW ANALYSIS"
     )
 
-    # --------------------------------------------------------
-    # Benign transitions
-    # --------------------------------------------------------
-
-    print("\n" + "-" * 70)
-    print("BENIGN FLOW ANALYSIS")
-    print("-" * 70)
+    print(
+        "-" * 70
+    )
 
     print(
-        f"\n  Persistent FP "
-        f"(FP -> FP -> FP): "
+        "\n  Persistent FP "
+        "(FP -> FP): "
         f"{len(persistent_fp):,}"
     )
 
     print(
-        f"  V1 repaired, V2 regressed "
-        f"(FP -> TN -> FP): "
-        f"{len(v1_repaired_v2_regressed_fp):,}"
+        "  Baseline FP repaired "
+        "(FP -> TN): "
+        f"{len(baseline_fp_repaired):,}"
     )
 
     print(
-        f"  V2-only FP "
-        f"(TN -> TN -> FP): "
-        f"{len(v2_only_fp):,}"
+        "  Current-only FP "
+        "(TN -> FP): "
+        f"{len(current_only_fp):,}"
+    )
+
+    # ========================================================
+    # Model summaries
+    # ========================================================
+
+    print(
+        "\n" + "-" * 70
     )
 
     print(
-        f"  FP repaired and kept "
-        f"(FP -> TN -> TN): "
-        f"{len(merged[merged['fp_repaired_and_kept']]):,}"
+        "MODEL ERROR SUMMARY"
     )
 
-    # --------------------------------------------------------
-    # Standard model metrics
-    # --------------------------------------------------------
+    print(
+        "-" * 70
+    )
 
-    print("\n" + "-" * 70)
-    print("MODEL ERROR SUMMARY")
-    print("-" * 70)
+    baseline_summary = calculate_model_summary(
+        merged,
+        "baseline",
+    )
 
-    model_summary = {}
+    current_summary = calculate_model_summary(
+        merged,
+        "current",
+    )
 
-    for name in ["baseline", "v1", "v2"]:
+    model_summary = {
+        "baseline": baseline_summary,
+        "current": current_summary,
+    }
 
-        status_counts = (
-            merged[f"{name}_status"]
-            .value_counts()
-            .to_dict()
-        )
-
-        tp = int(status_counts.get("TP", 0))
-        tn = int(status_counts.get("TN", 0))
-        fp = int(status_counts.get("FP", 0))
-        fn = int(status_counts.get("FN", 0))
-
-        total = tp + tn + fp + fn
-
-        model_summary[name] = {
-            "total": total,
-            "tp": tp,
-            "tn": tn,
-            "fp": fp,
-            "fn": fn,
-            "accuracy": (tp + tn) / total,
-            "fpr_percent": (
-                fp / (fp + tn) * 100
-                if (fp + tn) > 0
-                else 0
-            ),
-            "fnr_percent": (
-                fn / (fn + tp) * 100
-                if (fn + tp) > 0
-                else 0
-            ),
-        }
+    for name, summary in model_summary.items():
 
         print(
             f"\n{name.upper()}:"
         )
 
         print(
-            f"  TP: {tp:,}"
+            f"  TP: {summary['tp']:,}"
         )
+
         print(
-            f"  TN: {tn:,}"
+            f"  TN: {summary['tn']:,}"
         )
+
         print(
-            f"  FP: {fp:,}"
+            f"  FP: {summary['fp']:,}"
         )
+
         print(
-            f"  FN: {fn:,}"
+            f"  FN: {summary['fn']:,}"
         )
 
         print(
             f"  Accuracy: "
-            f"{model_summary[name]['accuracy'] * 100:.4f}%"
+            f"{summary['accuracy'] * 100:.4f}%"
         )
 
         print(
             f"  FPR: "
-            f"{model_summary[name]['fpr_percent']:.4f}%"
+            f"{summary['fpr_percent']:.4f}%"
         )
 
         print(
             f"  FNR: "
-            f"{model_summary[name]['fnr_percent']:.4f}%"
+            f"{summary['fnr_percent']:.4f}%"
         )
 
-    # --------------------------------------------------------
-    # Original label analysis for important error groups
-    # --------------------------------------------------------
-
-    def print_original_label_distribution(
-        df,
-        title,
-    ):
-        print(f"\n{title}")
-
-        if len(df) == 0:
-            print("  None")
-            return
-
-        counts = (
-            df["baseline_original_label"]
-            .fillna("<NA>")
-            .value_counts()
-        )
-
-        for label, count in counts.items():
-            percentage = count / len(df) * 100
-
-            print(
-                f"  {label}: "
-                f"{count:,} "
-                f"({percentage:.2f}%)"
-            )
+    # ========================================================
+    # Original label analysis
+    # ========================================================
 
     print_original_label_distribution(
         persistent_fn,
         "Persistent FN - Original Label Distribution",
+        "baseline_original_label",
     )
 
     print_original_label_distribution(
-        v1_repaired_v2_regressed_fn,
-        "V1 Repaired / V2 Regressed FN - Original Label Distribution",
+        baseline_fn_repaired,
+        "Baseline FN Repaired - Original Label Distribution",
+        "baseline_original_label",
     )
 
     print_original_label_distribution(
-        v2_only_fn,
-        "V2-only FN - Original Label Distribution",
+        current_only_fn,
+        "Current-only FN - Original Label Distribution",
+        "baseline_original_label",
     )
 
     print_original_label_distribution(
         persistent_fp,
         "Persistent FP - Original Label Distribution",
+        "baseline_original_label",
     )
 
     print_original_label_distribution(
-        v1_repaired_v2_regressed_fp,
-        "V1 Repaired / V2 Regressed FP - Original Label Distribution",
+        baseline_fp_repaired,
+        "Baseline FP Repaired - Original Label Distribution",
+        "baseline_original_label",
     )
 
     print_original_label_distribution(
-        v2_only_fp,
-        "V2-only FP - Original Label Distribution",
+        current_only_fp,
+        "Current-only FP - Original Label Distribution",
+        "baseline_original_label",
     )
 
-    # --------------------------------------------------------
-    # Probability summaries for important error groups
-    # --------------------------------------------------------
+    # ========================================================
+    # Probability analysis
+    # ========================================================
 
-    print("\n" + "-" * 70)
-    print("ATTACK PROBABILITY ANALYSIS")
-    print("-" * 70)
+    print(
+        "\n" + "-" * 70
+    )
+
+    print(
+        "CURRENT MODEL PROBABILITY ANALYSIS"
+    )
+
+    print(
+        "-" * 70
+    )
 
     probability_groups = {
         "Persistent FN": persistent_fn,
-        "V1 repaired / V2 regressed FN":
-            v1_repaired_v2_regressed_fn,
-        "V2-only FN": v2_only_fn,
+        "Baseline FN Repaired": baseline_fn_repaired,
+        "Current-only FN": current_only_fn,
         "Persistent FP": persistent_fp,
-        "V1 repaired / V2 regressed FP":
-            v1_repaired_v2_regressed_fp,
-        "V2-only FP": v2_only_fp,
+        "Baseline FP Repaired": baseline_fp_repaired,
+        "Current-only FP": current_only_fp,
     }
 
     for group_name, df in probability_groups.items():
 
-        print(f"\n  {group_name}:")
+        print(
+            f"\n  {group_name}:"
+        )
 
         if len(df) == 0:
-            print("    None")
+
+            print(
+                "    None"
+            )
+
             continue
 
         probability = df[
-            "v2_attack_probability"
+            "current_attack_probability"
         ]
 
         print(
@@ -815,111 +1060,157 @@ def main():
             f"({near_threshold / len(df) * 100:.2f}%)"
         )
 
-    # --------------------------------------------------------
-    # Save JSON summary
-    # --------------------------------------------------------
+    # ========================================================
+    # JSON summary
+    # ========================================================
 
     summary = {
-        "test_rows": int(len(merged)),
-        "attack_rows": int(len(attack_df)),
-        "benign_rows": int(len(benign_df)),
+
+        "analysis_name": analysis_name,
+
+        "baseline_prediction_file": str(
+            baseline_file
+        ),
+
+        "current_prediction_file": str(
+            current_file
+        ),
+
+        "test_rows": int(
+            len(merged)
+        ),
+
+        "attack_rows": int(
+            len(attack_df)
+        ),
+
+        "benign_rows": int(
+            len(benign_df)
+        ),
+
         "models": model_summary,
+
         "important_transition_counts": {
-            "persistent_fn": int(len(persistent_fn)),
-            "v1_repaired_v2_regressed_fn":
-                int(len(v1_repaired_v2_regressed_fn)),
-            "v2_only_fn":
-                int(len(v2_only_fn)),
-            "fn_repaired_and_kept":
-                int(
-                    merged["fn_repaired_and_kept"].sum()
-                ),
+
+            "persistent_fn":
+                int(len(persistent_fn)),
+
+            "baseline_fn_repaired":
+                int(len(baseline_fn_repaired)),
+
+            "current_only_fn":
+                int(len(current_only_fn)),
+
             "persistent_fp":
                 int(len(persistent_fp)),
-            "v1_repaired_v2_regressed_fp":
-                int(len(v1_repaired_v2_regressed_fp)),
-            "v2_only_fp":
-                int(len(v2_only_fp)),
-            "fp_repaired_and_kept":
-                int(
-                    merged["fp_repaired_and_kept"].sum()
-                ),
+
+            "baseline_fp_repaired":
+                int(len(baseline_fp_repaired)),
+
+            "current_only_fp":
+                int(len(current_only_fp)),
         },
     }
 
     with open(
-        SUMMARY_JSON_FILE,
+        summary_json_file,
         "w",
         encoding="utf-8",
     ) as f:
+
         json.dump(
             summary,
             f,
             indent=2,
         )
 
-    print("\n" + "=" * 70)
-    print("FILES SAVED")
-    print("=" * 70)
+    # ========================================================
+    # Files
+    # ========================================================
+
+    print(
+        "\n" + "=" * 70
+    )
+
+    print(
+        "FILES SAVED"
+    )
+
+    print(
+        "=" * 70
+    )
+
+    print(
+        f"\n  Output directory:\n"
+        f"    {output_dir}"
+    )
 
     print(
         f"\n  Full transitions:\n"
-        f"    {TRANSITION_FILE}"
+        f"    {transition_file}"
     )
 
     print(
         f"\n  Transition summary:\n"
-        f"    {TRANSITION_SUMMARY_FILE}"
+        f"    {transition_summary_file}"
     )
 
     print(
         f"\n  Attack transitions:\n"
-        f"    {ATTACK_SUMMARY_FILE}"
+        f"    {attack_summary_file}"
     )
 
     print(
         f"\n  Benign transitions:\n"
-        f"    {BENIGN_SUMMARY_FILE}"
+        f"    {benign_summary_file}"
     )
 
     print(
         f"\n  Persistent FN:\n"
-        f"    {PERSISTENT_FN_FILE}"
+        f"    {persistent_fn_file}"
     )
 
     print(
         f"\n  Persistent FP:\n"
-        f"    {PERSISTENT_FP_FILE}"
+        f"    {persistent_fp_file}"
     )
 
     print(
-        f"\n  V2-only FN:\n"
-        f"    {V2_ONLY_FN_FILE}"
+        f"\n  Baseline FN repaired:\n"
+        f"    {baseline_fn_repaired_file}"
     )
 
     print(
-        f"\n  V2-only FP:\n"
-        f"    {V2_ONLY_FP_FILE}"
+        f"\n  Baseline FP repaired:\n"
+        f"    {baseline_fp_repaired_file}"
     )
 
     print(
-        f"\n  V1 repaired / V2 regressed FN:\n"
-        f"    {V1_REPAIRED_V2_REGRESSED_FN_FILE}"
+        f"\n  Current-only FN:\n"
+        f"    {current_only_fn_file}"
     )
 
     print(
-        f"\n  V1 repaired / V2 regressed FP:\n"
-        f"    {V1_REPAIRED_V2_REGRESSED_FP_FILE}"
+        f"\n  Current-only FP:\n"
+        f"    {current_only_fp_file}"
     )
 
     print(
         f"\n  JSON summary:\n"
-        f"    {SUMMARY_JSON_FILE}"
+        f"    {summary_json_file}"
     )
 
-    print("\n" + "=" * 70)
-    print("ANALYSIS COMPLETE")
-    print("=" * 70)
+    print(
+        "\n" + "=" * 70
+    )
+
+    print(
+        "ANALYSIS COMPLETE"
+    )
+
+    print(
+        "=" * 70
+    )
 
 
 if __name__ == "__main__":

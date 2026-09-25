@@ -1,10 +1,43 @@
 from pathlib import Path
+import argparse
 import json
 
 import numpy as np
 import pandas as pd
 
 import config
+
+
+# ============================================================
+# Argument Parser
+# ============================================================
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(
+        description=(
+            "Analyse error profiles from a baseline/current "
+            "prediction transition analysis."
+        )
+    )
+
+    parser.add_argument(
+        "--transition-dir",
+        required=True,
+        help=(
+            "Directory containing prediction transition "
+            "error-group CSV files."
+        ),
+    )
+
+    parser.add_argument(
+        "--name",
+        required=True,
+        help=(
+            "Output analysis name, e.g. baseline_vs_v2_final"
+        ),
+    )
+
+    return parser.parse_args()
 
 
 # ============================================================
@@ -17,69 +50,9 @@ TEST_FILE = (
     / "test_dataset.csv"
 )
 
-COMPARISON_DIR = (
-    config.MODELS_DIR
-    / "error_analysis"
-    / "comparison"
-)
-
 ERROR_ANALYSIS_DIR = (
     config.MODELS_DIR
     / "error_analysis"
-)
-
-OUTPUT_DIR = (
-    ERROR_ANALYSIS_DIR
-    / "error_profiles"
-)
-
-
-# Transition-analysis files
-PERSISTENT_FN_FILE = (
-    COMPARISON_DIR
-    / "persistent_fn.csv"
-)
-
-V2_ONLY_FN_FILE = (
-    COMPARISON_DIR
-    / "v2_only_fn.csv"
-)
-
-PERSISTENT_FP_FILE = (
-    COMPARISON_DIR
-    / "persistent_fp.csv"
-)
-
-V2_ONLY_FP_FILE = (
-    COMPARISON_DIR
-    / "v2_only_fp.csv"
-)
-
-
-# Output files
-ERROR_GROUP_COMPARISON_FILE = (
-    OUTPUT_DIR
-    / "error_group_comparison.csv"
-)
-
-ORIGINAL_LABEL_SUMMARY_FILE = (
-    OUTPUT_DIR
-    / "original_label_summary.csv"
-)
-
-PORT_SUMMARY_FILE = (
-    OUTPUT_DIR
-    / "port_summary.csv"
-)
-
-PROTOCOL_SUMMARY_FILE = (
-    OUTPUT_DIR
-    / "protocol_summary.csv"
-)
-
-ERROR_PROFILE_SUMMARY_FILE = (
-    OUTPUT_DIR
-    / "error_profile_summary.json"
 )
 
 
@@ -87,7 +60,6 @@ ERROR_PROFILE_SUMMARY_FILE = (
 # Feature groups
 # ============================================================
 
-# Features that are useful for profiling network behaviour.
 PROFILE_FEATURES = [
     "ip_protocol",
 
@@ -138,11 +110,10 @@ PROFILE_FEATURES = [
 ]
 
 
-# Probability columns available in the transition file.
+# Probability columns in the new two-model transition file.
 PROBABILITY_COLUMNS = [
     "baseline_attack_probability",
-    "v1_attack_probability",
-    "v2_attack_probability",
+    "current_attack_probability",
 ]
 
 
@@ -151,8 +122,10 @@ PROBABILITY_COLUMNS = [
 # ============================================================
 
 def require_columns(df, columns, name):
+
     missing = [
-        col for col in columns
+        col
+        for col in columns
         if col not in df.columns
     ]
 
@@ -164,6 +137,9 @@ def require_columns(df, columns, name):
 
 
 def load_csv(path, name):
+
+    path = Path(path)
+
     if not path.exists():
         raise FileNotFoundError(
             f"{name} not found:\n"
@@ -180,6 +156,7 @@ def load_csv(path, name):
 
 
 def safe_numeric(series):
+
     return pd.to_numeric(
         series,
         errors="coerce",
@@ -187,15 +164,21 @@ def safe_numeric(series):
 
 
 def numeric_summary(df, feature):
-    """
-    Return useful descriptive statistics for one feature.
-    """
-    values = safe_numeric(df[feature]).dropna()
+
+    values = (
+        safe_numeric(
+            df[feature]
+        )
+        .dropna()
+    )
 
     if len(values) == 0:
+
         return {
             "count": 0,
-            "missing": int(df[feature].isna().sum()),
+            "missing": int(
+                df[feature].isna().sum()
+            ),
             "mean": None,
             "median": None,
             "std": None,
@@ -205,20 +188,37 @@ def numeric_summary(df, feature):
 
     return {
         "count": int(len(values)),
-        "missing": int(df[feature].isna().sum()),
-        "mean": float(values.mean()),
-        "median": float(values.median()),
-        "std": float(values.std(ddof=0)),
-        "min": float(values.min()),
-        "max": float(values.max()),
+        "missing": int(
+            df[feature].isna().sum()
+        ),
+        "mean": float(
+            values.mean()
+        ),
+        "median": float(
+            values.median()
+        ),
+        "std": float(
+            values.std(ddof=0)
+        ),
+        "min": float(
+            values.min()
+        ),
+        "max": float(
+            values.max()
+        ),
     }
 
 
-def distribution_difference(error_df, reference_df, feature):
+def distribution_difference(
+    error_df,
+    reference_df,
+    feature,
+):
     """
-    Compare an error group against its corresponding reference group.
+    Compare one error group against its
+    corresponding reference population.
 
-    Uses:
+    Descriptive only:
       - mean difference
       - median difference
       - missing-rate difference
@@ -232,8 +232,13 @@ def distribution_difference(error_df, reference_df, feature):
         reference_df[feature]
     )
 
-    error_non_null = error_values.dropna()
-    reference_non_null = reference_values.dropna()
+    error_non_null = (
+        error_values.dropna()
+    )
+
+    reference_non_null = (
+        reference_values.dropna()
+    )
 
     error_missing_rate = (
         error_values.isna().mean()
@@ -244,29 +249,48 @@ def distribution_difference(error_df, reference_df, feature):
     )
 
     if len(error_non_null) == 0:
+
         error_mean = np.nan
         error_median = np.nan
+
     else:
-        error_mean = error_non_null.mean()
-        error_median = error_non_null.median()
+
+        error_mean = (
+            error_non_null.mean()
+        )
+
+        error_median = (
+            error_non_null.median()
+        )
 
     if len(reference_non_null) == 0:
+
         reference_mean = np.nan
         reference_median = np.nan
+
     else:
-        reference_mean = reference_non_null.mean()
-        reference_median = reference_non_null.median()
+
+        reference_mean = (
+            reference_non_null.mean()
+        )
+
+        reference_median = (
+            reference_non_null.median()
+        )
 
     if (
         pd.notna(error_mean)
         and
         pd.notna(reference_mean)
     ):
+
         mean_difference = (
             error_mean
             - reference_mean
         )
+
     else:
+
         mean_difference = np.nan
 
     if (
@@ -274,11 +298,14 @@ def distribution_difference(error_df, reference_df, feature):
         and
         pd.notna(reference_median)
     ):
+
         median_difference = (
             error_median
             - reference_median
         )
+
     else:
+
         median_difference = np.nan
 
     return {
@@ -312,9 +339,6 @@ def create_profile_comparison(
     error_df,
     reference_df,
 ):
-    """
-    Compare one error group against its reference group.
-    """
 
     rows = []
 
@@ -344,19 +368,45 @@ def label_distribution(
     df,
     group_name,
 ):
+
     if "original_label" in df.columns:
+
         column = "original_label"
-    elif "baseline_original_label" in df.columns:
-        column = "baseline_original_label"
+
+    elif (
+        "baseline_original_label"
+        in df.columns
+    ):
+
+        column = (
+            "baseline_original_label"
+        )
+
+    elif (
+        "current_original_label"
+        in df.columns
+    ):
+
+        column = (
+            "current_original_label"
+        )
+
     else:
+
         return pd.DataFrame()
 
     counts = (
         df[column]
         .fillna("<NA>")
-        .value_counts(dropna=False)
-        .rename_axis("original_label")
-        .reset_index(name="count")
+        .value_counts(
+            dropna=False
+        )
+        .rename_axis(
+            "original_label"
+        )
+        .reset_index(
+            name="count"
+        )
     )
 
     counts["group"] = group_name
@@ -381,6 +431,7 @@ def port_distribution(
     df,
     group_name,
 ):
+
     rows = []
 
     for port_type in [
@@ -410,15 +461,24 @@ def port_distribution(
 
             rows.append(
                 {
-                    "group": group_name,
-                    "port_type": port_type,
-                    "port": int(port),
-                    "count": int(count),
-                    "percentage": (
-                        count
-                        / len(df)
-                        * 100
-                    ),
+                    "group":
+                        group_name,
+
+                    "port_type":
+                        port_type,
+
+                    "port":
+                        int(port),
+
+                    "count":
+                        int(count),
+
+                    "percentage":
+                        (
+                            count
+                            / len(df)
+                            * 100
+                        ),
                 }
             )
 
@@ -429,6 +489,7 @@ def protocol_distribution(
     df,
     group_name,
 ):
+
     if "ip_protocol" not in df.columns:
         return pd.DataFrame()
 
@@ -439,9 +500,15 @@ def protocol_distribution(
 
     counts = (
         values
-        .value_counts(dropna=False)
-        .rename_axis("ip_protocol")
-        .reset_index(name="count")
+        .value_counts(
+            dropna=False
+        )
+        .rename_axis(
+            "ip_protocol"
+        )
+        .reset_index(
+            name="count"
+        )
     )
 
     counts["group"] = group_name
@@ -466,6 +533,7 @@ def probability_profile(
     df,
     group_name,
 ):
+
     rows = []
 
     for column in PROBABILITY_COLUMNS:
@@ -473,10 +541,13 @@ def probability_profile(
         if column not in df.columns:
             continue
 
-        values = pd.to_numeric(
-            df[column],
-            errors="coerce",
-        ).dropna()
+        values = (
+            pd.to_numeric(
+                df[column],
+                errors="coerce",
+            )
+            .dropna()
+        )
 
         if len(values) == 0:
             continue
@@ -489,16 +560,33 @@ def probability_profile(
 
         rows.append(
             {
-                "group": group_name,
-                "probability": column,
-                "count": int(len(values)),
-                "mean": float(values.mean()),
-                "median": float(values.median()),
-                "std": float(values.std(ddof=0)),
-                "min": float(values.min()),
-                "max": float(values.max()),
+                "group":
+                    group_name,
+
+                "probability":
+                    column,
+
+                "count":
+                    int(len(values)),
+
+                "mean":
+                    float(values.mean()),
+
+                "median":
+                    float(values.median()),
+
+                "std":
+                    float(values.std(ddof=0)),
+
+                "min":
+                    float(values.min()),
+
+                "max":
+                    float(values.max()),
+
                 "near_threshold_count":
                     int(near_threshold),
+
                 "near_threshold_percentage":
                     float(
                         near_threshold
@@ -517,20 +605,127 @@ def probability_profile(
 
 def main():
 
-    print("=" * 70)
-    print("NetworkIDS - Error Profile Analysis")
-    print("=" * 70)
+    args = parse_arguments()
 
-    OUTPUT_DIR.mkdir(
+    transition_dir = Path(
+        args.transition_dir
+    )
+
+    analysis_name = args.name
+
+    output_dir = (
+        ERROR_ANALYSIS_DIR
+        / "error_profiles"
+        / analysis_name
+    )
+
+    output_dir.mkdir(
         parents=True,
         exist_ok=True,
     )
 
     # --------------------------------------------------------
-    # 1. Load test dataset
+    # Transition-analysis files
     # --------------------------------------------------------
 
-    print("\n[1/8] Loading test dataset...")
+    PERSISTENT_FN_FILE = (
+        transition_dir
+        / "persistent_fn.csv"
+    )
+
+    BASELINE_FN_REPAIRED_FILE = (
+        transition_dir
+        / "baseline_fn_repaired.csv"
+    )
+
+    CURRENT_ONLY_FN_FILE = (
+        transition_dir
+        / "current_only_fn.csv"
+    )
+
+    PERSISTENT_FP_FILE = (
+        transition_dir
+        / "persistent_fp.csv"
+    )
+
+    BASELINE_FP_REPAIRED_FILE = (
+        transition_dir
+        / "baseline_fp_repaired.csv"
+    )
+
+    CURRENT_ONLY_FP_FILE = (
+        transition_dir
+        / "current_only_fp.csv"
+    )
+
+    # --------------------------------------------------------
+    # Output files
+    # --------------------------------------------------------
+
+    ERROR_GROUP_COMPARISON_FILE = (
+        output_dir
+        / "error_group_comparison.csv"
+    )
+
+    ORIGINAL_LABEL_SUMMARY_FILE = (
+        output_dir
+        / "original_label_summary.csv"
+    )
+
+    PORT_SUMMARY_FILE = (
+        output_dir
+        / "port_summary.csv"
+    )
+
+    PROTOCOL_SUMMARY_FILE = (
+        output_dir
+        / "protocol_summary.csv"
+    )
+
+    PROBABILITY_SUMMARY_FILE = (
+        output_dir
+        / "probability_summary.csv"
+    )
+
+    ERROR_PROFILE_SUMMARY_FILE = (
+        output_dir
+        / "error_profile_summary.json"
+    )
+
+    # ========================================================
+    # Header
+    # ========================================================
+
+    print("=" * 70)
+
+    print(
+        "NetworkIDS - Current Model Error Profile Analysis"
+    )
+
+    print("=" * 70)
+
+    print("\nAnalysis:")
+    print(
+        f"  Name: {analysis_name}"
+    )
+
+    print("\nTransition directory:")
+    print(
+        f"  {transition_dir}"
+    )
+
+    print("\nOutput directory:")
+    print(
+        f"  {output_dir}"
+    )
+
+    # ========================================================
+    # 1. Load test dataset
+    # ========================================================
+
+    print(
+        "\n[1/8] Loading test dataset..."
+    )
 
     test_df = load_csv(
         TEST_FILE,
@@ -539,7 +734,10 @@ def main():
 
     require_columns(
         test_df,
-        ["flow_id", "label"],
+        [
+            "flow_id",
+            "label",
+        ],
         "Test dataset",
     )
 
@@ -553,20 +751,27 @@ def main():
         f"{(test_df['label'] == 0).sum():,}"
     )
 
-    # --------------------------------------------------------
+    # ========================================================
     # 2. Load error groups
-    # --------------------------------------------------------
+    # ========================================================
 
-    print("\n[2/8] Loading error groups...")
+    print(
+        "\n[2/8] Loading error groups..."
+    )
 
     persistent_fn = load_csv(
         PERSISTENT_FN_FILE,
         "Persistent FN",
     )
 
-    v2_only_fn = load_csv(
-        V2_ONLY_FN_FILE,
-        "V2-only FN",
+    baseline_fn_repaired = load_csv(
+        BASELINE_FN_REPAIRED_FILE,
+        "Baseline FN repaired",
+    )
+
+    current_only_fn = load_csv(
+        CURRENT_ONLY_FN_FILE,
+        "Current-only FN",
     )
 
     persistent_fp = load_csv(
@@ -574,21 +779,40 @@ def main():
         "Persistent FP",
     )
 
-    v2_only_fp = load_csv(
-        V2_ONLY_FP_FILE,
-        "V2-only FP",
+    baseline_fp_repaired = load_csv(
+        BASELINE_FP_REPAIRED_FILE,
+        "Baseline FP repaired",
+    )
+
+    current_only_fp = load_csv(
+        CURRENT_ONLY_FP_FILE,
+        "Current-only FP",
     )
 
     error_groups = {
-        "Persistent FN": persistent_fn,
-        "V2-only FN": v2_only_fn,
-        "Persistent FP": persistent_fp,
-        "V2-only FP": v2_only_fp,
+
+        "Persistent FN":
+            persistent_fn,
+
+        "Baseline FN Repaired":
+            baseline_fn_repaired,
+
+        "Current-only FN":
+            current_only_fn,
+
+        "Persistent FP":
+            persistent_fp,
+
+        "Baseline FP Repaired":
+            baseline_fp_repaired,
+
+        "Current-only FP":
+            current_only_fp,
     }
 
-    # --------------------------------------------------------
+    # ========================================================
     # 3. Prepare reference populations
-    # --------------------------------------------------------
+    # ========================================================
 
     print(
         "\n[3/8] Preparing Attack / Benign reference groups..."
@@ -612,9 +836,9 @@ def main():
         f"{len(all_benign):,}"
     )
 
-    # --------------------------------------------------------
-    # 4. Merge test dataset features into error groups
-    # --------------------------------------------------------
+    # ========================================================
+    # 4. Attach test features
+    # ========================================================
 
     print(
         "\n[4/8] Attaching full feature data to error groups..."
@@ -634,7 +858,6 @@ def main():
         ]
     )
 
-    # Add metadata that may be useful.
     for column in [
         "timestamp",
         "src_ip",
@@ -642,12 +865,19 @@ def main():
         "src_mac",
         "dst_mac",
     ]:
+
         if column in test_df.columns:
-            feature_columns.append(column)
+            feature_columns.append(
+                column
+            )
 
     feature_source = (
         test_df[
-            list(dict.fromkeys(feature_columns))
+            list(
+                dict.fromkeys(
+                    feature_columns
+                )
+            )
         ]
         .copy()
     )
@@ -666,7 +896,10 @@ def main():
             feature_source,
             on="flow_id",
             how="left",
-            suffixes=("", "_test"),
+            suffixes=(
+                "",
+                "_test",
+            ),
             validate="one_to_one",
         )
 
@@ -714,9 +947,9 @@ def main():
             f"{len(enriched):,} rows"
         )
 
-    # --------------------------------------------------------
+    # ========================================================
     # 5. Feature profile comparison
-    # --------------------------------------------------------
+    # ========================================================
 
     print(
         "\n[5/8] Comparing feature distributions..."
@@ -724,34 +957,64 @@ def main():
 
     comparison_frames = []
 
+    # Attack groups.
     comparison_frames.append(
         create_profile_comparison(
             "Persistent FN vs All Attack",
-            enriched_groups["Persistent FN"],
+            enriched_groups[
+                "Persistent FN"
+            ],
             all_attack,
         )
     )
 
     comparison_frames.append(
         create_profile_comparison(
-            "V2-only FN vs All Attack",
-            enriched_groups["V2-only FN"],
+            "Baseline FN Repaired vs All Attack",
+            enriched_groups[
+                "Baseline FN Repaired"
+            ],
             all_attack,
         )
     )
 
+    comparison_frames.append(
+        create_profile_comparison(
+            "Current-only FN vs All Attack",
+            enriched_groups[
+                "Current-only FN"
+            ],
+            all_attack,
+        )
+    )
+
+    # Benign groups.
     comparison_frames.append(
         create_profile_comparison(
             "Persistent FP vs All Benign",
-            enriched_groups["Persistent FP"],
+            enriched_groups[
+                "Persistent FP"
+            ],
             all_benign,
         )
     )
 
     comparison_frames.append(
         create_profile_comparison(
-            "V2-only FP vs All Benign",
-            enriched_groups["V2-only FP"],
+            "Baseline FP Repaired vs All Benign",
+            enriched_groups[
+                "Baseline FP Repaired"
+            ],
+            all_benign,
+        )
+    )
+
+    comparison_frames.append(
+        create_profile_comparison(
+            "Current-only FP vs All Benign",
+            enriched_groups[
+                "Current-only FP"
+            ],
             all_benign,
         )
     )
@@ -761,34 +1024,24 @@ def main():
         ignore_index=True,
     )
 
-    # Add absolute standardized-ish difference.
-    # This is descriptive only; it is NOT a statistical test.
-    def add_relative_difference(df):
+    comparison_df[
+        "relative_mean_difference"
+    ] = np.where(
+        comparison_df[
+            "reference_mean"
+        ].abs() > 1e-12,
 
-        reference_abs = (
-            df["reference_mean"]
-            .abs()
-        )
-
-        df["relative_mean_difference"] = np.where(
-            reference_abs > 1e-12,
-            (
-                df["mean_difference"].abs()
-                / reference_abs
-                * 100
-            ),
-            np.nan,
-        )
-
-        return df
-
-    comparison_df["relative_mean_difference"] = np.where(
-        comparison_df["reference_mean"].abs() > 1e-12,
         (
-            comparison_df["mean_difference"].abs()
-            / comparison_df["reference_mean"].abs()
+            comparison_df[
+                "mean_difference"
+            ].abs()
+            /
+            comparison_df[
+                "reference_mean"
+            ].abs()
             * 100
         ),
+
         np.nan,
     )
 
@@ -797,13 +1050,17 @@ def main():
         index=False,
     )
 
-    # --------------------------------------------------------
-    # 6. Label / port / protocol profiles
-    # --------------------------------------------------------
+    # ========================================================
+    # 6. Categorical profiles
+    # ========================================================
 
     print(
         "\n[6/8] Generating categorical profiles..."
     )
+
+    # --------------------------------------------------------
+    # Original labels
+    # --------------------------------------------------------
 
     label_frames = []
 
@@ -816,7 +1073,6 @@ def main():
             )
         )
 
-    # Add full references.
     label_frames.append(
         label_distribution(
             all_attack,
@@ -841,7 +1097,10 @@ def main():
         index=False,
     )
 
-    # Ports.
+    # --------------------------------------------------------
+    # Ports
+    # --------------------------------------------------------
+
     port_frames = []
 
     for group_name, group_df in enriched_groups.items():
@@ -877,7 +1136,10 @@ def main():
         index=False,
     )
 
-    # Protocols.
+    # --------------------------------------------------------
+    # Protocols
+    # --------------------------------------------------------
+
     protocol_frames = []
 
     for group_name, group_df in enriched_groups.items():
@@ -913,9 +1175,9 @@ def main():
         index=False,
     )
 
-    # --------------------------------------------------------
+    # ========================================================
     # 7. Probability analysis
-    # --------------------------------------------------------
+    # ========================================================
 
     print(
         "\n[7/8] Analysing model probability profiles..."
@@ -937,26 +1199,50 @@ def main():
         ignore_index=True,
     )
 
-    # --------------------------------------------------------
-    # 8. Human-readable terminal summary
-    # --------------------------------------------------------
+    probability_df.to_csv(
+        PROBABILITY_SUMMARY_FILE,
+        index=False,
+    )
 
-    print("\n" + "=" * 70)
-    print("ERROR PROFILE SUMMARY")
-    print("=" * 70)
+    # ========================================================
+    # 8. Human-readable terminal summary
+    # ========================================================
+
+    print(
+        "\n" + "=" * 70
+    )
+
+    print(
+        "ERROR PROFILE SUMMARY"
+    )
+
+    print(
+        "=" * 70
+    )
 
     for group_name, group_df in enriched_groups.items():
 
-        print("\n" + "-" * 70)
-        print(group_name.upper())
-        print("-" * 70)
+        print(
+            "\n" + "-" * 70
+        )
+
+        print(
+            group_name.upper()
+        )
+
+        print(
+            "-" * 70
+        )
 
         print(
             f"  Rows: "
             f"{len(group_df):,}"
         )
 
-        # Original labels.
+        # ----------------------------------------------------
+        # Original labels
+        # ----------------------------------------------------
+
         if "original_label" in group_df.columns:
 
             print(
@@ -964,7 +1250,9 @@ def main():
             )
 
             counts = (
-                group_df["original_label"]
+                group_df[
+                    "original_label"
+                ]
                 .fillna("<NA>")
                 .value_counts()
             )
@@ -977,7 +1265,10 @@ def main():
                     f"({count / len(group_df) * 100:.2f}%)"
                 )
 
-        # Ports.
+        # ----------------------------------------------------
+        # Ports
+        # ----------------------------------------------------
+
         for port_type in [
             "src_port",
             "dst_port",
@@ -986,10 +1277,13 @@ def main():
             if port_type not in group_df.columns:
                 continue
 
-            values = pd.to_numeric(
-                group_df[port_type],
-                errors="coerce",
-            ).dropna()
+            values = (
+                pd.to_numeric(
+                    group_df[port_type],
+                    errors="coerce",
+                )
+                .dropna()
+            )
 
             if len(values) == 0:
                 continue
@@ -1013,7 +1307,10 @@ def main():
                     f"({count / len(group_df) * 100:.2f}%)"
                 )
 
-        # Important numeric features.
+        # ----------------------------------------------------
+        # Important numeric features
+        # ----------------------------------------------------
+
         print(
             "\n  Numeric profile:"
         )
@@ -1040,9 +1337,11 @@ def main():
             )
 
             if summary["count"] == 0:
+
                 print(
                     f"    {feature}: all NaN"
                 )
+
                 continue
 
             print(
@@ -1053,7 +1352,10 @@ def main():
                 f"max={summary['max']:.4f}"
             )
 
-        # Probabilities.
+        # ----------------------------------------------------
+        # Probabilities
+        # ----------------------------------------------------
+
         print(
             "\n  Model probabilities:"
         )
@@ -1063,10 +1365,13 @@ def main():
             if column not in group_df.columns:
                 continue
 
-            values = pd.to_numeric(
-                group_df[column],
-                errors="coerce",
-            ).dropna()
+            values = (
+                pd.to_numeric(
+                    group_df[column],
+                    errors="coerce",
+                )
+                .dropna()
+            )
 
             if len(values) == 0:
                 continue
@@ -1085,28 +1390,47 @@ def main():
                 f"{near_threshold:,}"
             )
 
-    # --------------------------------------------------------
+    # ========================================================
     # Save JSON summary
-    # --------------------------------------------------------
+    # ========================================================
 
     summary = {
-        "test_rows": int(len(test_df)),
-        "all_attack_rows": int(len(all_attack)),
-        "all_benign_rows": int(len(all_benign)),
+
+        "analysis_name":
+            analysis_name,
+
+        "transition_directory":
+            str(transition_dir),
+
+        "test_rows":
+            int(len(test_df)),
+
+        "all_attack_rows":
+            int(len(all_attack)),
+
+        "all_benign_rows":
+            int(len(all_benign)),
+
         "groups": {},
     }
 
     for group_name, group_df in enriched_groups.items():
 
         group_summary = {
-            "count": int(len(group_df)),
+            "count":
+                int(len(group_df)),
         }
 
-        # Original label distribution.
+        # ----------------------------------------------------
+        # Original labels
+        # ----------------------------------------------------
+
         if "original_label" in group_df.columns:
 
             label_counts = (
-                group_df["original_label"]
+                group_df[
+                    "original_label"
+                ]
                 .fillna("<NA>")
                 .value_counts()
                 .to_dict()
@@ -1115,12 +1439,17 @@ def main():
             group_summary[
                 "original_label_counts"
             ] = {
-                str(key): int(value)
+                str(key):
+                    int(value)
+
                 for key, value
                 in label_counts.items()
             }
 
-        # Probability summary.
+        # ----------------------------------------------------
+        # Probability summary
+        # ----------------------------------------------------
+
         probability_summary = {}
 
         for column in PROBABILITY_COLUMNS:
@@ -1128,34 +1457,58 @@ def main():
             if column not in group_df.columns:
                 continue
 
-            values = pd.to_numeric(
-                group_df[column],
-                errors="coerce",
-            ).dropna()
+            values = (
+                pd.to_numeric(
+                    group_df[column],
+                    errors="coerce",
+                )
+                .dropna()
+            )
 
             if len(values) == 0:
                 continue
 
-            probability_summary[column] = {
-                "mean": float(values.mean()),
-                "median": float(values.median()),
-                "std": float(values.std(ddof=0)),
-                "min": float(values.min()),
-                "max": float(values.max()),
-                "near_threshold_count": int(
-                    (
-                        (values >= 0.45)
-                        &
-                        (values <= 0.55)
-                    ).sum()
-                ),
+            probability_summary[
+                column
+            ] = {
+
+                "mean":
+                    float(values.mean()),
+
+                "median":
+                    float(values.median()),
+
+                "std":
+                    float(
+                        values.std(
+                            ddof=0
+                        )
+                    ),
+
+                "min":
+                    float(values.min()),
+
+                "max":
+                    float(values.max()),
+
+                "near_threshold_count":
+                    int(
+                        (
+                            (values >= 0.45)
+                            &
+                            (values <= 0.55)
+                        ).sum()
+                    ),
             }
 
         group_summary[
             "probabilities"
         ] = probability_summary
 
-        # Numeric summaries.
+        # ----------------------------------------------------
+        # Numeric summaries
+        # ----------------------------------------------------
+
         numeric_summary_dict = {}
 
         for feature in PROFILE_FEATURES:
@@ -1191,13 +1544,26 @@ def main():
             allow_nan=True,
         )
 
-    # --------------------------------------------------------
+    # ========================================================
     # Final output
-    # --------------------------------------------------------
+    # ========================================================
 
-    print("\n" + "=" * 70)
-    print("FILES SAVED")
-    print("=" * 70)
+    print(
+        "\n" + "=" * 70
+    )
+
+    print(
+        "FILES SAVED"
+    )
+
+    print(
+        "=" * 70
+    )
+
+    print(
+        f"\n  Output directory:"
+        f"\n    {output_dir}"
+    )
 
     print(
         f"\n  Feature comparison:"
@@ -1220,13 +1586,26 @@ def main():
     )
 
     print(
+        f"\n  Probabilities:"
+        f"\n    {PROBABILITY_SUMMARY_FILE}"
+    )
+
+    print(
         f"\n  JSON summary:"
         f"\n    {ERROR_PROFILE_SUMMARY_FILE}"
     )
 
-    print("\n" + "=" * 70)
-    print("ERROR PROFILE ANALYSIS COMPLETE")
-    print("=" * 70)
+    print(
+        "\n" + "=" * 70
+    )
+
+    print(
+        "ERROR PROFILE ANALYSIS COMPLETE"
+    )
+
+    print(
+        "=" * 70
+    )
 
 
 if __name__ == "__main__":
