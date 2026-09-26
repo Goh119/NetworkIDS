@@ -1,0 +1,14 @@
+{
+  "test_rows": 214255,
+  "sample_size_per_class": 2000,
+  "random_state": 42,
+  "rst_attack_samples": 2000,
+  "rst_evasion_cases": 209,
+  "rst_attack_evasion_rate_percent": 10.45,
+  "clean_test_false_negatives": 152,
+  "overlap_count": 0,
+  "overlap_of_rst_evasions_percent": 0.0,
+  "overlap_of_clean_test_fn_percent": 0.0,
+  "model_path": "C:\\FYP\\NetworkIDS\\models\\random_forest_robust_v2.pkl",
+  "prediction_file": "C:\\FYP\\NetworkIDS\\models\\error_analysis\\v2_test1\\prediction_results.csv"
+}

@@ -1,0 +1,5 @@
+group,count,rst_count_mean,rst_count_median,syn_count_mean,syn_count_median,ack_count_mean,ack_count_median,fin_count_mean,fin_count_median,psh_count_mean,psh_count_median,flow_packet_count_mean,flow_packet_count_median,flow_duration_mean,flow_duration_median,dst_port_mean,dst_port_median,src_port_mean,src_port_median,ttl_mean_mean,ttl_mean_median,tcp_window_mean_mean,tcp_window_mean_median,tcp_header_length_mean_mean,tcp_header_length_mean_median
+all_rst_tested_attacks,2000,0.55,1.0,0.7205,0.0,3.7605,2.0,0.4295,0.0,0.7635,0.0,4.527,3.0,3.736769789338112,0.00098645687103265,5729.299,80.0,41049.69,44506.0,62.51549165167201,62.0,2506.8404262385484,281.0,29.04967418157335,32.0
+rst_evasion,209,1.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,1.0,0.0,0.0,80.0,80.0,43248.75598086124,42620.0,62.0,62.0,0.0,0.0,20.0,20.0
+clean_test_fn,152,0.5789473684210527,1.0,0.10526315789473684,0.0,1.144736842105263,0.0,0.40131578947368424,0.0,0.4934210526315789,0.0,1.769736842105263,1.0,0.29982030391693115,0.0,15221.723684210527,80.0,31606.947368421053,38144.0,62.65053606237816,62.0,526.0136208576997,0.0,25.36617933723197,20.0
+overlap,0,,,,,,,,,,,,,,,,,,,,,,,,

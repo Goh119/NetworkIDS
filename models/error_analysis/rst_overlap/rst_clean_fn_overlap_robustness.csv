@@ -1,0 +1,1 @@
+flow_id,timestamp,src_ip,dst_ip,src_mac,dst_mac,actual_label,baseline_prediction,baseline_attack_probability,rst_prediction,rst_attack_probability,rst_prediction_changed,rst_evasion,original_rst_count

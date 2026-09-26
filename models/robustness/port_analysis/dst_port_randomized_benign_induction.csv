@@ -1,0 +1,2 @@
+flow_id,timestamp,src_ip,dst_ip,src_mac,dst_mac,actual_label,baseline_prediction,baseline_attack_probability,perturbed_prediction,perturbed_attack_probability,prediction_changed,benign_induction,original_dst_port,original_src_port,scenario
+FLOW_847073,1499273853.845369,192.168.10.17,31.13.69.228,00:23:ae:9b:95:67,00:c1:b1:14:eb:31,0,0,0.0,1,0.555,True,True,443,59016,dst_port_randomized

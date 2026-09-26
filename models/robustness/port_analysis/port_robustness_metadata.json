@@ -1,0 +1,20 @@
+{
+  "model_path": "C:\\FYP\\NetworkIDS\\models\\random_forest_robust_v2.pkl",
+  "test_dataset": "C:\\FYP\\NetworkIDS\\data\\processed\\split\\test_dataset.csv",
+  "random_state": 42,
+  "sample_size_per_class": 2000,
+  "n_ml_features": 42,
+  "port_range": [
+    1,
+    65535
+  ],
+  "controlled_perturbation": true,
+  "ground_truth_preserved": true,
+  "baseline_model_reused_without_retraining": true,
+  "scenarios": [
+    "dst_port_randomized",
+    "src_port_randomized",
+    "both_ports_randomized",
+    "ports_masked"
+  ]
+}

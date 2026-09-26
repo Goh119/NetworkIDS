@@ -1,0 +1,9 @@
+flow_id,timestamp,src_ip,dst_ip,src_mac,dst_mac,actual_label,baseline_prediction,baseline_attack_probability,perturbed_prediction,perturbed_attack_probability,prediction_changed,benign_induction,original_dst_port,original_src_port,scenario
+FLOW_348754,1499262587.654376,172.16.0.1,192.168.10.50,00:c1:b1:14:eb:31,00:19:b9:0a:69:f1,0,0,0.405,1,0.985,True,True,80,54184,src_port_randomized
+FLOW_629019,1499263138.715809,172.16.0.1,192.168.10.50,00:c1:b1:14:eb:31,00:19:b9:0a:69:f1,0,0,0.48,1,1.0,True,True,80,50928,src_port_randomized
+FLOW_491977,1499262871.244348,172.16.0.1,192.168.10.50,00:c1:b1:14:eb:31,00:19:b9:0a:69:f1,0,0,0.185,1,0.59,True,True,80,57594,src_port_randomized
+FLOW_507012,1499262904.306478,172.16.0.1,192.168.10.50,00:c1:b1:14:eb:31,00:19:b9:0a:69:f1,0,0,0.205,1,0.95,True,True,80,38310,src_port_randomized
+FLOW_115032,1499260763.468049,172.16.0.1,192.168.10.50,00:c1:b1:14:eb:31,00:19:b9:0a:69:f1,0,0,0.015,1,0.98,True,True,80,35498,src_port_randomized
+FLOW_275209,1499262438.352614,172.16.0.1,192.168.10.50,00:c1:b1:14:eb:31,00:19:b9:0a:69:f1,0,0,0.27,1,0.59,True,True,80,40080,src_port_randomized
+FLOW_530864,1499262940.908414,172.16.0.1,192.168.10.50,00:c1:b1:14:eb:31,00:19:b9:0a:69:f1,0,0,0.39,1,0.795,True,True,80,51868,src_port_randomized
+FLOW_181155,1499262254.822852,172.16.0.1,192.168.10.50,00:c1:b1:14:eb:31,00:19:b9:0a:69:f1,0,0,0.28,1,0.605,True,True,80,38074,src_port_randomized

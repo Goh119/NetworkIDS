@@ -1,0 +1,70 @@
+{
+  "model_path": "C:\\FYP\\NetworkIDS\\models\\random_forest_robust_v2.pkl",
+  "test_dataset": "C:\\FYP\\NetworkIDS\\data\\processed\\split\\test_dataset.csv",
+  "test_rows": 214255,
+  "n_ml_features": 42,
+  "nan_cells": 805637,
+  "permutation_sample_size": 50000,
+  "permutation_repeats": 3,
+  "random_state": 42,
+  "baseline_metrics": {
+    "accuracy": 0.994441203239131,
+    "balanced_accuracy": 0.9944676956471631,
+    "precision": 0.9903189437492429,
+    "recall": 0.9985719117591793,
+    "f1": 0.9944283047731324,
+    "auc_roc": 0.9980127801001223
+  },
+  "feature_groups": {
+    "L2": [
+      "frame_length_mean",
+      "eth_type",
+      "vlan_id",
+      "vlan_priority"
+    ],
+    "L3": [
+      "ip_version",
+      "ip_dscp",
+      "ip_ecn",
+      "ip_total_length_mean",
+      "ip_id_mean",
+      "ip_df",
+      "ip_mf",
+      "fragment_offset",
+      "ttl_mean",
+      "ip_protocol",
+      "ip_header_length",
+      "ip_checksum_valid"
+    ],
+    "L4": [
+      "src_port",
+      "dst_port",
+      "tcp_window_mean",
+      "tcp_header_length_mean",
+      "l4_checksum_valid"
+    ],
+    "Flow": [
+      "flow_duration",
+      "flow_packet_count",
+      "flow_byte_count",
+      "forward_packet_count",
+      "reverse_packet_count",
+      "forward_byte_count",
+      "reverse_byte_count",
+      "iat_min",
+      "iat_mean",
+      "iat_max",
+      "iat_std",
+      "byte_rate",
+      "flow_direction",
+      "syn_count",
+      "ack_count",
+      "fin_count",
+      "rst_count",
+      "psh_count",
+      "syn_seen",
+      "syn_ack_seen",
+      "ack_after_syn_ack"
+    ]
+  }
+}

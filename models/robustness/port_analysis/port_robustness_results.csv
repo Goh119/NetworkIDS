@@ -1,0 +1,5 @@
+scenario,description,attack_evasion_rate,benign_induction_rate,mean_prob_shift_attack,mean_prob_shift_benign,mean_prob_drop_attack,mean_prob_rise_benign,n_attack_tested,n_benign_tested
+dst_port_randomized,Destination port replaced with random valid port,0.5845,0.0005,0.5712821893504126,0.007987500000000002,0.5708321893504126,0.005052500000000001,2000,2000
+src_port_randomized,Source port replaced with random valid port,0.125,0.004,0.19236301407999348,0.014227500000000002,0.1884276476909398,0.0139875,2000,2000
+both_ports_randomized,Source and destination ports randomized,0.6795,0.0,0.6365071224853985,0.0187175,0.6365071224853985,0.016227500000000002,2000,2000
+ports_masked,Source and destination ports removed,0.0145,0.048,0.06776515358604612,0.09772249999999999,0.059854846413953874,0.0975775,2000,2000
