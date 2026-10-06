@@ -1,111 +1,139 @@
 """
-NetworkIDS - SHAP explainability for the trained Random Forest.
+shap_explain.py
+---------------
+NetworkIDS - SHAP explainability for the primary trained
+Random Forest classifier.
 
-Purpose:
-    Explain the predictions of the trained Random Forest classifier
-    using SHAP (SHapley Additive exPlanations).
+Primary input:
+    config.TEST_DATASET_FILE
+    config.RANDOM_FOREST_MODEL_FILE
 
-Input:
-    data/processed/split/train_dataset.csv
-    data/processed/split/test_dataset.csv
-    models/random_forest.pkl
-
-Outputs:
+Primary outputs:
     models/shap/
-        global_importance_bar.png
         global_importance.csv
+        global_importance_bar.png
         global_beeswarm.png
-        waterfall_true_positive.png
-        waterfall_true_negative.png
-        waterfall_false_positive.png
-        waterfall_false_negative.png
-        shap_values_attack.npy
-        shap_sample_features.csv
-        shap_sample_metadata.csv
-        shap_explanation_summary.json
+        local_waterfall.png              (optional)
+        shap_summary.json
+
+The SHAP feature set is defined entirely by:
+
+    config.ML_FEATURES
+
+The number of ML features is dynamic and is NOT hard-coded.
+
+============================================================
+Classification
+============================================================
+
+The Random Forest performs binary classification using:
+
+    config.LABEL_BENIGN
+    config.LABEL_ATTACK
+
+The Attack probability column is determined from:
+
+    model.classes_
+
+The script does NOT assume that the Attack class is always
+stored at probability column index 1.
 
 ============================================================
 Missing-value policy
 ============================================================
 
-The Random Forest model was trained using scikit-learn's native
-missing-value support.
+The Random Forest was trained using the original feature
+representation where protocol-specific unavailable values
+remain NaN.
 
 Therefore:
 
-    NaN values are retained as-is.
+    NaN values are retained.
 
-No placeholder values such as -1 or 0 are introduced to represent
-missing values.
+No:
 
-The SHAP explanation is first performed directly on the original
-NaN-containing feature data.
+    NaN -> 0
 
-An additivity consistency check is then performed:
+and no:
 
-    base_value + sum(SHAP values)
-        ≈
-    model predicted probability for the Attack class
+    median imputation
 
-A small numerical tolerance is allowed.
+is performed by this script.
 
-If the raw-NaN SHAP explanation fails this consistency check,
-the script STOPS instead of silently changing the feature
-representation.
-
-This is intentional.
-
-The project uses the same feature representation for:
-
-    Model training
-        ↓
-    Model prediction
-        ↓
-    Model explanation
-
-No median imputation is performed in this script.
+SHAP receives the same feature representation used by the
+Random Forest model.
 
 ============================================================
-SHAP interpretation
+Global SHAP
 ============================================================
 
-The project uses binary classification:
+A reproducible sample is selected from the held-out test set.
 
-    Benign = 0
-    Attack = 1
+Default:
 
-SHAP values are therefore interpreted for:
+    sample size = 5,000
+    random state = 42
 
-    Attack class (class = 1)
+Global SHAP outputs:
 
-Positive SHAP value:
-    pushes the model prediction toward Attack.
+    global_importance.csv
 
-Negative SHAP value:
-    pushes the model prediction toward Benign.
+        Mean absolute SHAP value for every configured feature.
 
-Mean absolute SHAP value:
-    measures the average magnitude of a feature's contribution
-    across the SHAP sample.
+    global_importance_bar.png
+
+        Global feature-importance visualization.
+
+    global_beeswarm.png
+
+        Feature-value direction and SHAP impact visualization.
 
 ============================================================
-Sampling
+Local SHAP
 ============================================================
 
-The complete test set is NOT used for SHAP computation.
+A local waterfall explanation can optionally be generated for
+one row in the held-out test dataset.
 
-A reproducible sample is selected from the held-out test set:
+Example:
 
-    Default sample size = 5,000
-    Random state = 42
+    python src/shap_explain.py --local-row 100
 
-The sample is used only for model explanation.
+The value refers to the zero-based row position in
+test_multiday.csv.
 
-It is NOT used to train or modify the Random Forest model.
+The local explanation also preserves traceability metadata:
 
+    flow_id
+    timestamp
+    src_ip
+    dst_ip
+    src_port
+    dst_port
 
-Usage:
+The metadata is used only for investigation / dashboard display.
+
+It is NOT included in the Random Forest feature vector and
+does NOT contribute to SHAP values.
+
+If --local-row is not provided, only global SHAP outputs are
+generated.
+
+============================================================
+Usage
+============================================================
+
+Global explanation:
+
     python src/shap_explain.py
+
+Custom SHAP sample size:
+
+    python src/shap_explain.py --sample-size 3000
+
+Global + local explanation:
+
+    python src/shap_explain.py --local-row 100
 """
 
 import argparse
@@ -117,9 +145,11 @@ import joblib
 
 import matplotlib
 
-# Use a non-interactive backend because plots are saved directly
-# to PNG files.
-matplotlib.use("Agg")
+# Non-interactive backend because plots are written directly
+# to files.
+matplotlib.use(
+    "Agg"
+)
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -132,7 +162,9 @@ import shap
 # ============================================================
 
 sys.path.append(
-    str(Path(__file__).resolve().parents[1])
+    str(
+        Path(__file__).resolve().parents[1]
+    )
 )
 
 import src.config as config
@@ -147,187 +179,575 @@ OUTPUT_DIR = (
     / "shap"
 )
 
-TRAIN_FILE = (
-    config.PROCESSED_DIR
-    / "split"
-    / "train_dataset.csv"
-)
-
 TEST_FILE = (
-    config.PROCESSED_DIR
-    / "split"
-    / "test_dataset.csv"
+    config.TEST_DATASET_FILE
 )
 
-DEFAULT_SAMPLE_SIZE = 5000
+DEFAULT_SAMPLE_SIZE = 500
 
 RANDOM_STATE = 42
 
-# Project label definition:
-# Benign = 0
-# Attack = 1
-ATTACK_CLASS_INDEX = 1
+FEATURE_DTYPE = np.float32
+
+LABEL_DTYPE = np.int8
+
+ADDITIVITY_TOLERANCE = 1e-3
 
 
 # ============================================================
-# Loaders
+# ==================== CHANGED / ADDED ========================
+#
+# Metadata required to trace a local SHAP explanation back to
+# the original network flow.
+#
+# IMPORTANT:
+#
+# These fields are NOT Random Forest input features.
+# They are loaded only for local explanation / dashboard
+# context.
+#
+# src_port and dst_port are already part of ML_FEATURES, so
+# they do not need to be repeated here.
+# ============================================================
+
+LOCAL_METADATA_COLUMNS = [
+    "flow_id",
+    "timestamp",
+    "src_ip",
+    "dst_ip",
+]
+
+
+# ============================================================
+# Helpers
+# ============================================================
+
+def print_section(
+    title,
+):
+    """
+    Print a formatted console section.
+    """
+
+    print()
+
+    print(
+        "=" * 70
+    )
+
+    print(
+        title
+    )
+
+    print(
+        "=" * 70
+    )
+
+
+# ============================================================
+
+def label_to_text(
+    label,
+):
+    """
+    Convert configured numeric labels into readable names.
+    """
+
+    label = int(
+        label
+    )
+
+    if (
+        label
+        == config.LABEL_BENIGN
+    ):
+
+        return "Benign"
+
+    if (
+        label
+        == config.LABEL_ATTACK
+    ):
+
+        return "Attack"
+
+    return str(
+        label
+    )
+
+
+# ============================================================
+# Model loading
 # ============================================================
 
 def load_model():
     """
-    Load the trained Random Forest model.
+    Load the bare trained Random Forest model.
     """
 
-    if not config.RANDOM_FOREST_MODEL_FILE.exists():
+    model_path = Path(
+        config.RANDOM_FOREST_MODEL_FILE
+    )
+
+    if not model_path.exists():
+
         raise FileNotFoundError(
             "Random Forest model not found:\n"
-            f"{config.RANDOM_FOREST_MODEL_FILE}"
+            f"{model_path}"
         )
 
     print(
-        f"Loading model:\n"
-        f"  {config.RANDOM_FOREST_MODEL_FILE}"
+        f"  Model: "
+        f"{model_path}"
     )
 
     model = joblib.load(
-        config.RANDOM_FOREST_MODEL_FILE
+        model_path
     )
 
     return model
 
 
-def load_data():
+# ============================================================
+# Dataset loading
+# ============================================================
+
+def load_test_dataset(
+    path,
+):
     """
-    Load the pre-split training and testing datasets.
+    Load the columns required for SHAP and local flow
+    traceability.
+
+    Loaded model columns:
+
+        config.ML_FEATURES
+        config.LABEL_COLUMN
+
+    Loaded metadata columns:
+
+        flow_id
+        timestamp
+        src_ip
+        dst_ip
+
+    Metadata fields are NOT Random Forest input features.
     """
 
-    if not TRAIN_FILE.exists():
-        raise FileNotFoundError(
-            f"Training dataset not found:\n{TRAIN_FILE}"
-        )
-
-    if not TEST_FILE.exists():
-        raise FileNotFoundError(
-            f"Testing dataset not found:\n{TEST_FILE}"
-        )
-
-    train_df = pd.read_csv(
-        TRAIN_FILE,
-        low_memory=False
+    path = Path(
+        path
     )
 
-    test_df = pd.read_csv(
-        TEST_FILE,
-        low_memory=False
+    if not path.exists():
+
+        raise FileNotFoundError(
+            "Test dataset not found:\n"
+            f"{path}"
+        )
+
+    # ========================================================
+    # ==================== CHANGED / ADDED ====================
+    #
+    # Read metadata together with model features so local SHAP
+    # results can be traced back to the original flow.
+    # ========================================================
+
+    required_columns = [
+        *LOCAL_METADATA_COLUMNS,
+        *config.ML_FEATURES,
+        config.LABEL_COLUMN,
+    ]
+
+    # --------------------------------------------------------
+    # Remove accidental duplicates while preserving order.
+    # --------------------------------------------------------
+
+    required_columns = list(
+        dict.fromkeys(
+            required_columns
+        )
+    )
+
+    # --------------------------------------------------------
+    # Validate CSV header first
+    # --------------------------------------------------------
+
+    header = pd.read_csv(
+        path,
+        nrows=0,
+    )
+
+    missing = [
+
+        column
+
+        for column in required_columns
+
+        if column not in header.columns
+    ]
+
+    if missing:
+
+        raise ValueError(
+            "Test dataset is missing required columns:\n"
+            + "\n".join(
+                f"  - {column}"
+                for column in missing
+            )
+        )
+
+    # --------------------------------------------------------
+    # Explicit dtypes only for model features / label.
+    #
+    # Metadata keeps its natural CSV representation.
+    # --------------------------------------------------------
+
+    dtype_map = {
+
+        feature:
+            FEATURE_DTYPE
+
+        for feature
+        in config.ML_FEATURES
+    }
+
+    dtype_map[
+        config.LABEL_COLUMN
+    ] = LABEL_DTYPE
+
+    # --------------------------------------------------------
+    # Load only required columns
+    # --------------------------------------------------------
+
+    df = pd.read_csv(
+
+        path,
+
+        usecols=required_columns,
+
+        dtype=dtype_map,
+
+        low_memory=False,
     )
 
     print(
-        f"  Train: {len(train_df):,} rows"
+        f"  Test rows: "
+        f"{len(df):,}"
     )
 
     print(
-        f"  Test : {len(test_df):,} rows"
+        f"  Traceability metadata: "
+        f"{', '.join(LOCAL_METADATA_COLUMNS)}"
     )
 
-    return train_df, test_df
+    return df
 
 
 # ============================================================
-# Validation
+# Feature validation
 # ============================================================
 
-def validate_features(df, name):
+def validate_features(
+    df,
+):
     """
-    Validate that all 42 ML features are present.
+    Validate configured model features.
+
+    NaN:
+        allowed
+
+    Infinite values:
+        rejected
     """
 
-    missing_features = [
+    config.validate_ml_features()
+
+    missing = [
+
         feature
+
         for feature in config.ML_FEATURES
+
         if feature not in df.columns
     ]
 
-    if missing_features:
+    if missing:
+
         raise ValueError(
-            f"{name}: missing ML features:\n"
-            f"{missing_features}"
-        )
-
-    if len(config.ML_FEATURES) != 42:
-        raise ValueError(
-            "Expected exactly 42 ML features, "
-            f"but config contains "
-            f"{len(config.ML_FEATURES)}."
-        )
-
-
-def validate_no_infinite_values(X, name):
-    """
-    Ensure that no infinite values exist.
-
-    NaN values are allowed because they are legitimate
-    missing values in the project's feature representation.
-    """
-
-    numeric_X = X.select_dtypes(
-        include=[np.number]
-    )
-
-    if numeric_X.empty:
-        return
-
-    inf_count = int(
-        np.isinf(
-            numeric_X.to_numpy(
-                dtype=float
+            "Missing ML features:\n"
+            + "\n".join(
+                f"  - {feature}"
+                for feature in missing
             )
-        ).sum()
+        )
+
+    X = df[
+        config.ML_FEATURES
+    ]
+
+    # --------------------------------------------------------
+    # NaN statistics
+    # --------------------------------------------------------
+
+    nan_count = int(
+        X.isna()
+        .sum()
+        .sum()
     )
 
-    if inf_count > 0:
+    total_cells = (
+        X.shape[0]
+        * X.shape[1]
+    )
+
+    nan_percentage = (
+        (
+            nan_count
+            / total_cells
+        )
+        * 100.0
+        if total_cells
+        else 0.0
+    )
+
+    print(
+        f"  NaN cells: "
+        f"{nan_count:,} "
+        f"({nan_percentage:.4f}%)"
+    )
+
+    print(
+        "  NaN values are retained."
+    )
+
+    # --------------------------------------------------------
+    # Infinite-value validation
+    # --------------------------------------------------------
+
+    inf_count = 0
+
+    for feature in config.ML_FEATURES:
+
+        values = (
+            X[
+                feature
+            ]
+            .to_numpy(
+                copy=False
+            )
+        )
+
+        inf_count += int(
+            np.isinf(
+                values
+            ).sum()
+        )
+
+    if inf_count:
+
         raise ValueError(
-            f"{name}: found "
-            f"{inf_count:,} infinite feature values."
+            f"Found "
+            f"{inf_count:,} infinite ML feature values."
         )
 
 
-def check_flow_id_leakage(train_df, test_df):
+# ============================================================
+# ==================== CHANGED / ADDED ========================
+# Metadata validation
+# ============================================================
+
+def validate_local_metadata(
+    df,
+):
     """
-    Check that no flow_id occurs in both train and test.
+    Validate metadata required for local flow traceability.
+
+    These columns are display/context fields only.
+    They are never passed to the Random Forest.
     """
 
-    train_ids = set(
-        train_df["flow_id"]
-    )
+    missing = [
 
-    test_ids = set(
-        test_df["flow_id"]
-    )
+        column
 
-    overlap = train_ids.intersection(
-        test_ids
-    )
+        for column in LOCAL_METADATA_COLUMNS
 
-    if overlap:
-        raise RuntimeError(
-            "Flow ID leakage detected: "
-            f"{len(overlap):,} overlapping flow IDs."
+        if column not in df.columns
+    ]
+
+    if missing:
+
+        raise ValueError(
+            "Missing local SHAP metadata columns:\n"
+            + "\n".join(
+                f"  - {column}"
+                for column in missing
+            )
         )
 
     print(
-        "  [OK] Flow ID overlap: 0"
+        "  Local flow traceability metadata: OK"
     )
+
+
+# ============================================================
+# Model / config compatibility
+# ============================================================
+
+def validate_model_compatibility(
+    model,
+):
+    """
+    Ensure the trained model is compatible with the current
+    config.ML_FEATURES definition.
+
+    This prevents an old model from being explained using a
+    newly modified feature list.
+    """
+
+    configured_features = list(
+        config.ML_FEATURES
+    )
+
+    configured_count = len(
+        configured_features
+    )
+
+    # --------------------------------------------------------
+    # Number of trained features
+    # --------------------------------------------------------
+
+    if hasattr(
+        model,
+        "n_features_in_",
+    ):
+
+        model_feature_count = int(
+            model.n_features_in_
+        )
+
+        if (
+            model_feature_count
+            != configured_count
+        ):
+
+            raise RuntimeError(
+                "Model/config feature-count mismatch.\n"
+                f"Model expects : "
+                f"{model_feature_count}\n"
+                f"Config defines: "
+                f"{configured_count}\n"
+                "\nRetrain the model or restore the feature "
+                "configuration used during training."
+            )
+
+    # --------------------------------------------------------
+    # Exact feature names / order
+    # --------------------------------------------------------
+
+    if hasattr(
+        model,
+        "feature_names_in_",
+    ):
+
+        model_features = list(
+            model.feature_names_in_
+        )
+
+        if (
+            model_features
+            != configured_features
+        ):
+
+            raise RuntimeError(
+                "Model/config feature order mismatch.\n"
+                "\nThe current config.ML_FEATURES does not "
+                "match the exact feature order used to train "
+                "the saved Random Forest."
+            )
+
+    print(
+        f"  Model/config features: "
+        f"OK ({configured_count})"
+    )
+
+
+# ============================================================
+# Label / probability helpers
+# ============================================================
+
+def get_attack_class_index(
+    model,
+):
+    """
+    Return the probability / SHAP class index corresponding
+    to config.LABEL_ATTACK.
+    """
+
+    if not hasattr(
+        model,
+        "classes_",
+    ):
+
+        raise RuntimeError(
+            "Loaded model does not contain classes_."
+        )
+
+    classes = list(
+        model.classes_
+    )
+
+    if (
+        config.LABEL_ATTACK
+        not in classes
+    ):
+
+        raise RuntimeError(
+            f"Configured Attack label "
+            f"{config.LABEL_ATTACK} "
+            "was not found in model.classes_.\n"
+            f"Model classes: "
+            f"{classes}"
+        )
+
+    return classes.index(
+        config.LABEL_ATTACK
+    )
+
+
+# ============================================================
+
+def get_attack_probability(
+    model,
+    X,
+    attack_class_index,
+):
+    """
+    Return P(Attack).
+    """
+
+    probabilities = model.predict_proba(
+        X
+    )
+
+    return probabilities[
+        :,
+        attack_class_index
+    ]
 
 
 # ============================================================
 # SHAP output handling
 # ============================================================
 
-def extract_attack_values(shap_output):
+def extract_attack_values(
+    shap_output,
+    attack_class_index,
+):
     """
-    Extract SHAP values for the Attack class.
+    Extract SHAP values for the configured Attack class.
 
-    SHAP versions may represent binary classification output as:
+    Possible SHAP output formats:
 
         (samples, features, classes)
 
@@ -335,7 +755,7 @@ def extract_attack_values(shap_output):
 
         (samples, features)
 
-    This function normalises the output to:
+    Returned shape:
 
         (samples, features)
     """
@@ -344,37 +764,55 @@ def extract_attack_values(shap_output):
         shap_output.values
     )
 
+    # --------------------------------------------------------
+    # Multi-output classifier
+    # --------------------------------------------------------
+
     if values.ndim == 3:
 
-        if values.shape[2] <= ATTACK_CLASS_INDEX:
+        if (
+            attack_class_index
+            >= values.shape[2]
+        ):
+
             raise ValueError(
                 "Attack class index is outside "
-                f"SHAP output shape: {values.shape}"
+                "the SHAP output dimensions.\n"
+                f"Attack index: "
+                f"{attack_class_index}\n"
+                f"SHAP shape  : "
+                f"{values.shape}"
             )
 
-        values_attack = (
-            values[:, :, ATTACK_CLASS_INDEX]
-        )
+        return values[
+            :,
+            :,
+            attack_class_index
+        ]
 
-    elif values.ndim == 2:
+    # --------------------------------------------------------
+    # Single-output SHAP representation
+    # --------------------------------------------------------
 
-        values_attack = values
+    if values.ndim == 2:
 
-    else:
+        return values
 
-        raise ValueError(
-            "Unexpected SHAP value shape: "
-            f"{values.shape}"
-        )
-
-    return values_attack
+    raise ValueError(
+        "Unexpected SHAP value shape: "
+        f"{values.shape}"
+    )
 
 
-def extract_attack_base_values(shap_output, n_samples):
+# ============================================================
+
+def extract_attack_base_values(
+    shap_output,
+    n_samples,
+    attack_class_index,
+):
     """
-    Extract the SHAP base value for the Attack class.
-
-    Returns one base value per sample.
+    Extract one Attack-class base value per sample.
     """
 
     base = np.asarray(
@@ -382,42 +820,58 @@ def extract_attack_base_values(shap_output, n_samples):
     )
 
     # --------------------------------------------------------
-    # Case 1:
     # (samples, classes)
     # --------------------------------------------------------
 
     if base.ndim == 2:
 
-        if base.shape[1] <= ATTACK_CLASS_INDEX:
+        if (
+            attack_class_index
+            >= base.shape[1]
+        ):
+
             raise ValueError(
                 "Attack class index is outside "
-                f"base value shape: {base.shape}"
+                "SHAP base-value dimensions.\n"
+                f"Attack index: "
+                f"{attack_class_index}\n"
+                f"Base shape  : "
+                f"{base.shape}"
             )
 
         return base[
             :,
-            ATTACK_CLASS_INDEX
+            attack_class_index
         ]
 
     # --------------------------------------------------------
-    # Case 2:
     # (samples,)
     # --------------------------------------------------------
 
     if base.ndim == 1:
 
-        if base.shape[0] == n_samples:
-            return base.astype(float)
+        if (
+            base.shape[0]
+            == n_samples
+        ):
 
-        # Single base value
-        if base.shape[0] == 1:
+            return base.astype(
+                float
+            )
+
+        if (
+            base.shape[0]
+            == 1
+        ):
+
             return np.full(
                 n_samples,
-                float(base[0])
+                float(
+                    base[0]
+                ),
             )
 
     # --------------------------------------------------------
-    # Case 3:
     # scalar
     # --------------------------------------------------------
 
@@ -425,7 +879,9 @@ def extract_attack_base_values(shap_output, n_samples):
 
         return np.full(
             n_samples,
-            float(base)
+            float(
+                base
+            ),
         )
 
     raise ValueError(
@@ -435,52 +891,43 @@ def extract_attack_base_values(shap_output, n_samples):
 
 
 # ============================================================
-# Additivity consistency check
+# Additivity validation
 # ============================================================
 
 def check_additivity(
     shap_values_attack,
     base_values_attack,
     model,
-    X_data
+    X_data,
+    attack_class_index,
 ):
     """
-    Check whether:
+    Verify:
 
         base value + sum(SHAP values)
 
     approximately equals:
 
-        model.predict_proba(X)[:, Attack]
+        P(Attack)
 
-    Returns:
-
-        passed
-        max_discrepancy
-        mean_discrepancy
+    for the same Random Forest prediction.
     """
 
-    # --------------------------------------------------------
-    # Actual model probability
-    # --------------------------------------------------------
-
     model_probability = (
-        model.predict_proba(X_data)
-        [:, ATTACK_CLASS_INDEX]
+        get_attack_probability(
+            model,
+            X_data,
+            attack_class_index,
+        )
     )
-
-    # --------------------------------------------------------
-    # SHAP reconstruction
-    # --------------------------------------------------------
 
     reconstructed_probability = (
-        shap_values_attack.sum(axis=1)
-        + base_values_attack
+        base_values_attack
+        +
+        shap_values_attack.sum(
+            axis=1
+        )
     )
-
-    # --------------------------------------------------------
-    # Difference
-    # --------------------------------------------------------
 
     discrepancy = np.abs(
         reconstructed_probability
@@ -495,40 +942,168 @@ def check_additivity(
         discrepancy.mean()
     )
 
-    # Numerical tolerance
-    tolerance = 1e-3
-
     passed = (
-        max_discrepancy < tolerance
+        max_discrepancy
+        <= ADDITIVITY_TOLERANCE
     )
 
     return (
         passed,
         max_discrepancy,
-        mean_discrepancy
+        mean_discrepancy,
     )
 
 
 # ============================================================
-# Build single-row explanation
+# Build a local SHAP explanation
 # ============================================================
 
 def build_row_explanation(
     shap_values_attack,
     base_values_attack,
     X_data,
-    position
+    position,
 ):
     """
-    Create a shap.Explanation object for one flow.
+    Build a shap.Explanation object for one row.
     """
 
     return shap.Explanation(
-        values=shap_values_attack[position],
-        base_values=base_values_attack[position],
-        data=X_data.iloc[position].values,
-        feature_names=config.ML_FEATURES,
+
+        values=(
+            shap_values_attack[
+                position
+            ]
+        ),
+
+        base_values=(
+            base_values_attack[
+                position
+            ]
+        ),
+
+        data=(
+            X_data
+            .iloc[
+                position
+            ]
+            .to_numpy()
+        ),
+
+        feature_names=(
+            list(
+                config.ML_FEATURES
+            )
+        ),
     )
+
+
+# ============================================================
+# ==================== CHANGED / ADDED ========================
+# Local flow context
+# ============================================================
+
+def build_local_flow_context(
+    test_df,
+    local_position,
+):
+    """
+    Build traceability information for one explained flow.
+
+    Metadata is returned separately from ML / SHAP features.
+    """
+
+    row = test_df.iloc[
+        local_position
+    ]
+
+    context = {
+
+        "flow_id":
+            (
+                str(
+                    row["flow_id"]
+                )
+                if pd.notna(
+                    row["flow_id"]
+                )
+                else None
+            ),
+
+        "timestamp":
+            (
+                str(
+                    row["timestamp"]
+                )
+                if pd.notna(
+                    row["timestamp"]
+                )
+                else None
+            ),
+
+        "src_ip":
+            (
+                str(
+                    row["src_ip"]
+                )
+                if pd.notna(
+                    row["src_ip"]
+                )
+                else None
+            ),
+
+        "dst_ip":
+            (
+                str(
+                    row["dst_ip"]
+                )
+                if pd.notna(
+                    row["dst_ip"]
+                )
+                else None
+            ),
+    }
+
+    # src_port / dst_port are model features and therefore are
+    # already present in the test dataset.
+
+    if "src_port" in test_df.columns:
+
+        src_port = row[
+            "src_port"
+        ]
+
+        context[
+            "src_port"
+        ] = (
+            int(
+                src_port
+            )
+            if pd.notna(
+                src_port
+            )
+            else None
+        )
+
+    if "dst_port" in test_df.columns:
+
+        dst_port = row[
+            "dst_port"
+        ]
+
+        context[
+            "dst_port"
+        ] = (
+            int(
+                dst_port
+            )
+            if pd.notna(
+                dst_port
+            )
+            else None
+        )
+
+    return context
 
 
 # ============================================================
@@ -539,8 +1114,9 @@ def main():
 
     parser = argparse.ArgumentParser(
         description=(
-            "Generate SHAP explanations for "
-            "the trained Random Forest."
+            "Generate global and optional local SHAP "
+            "explanations for the trained NetworkIDS "
+            "Random Forest."
         )
     )
 
@@ -549,14 +1125,28 @@ def main():
         type=int,
         default=DEFAULT_SAMPLE_SIZE,
         help=(
-            "Number of test rows to explain "
-            "(default: 5000)."
+            "Number of held-out test rows used for "
+            "global SHAP explanation."
+        ),
+    )
+
+    parser.add_argument(
+        "--local-row",
+        type=int,
+        default=None,
+        help=(
+            "Optional zero-based row position from the "
+            "test dataset for local SHAP waterfall output."
         ),
     )
 
     args = parser.parse_args()
 
-    if args.sample_size <= 0:
+    if (
+        args.sample_size
+        <= 0
+    ):
+
         raise ValueError(
             "--sample-size must be greater than 0."
         )
@@ -565,386 +1155,393 @@ def main():
     # Header
     # ========================================================
 
-    print("=" * 70)
-    print("NetworkIDS - SHAP Explainability")
-    print("=" * 70)
+    print(
+        "=" * 70
+    )
 
     print(
-        f"SHAP version: {shap.__version__}"
+        "NetworkIDS - SHAP EXPLAINABILITY"
+    )
+
+    print(
+        "=" * 70
+    )
+
+    print(
+        f"SHAP version : "
+        f"{shap.__version__}"
     )
 
     # ========================================================
-    # 1. Load model and data
+    # 1. Configuration / model
     # ========================================================
 
-    print(
-        "\n[1/6] Loading model and datasets..."
+    print_section(
+        "[1/5] Loading model"
     )
+
+    config.validate_ml_features()
 
     OUTPUT_DIR.mkdir(
         parents=True,
-        exist_ok=True
+        exist_ok=True,
     )
 
     model = load_model()
 
-    train_df, test_df = load_data()
+    validate_model_compatibility(
+        model
+    )
 
-    # --------------------------------------------------------
-    # Validate features
-    # --------------------------------------------------------
+    attack_class_index = (
+        get_attack_class_index(
+            model
+        )
+    )
 
-    validate_features(
-        train_df,
-        "Train"
+    print(
+        f"  Model classes       : "
+        f"{list(model.classes_)}"
+    )
+
+    print(
+        f"  Attack label        : "
+        f"{config.LABEL_ATTACK}"
+    )
+
+    print(
+        f"  Attack class index  : "
+        f"{attack_class_index}"
+    )
+
+    # ========================================================
+    # 2. Load held-out test data
+    # ========================================================
+
+    print_section(
+        "[2/5] Loading held-out test dataset"
+    )
+
+    test_df = load_test_dataset(
+        TEST_FILE
     )
 
     validate_features(
-        test_df,
-        "Test"
-    )
-
-    # --------------------------------------------------------
-    # Leakage guard
-    # --------------------------------------------------------
-
-    check_flow_id_leakage(
-        train_df,
         test_df
     )
 
-    # --------------------------------------------------------
-    # Select features
-    # --------------------------------------------------------
+    # ==================== CHANGED / ADDED ====================
 
-    X_train = train_df[
-        config.ML_FEATURES
-    ].copy()
-
-    X_test = test_df[
-        config.ML_FEATURES
-    ].copy()
-
-    y_test = test_df[
-        config.LABEL_COLUMN
-    ].astype(int)
-
-    validate_no_infinite_values(
-        X_train,
-        "Train"
+    validate_local_metadata(
+        test_df
     )
 
-    validate_no_infinite_values(
-        X_test,
-        "Test"
+    X_test = (
+        test_df[
+            config.ML_FEATURES
+        ]
+        .copy()
     )
 
-    print(
-        f"  Features: {len(config.ML_FEATURES)}"
+    y_test = (
+        test_df[
+            config.LABEL_COLUMN
+        ]
+        .copy()
     )
 
     # ========================================================
-    # 2. Sample test rows
+    # Validate optional local row
     # ========================================================
 
-    print(
-        "\n[2/6] Sampling test rows..."
+    if (
+        args.local_row
+        is not None
+    ):
+
+        if (
+            args.local_row < 0
+            or
+            args.local_row
+            >= len(
+                X_test
+            )
+        ):
+
+            raise ValueError(
+                "--local-row is outside the test dataset.\n"
+                f"Valid range: "
+                f"0 to {len(X_test) - 1}"
+            )
+
+    # ========================================================
+    # 3. Sample global explanation rows
+    # ========================================================
+
+    print_section(
+        "[3/5] Computing SHAP values"
     )
 
     sample_size = min(
         args.sample_size,
-        len(X_test)
+        len(
+            X_test
+        ),
     )
 
     rng = np.random.RandomState(
         RANDOM_STATE
     )
 
-    sample_idx = rng.choice(
-        X_test.index.to_numpy(),
+    sample_positions = rng.choice(
+
+        len(
+            X_test
+        ),
+
         size=sample_size,
-        replace=False
+
+        replace=False,
     )
 
-    # Preserve original test data values.
     X_sample = (
         X_test
-        .loc[sample_idx]
-        .reset_index(drop=True)
-        .copy()
-    )
-
-    y_sample = (
-        y_test
-        .loc[sample_idx]
-        .reset_index(drop=True)
+        .iloc[
+            sample_positions
+        ]
+        .reset_index(
+            drop=True
+        )
         .copy()
     )
 
     nan_cells_in_sample = int(
-        X_sample.isna()
+        X_sample
+        .isna()
         .sum()
         .sum()
     )
 
     print(
-        f"  Sample size: {sample_size:,}"
+        f"  SHAP sample size : "
+        f"{sample_size:,}"
     )
 
     print(
-        f"  NaN cells in sample: "
+        f"  ML features      : "
+        f"{len(config.ML_FEATURES)}"
+    )
+
+    print(
+        f"  NaN cells        : "
         f"{nan_cells_in_sample:,}"
     )
 
     print(
-        f"  Random state: {RANDOM_STATE}"
-    )
-
-    # ========================================================
-    # 3. SHAP explanation on original NaN data
-    # ========================================================
-
-    print(
-        "\n[3/6] Building SHAP TreeExplainer..."
-    )
-
-    print(
-        "  Explaining the original "
-        "NaN-containing feature data."
+        "  Building TreeExplainer..."
     )
 
     explainer = shap.TreeExplainer(
-        model
+        model, feature_perturbation="tree_path_dependent"
     )
 
     print(
-        "  TreeExplainer created."
+        "  Computing SHAP values..."
     )
 
-    print(
-        "\n  Computing SHAP values..."
+    shap_output = explainer(
+        X_sample
     )
-
-    try:
-
-        shap_output = explainer(
-            X_sample
-        )
-
-    except Exception as exc:
-
-        print("\n" + "=" * 70)
-        print("SHAP EXPLANATION FAILED")
-        print("=" * 70)
-
-        print(
-            "TreeExplainer could not process "
-            "the original NaN-containing data."
-        )
-
-        print(
-            "\nError:"
-        )
-
-        print(
-            str(exc)
-        )
-
-        print(
-            "\nNo imputation was performed."
-        )
-
-        print(
-            "No SHAP results were generated."
-        )
-
-        print(
-            "\nThe model itself was NOT modified."
-        )
-
-        print("=" * 70)
-
-        raise RuntimeError(
-            "Raw-NaN SHAP explanation failed. "
-            "Investigate SHAP/model compatibility "
-            "instead of changing the feature representation."
-        ) from exc
-
-    # --------------------------------------------------------
-    # Extract Attack-class values
-    # --------------------------------------------------------
 
     shap_values_attack = (
         extract_attack_values(
-            shap_output
+
+            shap_output,
+
+            attack_class_index,
         )
     )
 
     base_values_attack = (
         extract_attack_base_values(
+
             shap_output,
-            sample_size
+
+            sample_size,
+
+            attack_class_index,
         )
     )
 
+    expected_shape = (
+
+        sample_size,
+
+        len(
+            config.ML_FEATURES
+        ),
+    )
+
+    if (
+        shap_values_attack.shape
+        != expected_shape
+    ):
+
+        raise RuntimeError(
+            "Unexpected SHAP matrix shape.\n"
+            f"Expected: "
+            f"{expected_shape}\n"
+            f"Actual  : "
+            f"{shap_values_attack.shape}"
+        )
+
     print(
-        f"\n  SHAP matrix shape: "
+        f"  SHAP matrix      : "
         f"{shap_values_attack.shape}"
     )
 
-    print(
-        f"  Expected feature count: "
-        f"{len(config.ML_FEATURES)}"
-    )
-
     # --------------------------------------------------------
-    # Validate shape
+    # Additivity check
     # --------------------------------------------------------
 
-    expected_shape = (
-        sample_size,
-        len(config.ML_FEATURES)
-    )
-
-    if shap_values_attack.shape != expected_shape:
-        raise ValueError(
-            "Unexpected SHAP matrix shape.\n"
-            f"Expected: {expected_shape}\n"
-            f"Actual:   {shap_values_attack.shape}"
-        )
-
-    # ========================================================
-    # Additivity consistency check
-    # ========================================================
-
     print(
-        "\n  Checking SHAP additivity consistency..."
+        "  Checking additivity..."
     )
 
     (
         additivity_passed,
         max_discrepancy,
-        mean_discrepancy
+        mean_discrepancy,
     ) = check_additivity(
+
         shap_values_attack,
+
         base_values_attack,
+
         model,
-        X_sample
+
+        X_sample,
+
+        attack_class_index,
     )
 
     print(
-        f"  Max discrepancy : "
+        f"  Max discrepancy  : "
         f"{max_discrepancy:.8f}"
     )
 
     print(
-        f"  Mean discrepancy: "
+        f"  Mean discrepancy : "
         f"{mean_discrepancy:.8f}"
     )
 
     if not additivity_passed:
 
-        print("\n" + "=" * 70)
-        print("SHAP ADDITIVITY CHECK FAILED")
-        print("=" * 70)
-
-        print(
-            "The SHAP explanation could not reproduce "
-            "the model's Attack probability within "
-            "the configured tolerance."
-        )
-
-        print(
-            f"\nMaximum discrepancy: "
-            f"{max_discrepancy:.8f}"
-        )
-
-        print(
-            "\nNo imputation was performed."
-        )
-
-        print(
-            "No explanation plots were generated."
-        )
-
-        print(
-            "\nInvestigate SHAP / scikit-learn "
-            "compatibility before continuing."
-        )
-
-        print("=" * 70)
-
         raise RuntimeError(
-            "SHAP additivity consistency check failed."
+            "SHAP additivity validation failed.\n"
+            f"Maximum discrepancy: "
+            f"{max_discrepancy:.8f}\n"
+            f"Allowed tolerance  : "
+            f"{ADDITIVITY_TOLERANCE}"
         )
 
     print(
-        "  [OK] Additivity consistency check passed."
+        "  [OK] SHAP additivity passed."
     )
 
     # ========================================================
-    # 4. Global SHAP plots
+    # 4. Global SHAP outputs
     # ========================================================
 
-    print(
-        "\n[4/6] Generating global SHAP explanations..."
+    print_section(
+        "[4/5] Saving global SHAP explanations"
     )
-
-    # --------------------------------------------------------
-    # Mean absolute SHAP
-    # --------------------------------------------------------
 
     mean_abs_shap = (
+
         np.abs(
             shap_values_attack
         )
-        .mean(axis=0)
+
+        .mean(
+            axis=0
+        )
     )
 
     importance = (
+
         pd.Series(
+
             mean_abs_shap,
-            index=config.ML_FEATURES
+
+            index=(
+                config.ML_FEATURES
+            ),
         )
+
         .sort_values(
             ascending=False
         )
     )
 
     # --------------------------------------------------------
-    # Print top 15
+    # Console output
     # --------------------------------------------------------
 
+    top_count = min(
+        15,
+        len(
+            importance
+        ),
+    )
+
     print(
-        "\nTop 15 features by mean |SHAP|:"
+        f"Top {top_count} features "
+        "by mean |SHAP|:"
     )
 
     for rank, (
         feature,
-        value
+        value,
     ) in enumerate(
-        importance.head(15).items(),
-        start=1
+
+        importance
+        .head(
+            top_count
+        )
+        .items(),
+
+        start=1,
     ):
 
         print(
             f"  {rank:>2}. "
-            f"{feature:<30} "
+            f"{feature:<35} "
             f"{value:.6f}"
         )
 
     # --------------------------------------------------------
-    # Save importance CSV
+    # Importance CSV
     # --------------------------------------------------------
 
-    importance_df = pd.DataFrame({
-        "rank": range(
-            1,
-            len(importance) + 1
-        ),
-        "feature": importance.index,
-        "mean_abs_shap": importance.values,
-    })
+    importance_df = pd.DataFrame(
+        {
+            "rank":
+                range(
+                    1,
+                    len(
+                        importance
+                    )
+                    + 1
+                ),
+
+            "feature":
+                importance.index,
+
+            "mean_abs_shap":
+                importance.values,
+        }
+    )
 
     importance_file = (
         OUTPUT_DIR
@@ -953,25 +1550,30 @@ def main():
 
     importance_df.to_csv(
         importance_file,
-        index=False
-    )
-
-    print(
-        f"\n  Importance table saved:\n"
-        f"  {importance_file}"
+        index=False,
     )
 
     # --------------------------------------------------------
-    # Global bar chart
+    # Global bar plot
     # --------------------------------------------------------
 
     plt.figure(
-        figsize=(9, 8)
+        figsize=(
+            9,
+            8
+        )
     )
 
     (
         importance
-        .head(20)
+        .head(
+            min(
+                20,
+                len(
+                    importance
+                )
+            )
+        )
         .sort_values()
         .plot(
             kind="barh"
@@ -984,40 +1586,50 @@ def main():
     )
 
     plt.title(
-        "Global Feature Importance (SHAP)"
+        "Global SHAP Feature Importance"
     )
 
     plt.tight_layout()
 
-    bar_file = (
+    global_bar_file = (
         OUTPUT_DIR
         / "global_importance_bar.png"
     )
 
     plt.savefig(
-        bar_file,
+        global_bar_file,
         dpi=150,
-        bbox_inches="tight"
+        bbox_inches="tight",
     )
 
     plt.close()
 
-    print(
-        f"  Global bar chart saved:\n"
-        f"  {bar_file}"
-    )
-
     # --------------------------------------------------------
-    # Global beeswarm
+    # Beeswarm
     # --------------------------------------------------------
 
     plt.figure()
 
     shap.summary_plot(
+
         shap_values_attack,
+
         X_sample,
+
+        feature_names=(
+            config.ML_FEATURES
+        ),
+
+        max_display=(
+            min(
+                20,
+                len(
+                    config.ML_FEATURES
+                )
+            )
+        ),
+
         show=False,
-        max_display=20,
     )
 
     plt.tight_layout()
@@ -1030,315 +1642,314 @@ def main():
     plt.savefig(
         beeswarm_file,
         dpi=150,
-        bbox_inches="tight"
+        bbox_inches="tight",
     )
 
     plt.close()
 
     print(
-        f"  Global beeswarm saved:\n"
-        f"  {beeswarm_file}"
+        f"  Importance CSV : "
+        f"{importance_file}"
     )
-
-    # ========================================================
-    # 5. Per-prediction waterfall plots
-    # ========================================================
 
     print(
-        "\n[5/6] Generating TP / TN / FP / FN "
-        "waterfall plots..."
+        f"  Global bar     : "
+        f"{global_bar_file}"
     )
 
-    # IMPORTANT:
-    #
-    # Predictions are generated from the ORIGINAL
-    # NaN-containing sample.
-    #
-    # This preserves consistency with the actual model
-    # training and test evaluation pipeline.
-
-    y_pred_sample = model.predict(
-        X_sample
+    print(
+        f"  Beeswarm       : "
+        f"{beeswarm_file}"
     )
 
-    # --------------------------------------------------------
-    # Verify prediction probabilities
-    # --------------------------------------------------------
+    # ========================================================
+    # 5. Optional local explanation + summary
+    # ========================================================
 
-    y_proba_sample = (
-        model.predict_proba(
-            X_sample
-        )[:, ATTACK_CLASS_INDEX]
+    print_section(
+        "[5/5] Local explanation and summary"
     )
 
-    # --------------------------------------------------------
-    # Define four prediction cases
-    # --------------------------------------------------------
+    local_summary = None
 
-    cases = {
+    if (
+        args.local_row
+        is not None
+    ):
 
-        "true_positive": (
-            (y_sample.to_numpy() == 1)
-            &
-            (y_pred_sample == 1)
-        ),
-
-        "true_negative": (
-            (y_sample.to_numpy() == 0)
-            &
-            (y_pred_sample == 0)
-        ),
-
-        "false_positive": (
-            (y_sample.to_numpy() == 0)
-            &
-            (y_pred_sample == 1)
-        ),
-
-        "false_negative": (
-            (y_sample.to_numpy() == 1)
-            &
-            (y_pred_sample == 0)
-        ),
-    }
-
-    case_indices = {}
-
-    # --------------------------------------------------------
-    # Generate waterfall for each case
-    # --------------------------------------------------------
-
-    for case_name, mask in cases.items():
-
-        positions = np.where(
-            mask
-        )[0]
-
-        if len(positions) == 0:
-
-            print(
-                f"  [skip] No "
-                f"{case_name.replace('_', ' ')} "
-                f"example in sample."
-            )
-
-            case_indices[
-                case_name
-            ] = None
-
-            continue
-
-        # ----------------------------------------------------
-        # Select first matching example
-        # ----------------------------------------------------
-
-        position = int(
-            positions[0]
+        local_position = int(
+            args.local_row
         )
 
-        case_indices[
-            case_name
-        ] = position
+        X_local = (
+            X_test
+            .iloc[
+                [
+                    local_position
+                ]
+            ]
+            .copy()
+        )
 
-        # ----------------------------------------------------
-        # Build SHAP explanation
-        # ----------------------------------------------------
+        local_output = explainer(
+            X_local
+        )
 
-        explanation = (
+        local_values_attack = (
+            extract_attack_values(
+
+                local_output,
+
+                attack_class_index,
+            )
+        )
+
+        local_base_attack = (
+            extract_attack_base_values(
+
+                local_output,
+
+                1,
+
+                attack_class_index,
+            )
+        )
+
+        prediction = int(
+            model.predict(
+                X_local
+            )[0]
+        )
+
+        attack_probability = float(
+            get_attack_probability(
+
+                model,
+
+                X_local,
+
+                attack_class_index,
+            )[0]
+        )
+
+        actual_label = int(
+            y_test.iloc[
+                local_position
+            ]
+        )
+
+        # ====================================================
+        # ==================== CHANGED / ADDED ================
+        #
+        # Retrieve the flow identity/context separately from
+        # the model feature vector.
+        # ====================================================
+
+        flow_context = (
+            build_local_flow_context(
+                test_df,
+                local_position,
+            )
+        )
+
+        local_explanation = (
             build_row_explanation(
-                shap_values_attack,
-                base_values_attack,
-                X_sample,
-                position
+
+                local_values_attack,
+
+                local_base_attack,
+
+                X_local.reset_index(
+                    drop=True
+                ),
+
+                0,
             )
         )
-
-        # ----------------------------------------------------
-        # Generate waterfall
-        # ----------------------------------------------------
 
         plt.figure()
 
         shap.plots.waterfall(
-            explanation,
-            max_display=15,
-            show=False
+
+            local_explanation,
+
+            max_display=(
+                min(
+                    15,
+                    len(
+                        config.ML_FEATURES
+                    )
+                )
+            ),
+
+            show=False,
+        )
+
+        # ====================================================
+        # ==================== CHANGED / ADDED ================
+        # Show flow_id in the waterfall title.
+        # ====================================================
+
+        flow_id_display = (
+            flow_context.get(
+                "flow_id"
+            )
+            or
+            "Unknown Flow"
         )
 
         plt.title(
-            f"{case_name.replace('_', ' ').title()} "
-            f"(sample row {position})"
+            "Local SHAP Explanation\n"
+            f"Flow: "
+            f"{flow_id_display} | "
+            f"Actual: "
+            f"{label_to_text(actual_label)} | "
+            f"Predicted: "
+            f"{label_to_text(prediction)} | "
+            f"P(Attack): "
+            f"{attack_probability:.4f}"
         )
 
         plt.tight_layout()
 
-        waterfall_file = (
+        local_file = (
             OUTPUT_DIR
-            / f"waterfall_{case_name}.png"
+            / "local_waterfall.png"
         )
 
         plt.savefig(
-            waterfall_file,
+            local_file,
             dpi=150,
-            bbox_inches="tight"
+            bbox_inches="tight",
         )
 
         plt.close()
 
-        actual_label = int(
-            y_sample.iloc[position]
-        )
+        # ====================================================
+        # ==================== CHANGED / ADDED ================
+        #
+        # Store network-flow traceability together with the
+        # local prediction information.
+        # ====================================================
 
-        predicted_label = int(
-            y_pred_sample[position]
-        )
+        local_summary = {
 
-        attack_probability = float(
-            y_proba_sample[position]
+            "test_row":
+                local_position,
+
+            "flow_id":
+                flow_context.get(
+                    "flow_id"
+                ),
+
+            "timestamp":
+                flow_context.get(
+                    "timestamp"
+                ),
+
+            "src_ip":
+                flow_context.get(
+                    "src_ip"
+                ),
+
+            "src_port":
+                flow_context.get(
+                    "src_port"
+                ),
+
+            "dst_ip":
+                flow_context.get(
+                    "dst_ip"
+                ),
+
+            "dst_port":
+                flow_context.get(
+                    "dst_port"
+                ),
+
+            "actual_label":
+                actual_label,
+
+            "actual_label_text":
+                label_to_text(
+                    actual_label
+                ),
+
+            "predicted_label":
+                prediction,
+
+            "predicted_label_text":
+                label_to_text(
+                    prediction
+                ),
+
+            "attack_probability":
+                attack_probability,
+
+            "output_file":
+                local_file.name,
+        }
+
+        # ====================================================
+        # Console local-flow information
+        # ====================================================
+
+        print(
+            f"  Local row       : "
+            f"{local_position}"
         )
 
         print(
-            f"  [OK] "
-            f"{case_name}: "
-            f"sample row {position}, "
-            f"actual={actual_label}, "
-            f"predicted={predicted_label}, "
-            f"attack_probability={attack_probability:.4f}"
+            f"  Flow ID         : "
+            f"{flow_context.get('flow_id')}"
         )
 
-    # ========================================================
-    # 6. Save raw outputs and summary
-    # ========================================================
+        print(
+            f"  Timestamp       : "
+            f"{flow_context.get('timestamp')}"
+        )
 
-    print(
-        "\n[6/6] Saving SHAP outputs and summary..."
-    )
+        print(
+            f"  Source          : "
+            f"{flow_context.get('src_ip')}:"
+            f"{flow_context.get('src_port')}"
+        )
 
-    # --------------------------------------------------------
-    # Save SHAP values
-    # --------------------------------------------------------
+        print(
+            f"  Destination     : "
+            f"{flow_context.get('dst_ip')}:"
+            f"{flow_context.get('dst_port')}"
+        )
 
-    shap_values_file = (
-        OUTPUT_DIR
-        / "shap_values_attack.npy"
-    )
+        print(
+            f"  Actual          : "
+            f"{label_to_text(actual_label)}"
+        )
 
-    np.save(
-        shap_values_file,
-        shap_values_attack
-    )
+        print(
+            f"  Predicted       : "
+            f"{label_to_text(prediction)}"
+        )
 
-    print(
-        f"  SHAP values saved:\n"
-        f"  {shap_values_file}"
-    )
+        print(
+            f"  P(Attack)       : "
+            f"{attack_probability:.6f}"
+        )
 
-    # --------------------------------------------------------
-    # Save feature sample
-    # --------------------------------------------------------
+        print(
+            f"  Waterfall       : "
+            f"{local_file}"
+        )
 
-    sample_features_file = (
-        OUTPUT_DIR
-        / "shap_sample_features.csv"
-    )
+    else:
 
-    X_sample.to_csv(
-        sample_features_file,
-        index=True
-    )
+        print(
+            "  No --local-row provided."
+        )
 
-    # --------------------------------------------------------
-    # Save metadata
-    # --------------------------------------------------------
-
-    metadata_columns = [
-        "flow_id",
-        "timestamp",
-        "src_ip",
-        "dst_ip",
-        "src_port",
-        "dst_port",
-        "flow_packet_count",
-        "flow_duration",
-        "label",
-        "original_label",
-    ]
-
-    metadata_columns = [
-        column
-        for column in metadata_columns
-        if column in test_df.columns
-    ]
-
-    sample_metadata = (
-        test_df
-        .loc[
-            sample_idx,
-            metadata_columns
-        ]
-        .reset_index(drop=True)
-        .copy()
-    )
-
-    # Add actual model prediction information.
-    sample_metadata[
-        "predicted_label"
-    ] = y_pred_sample
-
-    sample_metadata[
-        "attack_probability"
-    ] = y_proba_sample
-
-    sample_metadata_file = (
-        OUTPUT_DIR
-        / "shap_sample_metadata.csv"
-    )
-
-    sample_metadata.to_csv(
-        sample_metadata_file,
-        index=True
-    )
-
-    # --------------------------------------------------------
-    # Build case details
-    # --------------------------------------------------------
-
-    case_details = {}
-
-    for case_name, position in case_indices.items():
-
-        if position is None:
-
-            case_details[
-                case_name
-            ] = None
-
-            continue
-
-        case_details[
-            case_name
-        ] = {
-            "sample_position": int(
-                position
-            ),
-            "flow_id": str(
-                sample_metadata.iloc[
-                    position
-                ]["flow_id"]
-            )
-            if "flow_id"
-            in sample_metadata.columns
-            else None,
-            "actual_label": int(
-                y_sample.iloc[position]
-            ),
-            "predicted_label": int(
-                y_pred_sample[position]
-            ),
-            "attack_probability": float(
-                y_proba_sample[position]
-            ),
-        }
+        print(
+            "  Global SHAP outputs only."
+        )
 
     # --------------------------------------------------------
     # Summary JSON
@@ -1346,165 +1957,172 @@ def main():
 
     summary = {
 
-        "model": "RandomForestClassifier",
+        "model":
+            "RandomForestClassifier",
 
-        "model_path": str(
-            config.RANDOM_FOREST_MODEL_FILE
-        ),
+        "model_path":
+            str(
+                config.RANDOM_FOREST_MODEL_FILE
+            ),
 
-        "shap_version": shap.__version__,
+        "test_dataset":
+            str(
+                config.TEST_DATASET_FILE
+            ),
 
-        "sample_size": int(
-            sample_size
-        ),
+        "shap_version":
+            shap.__version__,
 
-        "random_state": int(
-            RANDOM_STATE
-        ),
+        "sample_size":
+            int(
+                sample_size
+            ),
 
-        "n_features": int(
-            len(config.ML_FEATURES)
-        ),
+        "random_state":
+            RANDOM_STATE,
 
-        "class_explained": "Attack",
+        "feature_count":
+            len(
+                config.ML_FEATURES
+            ),
 
-        "attack_class_index": int(
-            ATTACK_CLASS_INDEX
-        ),
+        "attack_label":
+            int(
+                config.LABEL_ATTACK
+            ),
 
-        "nan_cells_in_sample": int(
-            nan_cells_in_sample
-        ),
+        "attack_class_index":
+            int(
+                attack_class_index
+            ),
 
-        "nan_policy": (
-            "NaN retained as-is; "
-            "no imputation"
-        ),
+        "nan_policy":
+            "NaN retained; no imputation",
 
-        "imputation_used": False,
-
-        "shap_matrix_shape": [
-            int(value)
-            for value in shap_values_attack.shape
-        ],
+        "nan_cells_in_sample":
+            nan_cells_in_sample,
 
         "additivity_check": {
 
-            "passed": bool(
-                additivity_passed
-            ),
+            "passed":
+                bool(
+                    additivity_passed
+                ),
 
-            "tolerance": 1e-3,
+            "tolerance":
+                ADDITIVITY_TOLERANCE,
 
-            "max_discrepancy": float(
-                max_discrepancy
-            ),
+            "max_discrepancy":
+                max_discrepancy,
 
-            "mean_discrepancy": float(
-                mean_discrepancy
-            ),
+            "mean_discrepancy":
+                mean_discrepancy,
         },
 
-        "top_10_features": {
-            str(feature): float(value)
+        "top_features": {
+
+            str(
+                feature
+            ):
+                float(
+                    value
+                )
+
             for feature, value
-            in importance.head(10).items()
+            in importance
+            .head(
+                min(
+                    10,
+                    len(
+                        importance
+                    )
+                )
+            )
+            .items()
         },
 
-        "case_examples": case_details,
-
-        "output_files": sorted(
-            path.name
-            for path in OUTPUT_DIR.glob("*")
-        ),
+        "local_explanation":
+            local_summary,
     }
 
     summary_file = (
         OUTPUT_DIR
-        / "shap_explanation_summary.json"
+        / "shap_summary.json"
     )
 
     with open(
         summary_file,
         "w",
-        encoding="utf-8"
+        encoding="utf-8",
     ) as file:
 
         json.dump(
             summary,
             file,
-            indent=2
+            indent=2,
         )
+
+    print(
+        f"  Summary         : "
+        f"{summary_file}"
+    )
 
     # ========================================================
     # Final
     # ========================================================
 
-    print(
-        "\n" + "=" * 70
+    print_section(
+        "SHAP EXPLAINABILITY COMPLETE"
     )
 
     print(
-        "SHAP EXPLAINABILITY COMPLETE - PASS"
+        f"Model           : "
+        f"{config.RANDOM_FOREST_MODEL_FILE}"
     )
 
     print(
-        "=" * 70
+        f"Test rows       : "
+        f"{len(X_test):,}"
     )
 
     print(
-        f"  SHAP version       : "
-        f"{shap.__version__}"
-    )
-
-    print(
-        f"  Test rows          : "
-        f"{len(test_df):,}"
-    )
-
-    print(
-        f"  SHAP sample        : "
+        f"SHAP sample     : "
         f"{sample_size:,}"
     )
 
     print(
-        f"  Features explained : "
+        f"Features        : "
         f"{len(config.ML_FEATURES)}"
     )
 
     print(
-        f"  NaN cells          : "
-        f"{nan_cells_in_sample:,}"
+        f"Attack class    : "
+        f"{config.LABEL_ATTACK}"
     )
 
     print(
-        f"  Imputation used    : "
-        f"False"
+        f"Class index     : "
+        f"{attack_class_index}"
     )
 
     print(
-        f"  Additivity check   : "
-        f"PASSED"
+        f"NaN imputation : "
+        f"None"
     )
 
     print(
-        f"  Max discrepancy    : "
-        f"{max_discrepancy:.8f}"
+        f"Additivity      : "
+        f"PASS"
     )
 
     print(
-        f"  Output directory   : "
+        f"Output          : "
         f"{OUTPUT_DIR}"
     )
 
-    print(
-        f"  Summary file       : "
-        f"{summary_file}"
-    )
 
-    print(
-        "=" * 70
-    )
+# ============================================================
 
 if __name__ == "__main__":
+
     main()

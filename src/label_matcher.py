@@ -57,9 +57,7 @@ UTC_TO_CSV_LOCAL_HOURS = -3
 MINUTE_TOLERANCE = 1
 
 # Temporary columns for the canonical key; removed before saving.
-CKEY_COLUMNS = [
-    "ckey_ip1", "ckey_port1", "ckey_ip2", "ckey_port2", "ckey_proto",
-]
+CKEY_COLUMNS = ["ckey_ip1", "ckey_port1", "ckey_ip2", "ckey_port2", "ckey_proto",]
 
 # Canonical key construction
 def build_canonical_columns(df, ip1_col, port1_col, ip2_col, port2_col, proto_col):

@@ -33,13 +33,28 @@ An Explainable and Robust L2-L4 Header and Flow-Based Intrusion Detection System
 10. split_dataset.py
 11. train_model.py --> model produced at here
 12. shap_explain.py
+-- analysing
 13. analyze_prediction_errors.py
 14. analyze_integrity_rules.py
 15. analyze_l4_checksum.py
 16. integrity_checker.py 
 17. inspect_s2.py 可以删掉
 18. analyze_integrity_results.py 
+-- start robustness testing
 19. robustness_evaluation.py
+-- fixing the cause of high FN/FP results
 20. robust_train_model.py
+-- after lower the ttl features but others not solved yet
 21. robust_train_model_v2.py
+-- analysing port and flow features
 22. compare_prediction_transitions.py
+23. analyze_error_profiles.py
+24. analyze_rst_overlap.py 
+25. analyze_feature_dependency.py 
+26. analyze_port_robustness.py
+27. analyze_dst_port_breakdown.py
+28. analyze_port_label_distribution.py
+29. debug_pcap_timestamp.py 
+30. verify_cic2017_inputs.py
+31. test_timestamp_alignment.py
+32. merge_label_csvs.py

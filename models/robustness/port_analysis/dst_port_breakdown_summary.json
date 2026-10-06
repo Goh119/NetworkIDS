@@ -1,0 +1,10 @@
+{
+  "test_rows": 214255,
+  "clean_accuracy": 0.994441203239131,
+  "attack_sample_size": 2000,
+  "benign_sample_size": 2000,
+  "overall_attack_evasion_rate_percent": 58.45,
+  "overall_benign_induction_rate_percent": 0.0,
+  "random_state": 42,
+  "sample_size_per_class": 2000
+}
