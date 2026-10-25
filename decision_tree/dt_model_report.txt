@@ -1,0 +1,114 @@
+NetworkIDS - Decision Tree Training Report
+======================================================================
+
+Model Configuration
+----------------------------------------------------------------------
+Model              : DecisionTreeClassifier
+criterion          : gini
+max_depth          : 20
+min_samples_split  : 2
+min_samples_leaf   : 1
+class_weight       : balanced
+random_state       : 42
+scikit-learn       : 1.9.1
+ML feature count   : 42
+
+Comparison Purpose
+----------------------------------------------------------------------
+The Decision Tree is evaluated as a single-tree baseline against the primary Random Forest. The same training dataset, held-out test dataset, ML feature set, binary labels, class weighting, and maximum tree depth are used where applicable to support a controlled model comparison.
+
+Label Configuration
+----------------------------------------------------------------------
+Benign            : 0
+Attack            : 1
+
+Dataset
+----------------------------------------------------------------------
+Training file      : C:\FYP\NetworkIDS\data\train\training_dataset.csv
+Test file          : C:\FYP\NetworkIDS\data\test\test_multiday.csv
+Training rows      : 3,484,498
+Test rows          : 745,724
+Evaluation         : Predefined held-out test dataset; test data was not used for model fitting.
+
+Train Label Distribution
+----------------------------------------------------------------------
+0 Benign       2,291,533
+1 Attack       1,192,965
+
+Test Label Distribution
+----------------------------------------------------------------------
+0 Benign         567,230
+1 Attack         178,494
+
+Classification Metrics
+----------------------------------------------------------------------
+Accuracy            : 0.985535
+Precision           : 0.948331
+Recall              : 0.993708
+F1-score            : 0.970489
+AUC-ROC             : 0.995322
+False Positive Rate : 0.017037
+False Negative Rate : 0.006292
+
+Confusion Matrix
+----------------------------------------------------------------------
+                 Predicted
+                 Benign     Attack    
+Actual Benign      557,566      9,664
+Actual Attack        1,123    177,371
+
+Classification Report
+----------------------------------------------------------------------
+              precision    recall  f1-score   support
+
+      Benign   0.997990  0.982963  0.990419    567230
+      Attack   0.948331  0.993708  0.970489    178494
+
+    accuracy                       0.985535    745724
+   macro avg   0.973160  0.988336  0.980454    745724
+weighted avg   0.986104  0.985535  0.985649    745724
+
+Top Gini Feature Importances
+----------------------------------------------------------------------
+ 1. rst_count                           0.367036
+ 2. ip_total_length_mean                0.201069
+ 3. ttl_mean                            0.120876
+ 4. dst_port                            0.052426
+ 5. ip_id_mean                          0.047584
+ 6. tcp_header_length_mean              0.046193
+ 7. tcp_window_mean                     0.032751
+ 8. frame_length_mean                   0.029930
+ 9. ack_count                           0.028688
+10. src_port                            0.024600
+11. reverse_byte_count                  0.011506
+12. syn_ack_seen                        0.011406
+13. ip_dscp                             0.006700
+14. syn_count                           0.004967
+15. iat_min                             0.002591
+16. forward_byte_count                  0.002296
+17. iat_std                             0.002092
+18. fin_count                           0.001554
+19. byte_rate                           0.001445
+20. iat_max                             0.001401
+21. flow_duration                       0.001137
+22. iat_mean                            0.000670
+23. flow_byte_count                     0.000368
+24. forward_packet_count                0.000231
+25. psh_count                           0.000165
+26. ip_df                               0.000109
+27. syn_seen                            0.000074
+28. l4_checksum_valid                   0.000065
+29. ack_after_syn_ack                   0.000026
+30. flow_packet_count                   0.000017
+31. reverse_packet_count                0.000016
+32. flow_direction                      0.000012
+33. eth_type                            0.000000
+34. ip_version                          0.000000
+35. ip_ecn                              0.000000
+36. vlan_id                             0.000000
+37. vlan_priority                       0.000000
+38. ip_protocol                         0.000000
+39. ip_header_length                    0.000000
+40. fragment_offset                     0.000000
+41. ip_checksum_valid                   0.000000
+42. ip_mf                               0.000000

@@ -4,17 +4,51 @@ shap_explain.py
 NetworkIDS - SHAP explainability for the primary trained
 Random Forest classifier.
 
-Primary input:
-    config.TEST_DATASET_FILE
-    config.RANDOM_FOREST_MODEL_FILE
+============================================================
+TEST SCOPE
+============================================================
 
-Primary outputs:
-    models/shap/
-        global_importance.csv
-        global_importance_bar.png
-        global_beeswarm.png
-        local_waterfall.png              (optional)
-        shap_summary.json
+The SHAP test scope is NOT limited to config.TEST_DATASET_FILE.
+
+Instead, this script uses the project's unseen test scope:
+
+    data/test/
+
+All flow-level CSV files matching:
+
+    *_flow.csv
+
+are included.
+
+In addition:
+
+    data/test/test_multiday.csv
+
+is included through:
+
+    config.TEST_ADDITIONAL_FLOW_FILES
+
+IMPORTANT:
+
+A filename containing "train" is NOT excluded.
+
+The project defines the entire data/test directory as
+unseen test data.
+
+Packet-level files such as:
+
+    *_packets.csv
+
+are automatically excluded because SHAP operates on the
+flow-level Random Forest feature vector.
+
+============================================================
+MODEL
+============================================================
+
+Primary model:
+
+    config.RANDOM_FOREST_MODEL_FILE
 
 The SHAP feature set is defined entirely by:
 
@@ -23,7 +57,7 @@ The SHAP feature set is defined entirely by:
 The number of ML features is dynamic and is NOT hard-coded.
 
 ============================================================
-Classification
+CLASSIFICATION
 ============================================================
 
 The Random Forest performs binary classification using:
@@ -35,20 +69,47 @@ The Attack probability column is determined from:
 
     model.classes_
 
-The script does NOT assume that the Attack class is always
-stored at probability column index 1.
+The script does NOT assume that Attack is always at
+probability column index 1.
 
 ============================================================
-Missing-value policy
+GROUND-TRUTH LABEL POLICY
 ============================================================
 
-The Random Forest was trained using the original feature
-representation where protocol-specific unavailable values
-remain NaN.
+The data/test directory contains unseen inference datasets.
+
+Some flow CSV files contain:
+
+    label
+
+while others do not have ground-truth labels.
 
 Therefore:
 
-    NaN values are retained.
+    label is OPTIONAL.
+
+SHAP does NOT require ground truth in order to explain a
+Random Forest prediction.
+
+If a dataset contains label:
+
+    Actual label is preserved and can be shown in a local
+    explanation.
+
+If a dataset does not contain label:
+
+    label = missing
+    Actual = Unknown
+
+Prediction, P(Attack), SHAP feature contributions, global
+importance, beeswarm plots, and local waterfall explanations
+still work normally.
+
+============================================================
+MISSING-VALUE POLICY
+============================================================
+
+NaN values are retained.
 
 No:
 
@@ -58,80 +119,72 @@ and no:
 
     median imputation
 
-is performed by this script.
+is performed.
 
 SHAP receives the same feature representation used by the
 Random Forest model.
 
 ============================================================
-Global SHAP
+GLOBAL SHAP
 ============================================================
 
-A reproducible sample is selected from the held-out test set.
+A reproducible sample is selected from the complete unseen
+test scope.
 
 Default:
 
-    sample size = 5,000
+    sample size = 500
     random state = 42
 
-Global SHAP outputs:
+Global outputs:
 
-    global_importance.csv
-
-        Mean absolute SHAP value for every configured feature.
-
-    global_importance_bar.png
-
-        Global feature-importance visualization.
-
-    global_beeswarm.png
-
-        Feature-value direction and SHAP impact visualization.
+    models/shap/global_importance.csv
+    models/shap/global_importance_bar.png
+    models/shap/global_beeswarm.png
+    models/shap/shap_summary.json
 
 ============================================================
-Local SHAP
+LOCAL SHAP
 ============================================================
 
-A local waterfall explanation can optionally be generated for
-one row in the held-out test dataset.
-
-Example:
+Optional:
 
     python src/shap_explain.py --local-row 100
 
-The value refers to the zero-based row position in
-test_multiday.csv.
+The row number refers to the zero-based row position in the
+combined unseen test scope.
 
-The local explanation also preserves traceability metadata:
+The local explanation preserves where available:
 
+    dataset_file
+    day
     flow_id
     timestamp
     src_ip
     dst_ip
     src_port
     dst_port
+    label_available
 
-The metadata is used only for investigation / dashboard display.
+These metadata fields are used only for investigation /
+dashboard traceability.
 
-It is NOT included in the Random Forest feature vector and
-does NOT contribute to SHAP values.
-
-If --local-row is not provided, only global SHAP outputs are
-generated.
+They do NOT contribute additional features to the Random
+Forest.
 
 ============================================================
-Usage
+USAGE
 ============================================================
 
-Global explanation:
+Global SHAP:
 
     python src/shap_explain.py
 
-Custom SHAP sample size:
+Custom sample size:
 
-    python src/shap_explain.py --sample-size 3000
+    python src/shap_explain.py --sample-size 1000
 
-Global + local explanation:
+Global + local:
 
     python src/shap_explain.py --local-row 100
 """
@@ -179,35 +232,21 @@ OUTPUT_DIR = (
     / "shap"
 )
 
-TEST_FILE = (
-    config.TEST_DATASET_FILE
-)
-
 DEFAULT_SAMPLE_SIZE = 500
 
 RANDOM_STATE = 42
 
 FEATURE_DTYPE = np.float32
 
-LABEL_DTYPE = np.int8
-
 ADDITIVITY_TOLERANCE = 1e-3
 
 
 # ============================================================
-# ==================== CHANGED / ADDED ========================
+# Local metadata
 #
-# Metadata required to trace a local SHAP explanation back to
-# the original network flow.
+# These columns are required for normal flow traceability.
 #
-# IMPORTANT:
-#
-# These fields are NOT Random Forest input features.
-# They are loaded only for local explanation / dashboard
-# context.
-#
-# src_port and dst_port are already part of ML_FEATURES, so
-# they do not need to be repeated here.
+# They are NOT ML features.
 # ============================================================
 
 LOCAL_METADATA_COLUMNS = [
@@ -215,6 +254,20 @@ LOCAL_METADATA_COLUMNS = [
     "timestamp",
     "src_ip",
     "dst_ip",
+]
+
+
+# ============================================================
+# Optional metadata
+#
+# test_multiday.csv contains "day", but most external unseen
+# flow files do not.
+#
+# Therefore "day" must NOT be mandatory.
+# ============================================================
+
+OPTIONAL_METADATA_COLUMNS = [
+    "day",
 ]
 
 
@@ -251,7 +304,19 @@ def label_to_text(
 ):
     """
     Convert configured numeric labels into readable names.
+
+    None / missing labels are returned as Unknown.
     """
+
+    if label is None:
+
+        return "Unknown"
+
+    if pd.isna(
+        label
+    ):
+
+        return "Unknown"
 
     label = int(
         label
@@ -282,7 +347,7 @@ def label_to_text(
 
 def load_model():
     """
-    Load the bare trained Random Forest model.
+    Load the trained Random Forest model.
     """
 
     model_path = Path(
@@ -309,58 +374,195 @@ def load_model():
 
 
 # ============================================================
+# Discover unseen test flow files
+# ============================================================
+
+def discover_test_files():
+    """
+    Discover all flow-level CSV files belonging to the
+    project's unseen test scope.
+
+    Included:
+
+        data/test/*_flow.csv
+
+    plus:
+
+        config.TEST_ADDITIONAL_FLOW_FILES
+
+    IMPORTANT:
+
+    Files containing "train" are NOT excluded.
+
+    Packet files are excluded automatically because they
+    normally end with "_packets.csv" and therefore do not
+    match "*_flow.csv".
+    """
+
+    test_dir = Path(
+        config.TEST_DIR
+    )
+
+    if not test_dir.exists():
+
+        raise FileNotFoundError(
+            "Test directory not found:\n"
+            f"{test_dir}"
+        )
+
+    test_flow_glob = getattr(
+        config,
+        "TEST_FLOW_GLOB",
+        "*_flow.csv",
+    )
+
+    discovered = []
+
+    # --------------------------------------------------------
+    # Main flow-file discovery
+    # --------------------------------------------------------
+
+    for path in sorted(
+        test_dir.glob(
+            test_flow_glob
+        )
+    ):
+
+        if path.is_file():
+
+            discovered.append(
+                path.resolve()
+            )
+
+    # --------------------------------------------------------
+    # Additional explicitly configured flow datasets
+    # --------------------------------------------------------
+
+    additional_files = getattr(
+        config,
+        "TEST_ADDITIONAL_FLOW_FILES",
+        [],
+    )
+
+    for path in additional_files:
+
+        path = Path(
+            path
+        )
+
+        if not path.is_absolute():
+
+            path = (
+                Path(
+                    config.PROJECT_ROOT
+                )
+                / path
+            )
+
+        if not path.exists():
+
+            raise FileNotFoundError(
+                "Configured additional test flow dataset "
+                "does not exist:\n"
+                f"{path}"
+            )
+
+        if not path.is_file():
+
+            raise ValueError(
+                "Configured additional test dataset "
+                "is not a file:\n"
+                f"{path}"
+            )
+
+        discovered.append(
+            path.resolve()
+        )
+
+    # --------------------------------------------------------
+    # Remove duplicates
+    # --------------------------------------------------------
+
+    unique_files = []
+
+    seen = set()
+
+    for path in discovered:
+
+        key = str(
+            path
+        ).lower()
+
+        if key not in seen:
+
+            seen.add(
+                key
+            )
+
+            unique_files.append(
+                path
+            )
+
+    unique_files = sorted(
+        unique_files,
+        key=lambda p: str(
+            p
+        ).lower(),
+    )
+
+    if not unique_files:
+
+        raise FileNotFoundError(
+            "No unseen test flow CSV files were found.\n"
+            f"Test directory: {test_dir}\n"
+            f"Pattern      : {test_flow_glob}"
+        )
+
+    return unique_files
+
+
+# ============================================================
 # Dataset loading
 # ============================================================
 
-def load_test_dataset(
+def load_single_test_dataset(
     path,
 ):
     """
-    Load the columns required for SHAP and local flow
-    traceability.
+    Load one flow-level unseen test CSV.
 
-    Loaded model columns:
+    Required:
 
+        LOCAL_METADATA_COLUMNS
         config.ML_FEATURES
+
+    Optional:
+
         config.LABEL_COLUMN
+        OPTIONAL_METADATA_COLUMNS
 
-    Loaded metadata columns:
-
-        flow_id
-        timestamp
-        src_ip
-        dst_ip
-
-    Metadata fields are NOT Random Forest input features.
+    Ground-truth labels are NOT required for SHAP.
     """
 
     path = Path(
         path
     )
 
-    if not path.exists():
+    print()
 
-        raise FileNotFoundError(
-            "Test dataset not found:\n"
-            f"{path}"
-        )
+    print(
+        f"  Loading: "
+        f"{path.name}"
+    )
 
     # ========================================================
-    # ==================== CHANGED / ADDED ====================
-    #
-    # Read metadata together with model features so local SHAP
-    # results can be traced back to the original flow.
+    # Required model + traceability columns
     # ========================================================
 
     required_columns = [
         *LOCAL_METADATA_COLUMNS,
         *config.ML_FEATURES,
-        config.LABEL_COLUMN,
     ]
-
-    # --------------------------------------------------------
-    # Remove accidental duplicates while preserving order.
-    # --------------------------------------------------------
 
     required_columns = list(
         dict.fromkeys(
@@ -368,14 +570,22 @@ def load_test_dataset(
         )
     )
 
-    # --------------------------------------------------------
-    # Validate CSV header first
-    # --------------------------------------------------------
+    # ========================================================
+    # Read header first
+    # ========================================================
 
     header = pd.read_csv(
         path,
         nrows=0,
     )
+
+    header_columns = list(
+        header.columns
+    )
+
+    # ========================================================
+    # Validate required columns
+    # ========================================================
 
     missing = [
 
@@ -383,24 +593,68 @@ def load_test_dataset(
 
         for column in required_columns
 
-        if column not in header.columns
+        if column not in header_columns
     ]
 
     if missing:
 
         raise ValueError(
-            "Test dataset is missing required columns:\n"
+            "Dataset is missing required columns:\n"
+            f"File: {path}\n"
             + "\n".join(
                 f"  - {column}"
                 for column in missing
             )
         )
 
-    # --------------------------------------------------------
-    # Explicit dtypes only for model features / label.
+    # ========================================================
+    # Ground-truth label availability
+    # ========================================================
+
+    label_available = (
+        config.LABEL_COLUMN
+        in header_columns
+    )
+
+    # ========================================================
+    # Optional metadata present in this file
+    # ========================================================
+
+    optional_metadata_present = [
+
+        column
+
+        for column in OPTIONAL_METADATA_COLUMNS
+
+        if column in header_columns
+    ]
+
+    # ========================================================
+    # Columns to load
+    # ========================================================
+
+    columns_to_load = [
+        *required_columns,
+        *optional_metadata_present,
+    ]
+
+    if label_available:
+
+        columns_to_load.append(
+            config.LABEL_COLUMN
+        )
+
+    columns_to_load = list(
+        dict.fromkeys(
+            columns_to_load
+        )
+    )
+
+    # ========================================================
+    # Explicit dtype only for ML features.
     #
-    # Metadata keeps its natural CSV representation.
-    # --------------------------------------------------------
+    # NaN values remain NaN.
+    # ========================================================
 
     dtype_map = {
 
@@ -411,36 +665,259 @@ def load_test_dataset(
         in config.ML_FEATURES
     }
 
-    dtype_map[
-        config.LABEL_COLUMN
-    ] = LABEL_DTYPE
-
-    # --------------------------------------------------------
-    # Load only required columns
-    # --------------------------------------------------------
+    # ========================================================
+    # Load dataset
+    # ========================================================
 
     df = pd.read_csv(
-
         path,
-
-        usecols=required_columns,
-
+        usecols=columns_to_load,
         dtype=dtype_map,
-
         low_memory=False,
     )
 
+    # ========================================================
+    # Ground-truth label handling
+    #
+    # Use pandas nullable Int8 because missing ground truth
+    # cannot be represented by numpy int8.
+    # ========================================================
+
+    if label_available:
+
+        label_values = pd.to_numeric(
+            df[
+                config.LABEL_COLUMN
+            ],
+            errors="coerce",
+        )
+
+        df[
+            config.LABEL_COLUMN
+        ] = label_values.astype(
+            "Int8"
+        )
+
+        invalid_label_mask = (
+            df[
+                config.LABEL_COLUMN
+            ]
+            .notna()
+            &
+            ~df[
+                config.LABEL_COLUMN
+            ]
+            .isin(
+                [
+                    config.LABEL_BENIGN,
+                    config.LABEL_ATTACK,
+                ]
+            )
+        )
+
+        if invalid_label_mask.any():
+
+            invalid_values = (
+                df.loc[
+                    invalid_label_mask,
+                    config.LABEL_COLUMN,
+                ]
+                .drop_duplicates()
+                .tolist()
+            )
+
+            raise ValueError(
+                "Unexpected ground-truth labels detected.\n"
+                f"File: {path}\n"
+                f"Values: {invalid_values}"
+            )
+
+    else:
+
+        df[
+            config.LABEL_COLUMN
+        ] = pd.Series(
+            pd.NA,
+            index=df.index,
+            dtype="Int8",
+        )
+
+    # ========================================================
+    # Optional metadata normalization
+    #
+    # Ensure every combined dataframe contains the same
+    # optional metadata columns.
+    # ========================================================
+
+    for column in OPTIONAL_METADATA_COLUMNS:
+
+        if column not in df.columns:
+
+            df[
+                column
+            ] = pd.NA
+
+    # ========================================================
+    # Preserve source dataset identity
+    # ========================================================
+
+    df.insert(
+        0,
+        "dataset_file",
+        path.name,
+    )
+
+    df.insert(
+        1,
+        "label_available",
+        bool(
+            label_available
+        ),
+    )
+
     print(
-        f"  Test rows: "
+        f"    Rows              : "
         f"{len(df):,}"
     )
 
     print(
-        f"  Traceability metadata: "
-        f"{', '.join(LOCAL_METADATA_COLUMNS)}"
+        f"    Ground-truth label: "
+        f"{'YES' if label_available else 'NO'}"
     )
 
+    if label_available:
+
+        labelled_rows = int(
+            df[
+                config.LABEL_COLUMN
+            ]
+            .notna()
+            .sum()
+        )
+
+        print(
+            f"    Labelled rows     : "
+            f"{labelled_rows:,}"
+        )
+
     return df
+
+
+# ============================================================
+
+def load_test_scope(
+    test_files,
+):
+    """
+    Load and combine all unseen flow-level test datasets.
+    """
+
+    print(
+        f"  Test datasets discovered: "
+        f"{len(test_files)}"
+    )
+
+    for index, path in enumerate(
+        test_files,
+        start=1,
+    ):
+
+        print(
+            f"    [{index:>2}] "
+            f"{path.name}"
+        )
+
+    frames = []
+
+    for path in test_files:
+
+        df = load_single_test_dataset(
+            path
+        )
+
+        frames.append(
+            df
+        )
+
+    if not frames:
+
+        raise RuntimeError(
+            "No test datasets were loaded."
+        )
+
+    test_df = pd.concat(
+        frames,
+        axis=0,
+        ignore_index=True,
+    )
+
+    print()
+
+    print(
+        f"  Combined unseen test rows: "
+        f"{len(test_df):,}"
+    )
+
+    labelled_rows = int(
+        test_df[
+            config.LABEL_COLUMN
+        ]
+        .notna()
+        .sum()
+    )
+
+    unlabelled_rows = (
+        len(
+            test_df
+        )
+        - labelled_rows
+    )
+
+    labelled_datasets = int(
+        test_df[
+            [
+                "dataset_file",
+                "label_available",
+            ]
+        ]
+        .drop_duplicates(
+            subset=[
+                "dataset_file"
+            ]
+        )[
+            "label_available"
+        ]
+        .sum()
+    )
+
+    unlabelled_datasets = (
+        len(
+            test_files
+        )
+        - labelled_datasets
+    )
+
+    print(
+        f"  Labelled datasets   : "
+        f"{labelled_datasets:,}"
+    )
+
+    print(
+        f"  Unlabelled datasets : "
+        f"{unlabelled_datasets:,}"
+    )
+
+    print(
+        f"  Labelled rows       : "
+        f"{labelled_rows:,}"
+    )
+
+    print(
+        f"  Unlabelled rows     : "
+        f"{unlabelled_rows:,}"
+    )
+
+    return test_df
 
 
 # ============================================================
@@ -552,7 +1029,6 @@ def validate_features(
 
 
 # ============================================================
-# ==================== CHANGED / ADDED ========================
 # Metadata validation
 # ============================================================
 
@@ -600,9 +1076,6 @@ def validate_model_compatibility(
     """
     Ensure the trained model is compatible with the current
     config.ML_FEATURES definition.
-
-    This prevents an old model from being explained using a
-    newly modified feature list.
     """
 
     configured_features = list(
@@ -614,7 +1087,7 @@ def validate_model_compatibility(
     )
 
     # --------------------------------------------------------
-    # Number of trained features
+    # Feature count
     # --------------------------------------------------------
 
     if hasattr(
@@ -637,8 +1110,8 @@ def validate_model_compatibility(
                 f"{model_feature_count}\n"
                 f"Config defines: "
                 f"{configured_count}\n"
-                "\nRetrain the model or restore the feature "
-                "configuration used during training."
+                "\nRetrain the model or restore the exact "
+                "feature configuration used during training."
             )
 
     # --------------------------------------------------------
@@ -747,7 +1220,7 @@ def extract_attack_values(
     """
     Extract SHAP values for the configured Attack class.
 
-    Possible SHAP output formats:
+    Supported formats:
 
         (samples, features, classes)
 
@@ -755,7 +1228,7 @@ def extract_attack_values(
 
         (samples, features)
 
-    Returned shape:
+    Returns:
 
         (samples, features)
     """
@@ -999,7 +1472,6 @@ def build_row_explanation(
 
 
 # ============================================================
-# ==================== CHANGED / ADDED ========================
 # Local flow context
 # ============================================================
 
@@ -1019,13 +1491,57 @@ def build_local_flow_context(
 
     context = {
 
+        "dataset_file":
+            (
+                str(
+                    row[
+                        "dataset_file"
+                    ]
+                )
+                if pd.notna(
+                    row[
+                        "dataset_file"
+                    ]
+                )
+                else None
+            ),
+
+        "label_available":
+            bool(
+                row[
+                    "label_available"
+                ]
+            ),
+
+        "day":
+            (
+                str(
+                    row[
+                        "day"
+                    ]
+                )
+                if (
+                    "day" in test_df.columns
+                    and pd.notna(
+                        row[
+                            "day"
+                        ]
+                    )
+                )
+                else None
+            ),
+
         "flow_id":
             (
                 str(
-                    row["flow_id"]
+                    row[
+                        "flow_id"
+                    ]
                 )
                 if pd.notna(
-                    row["flow_id"]
+                    row[
+                        "flow_id"
+                    ]
                 )
                 else None
             ),
@@ -1033,10 +1549,14 @@ def build_local_flow_context(
         "timestamp":
             (
                 str(
-                    row["timestamp"]
+                    row[
+                        "timestamp"
+                    ]
                 )
                 if pd.notna(
-                    row["timestamp"]
+                    row[
+                        "timestamp"
+                    ]
                 )
                 else None
             ),
@@ -1044,10 +1564,14 @@ def build_local_flow_context(
         "src_ip":
             (
                 str(
-                    row["src_ip"]
+                    row[
+                        "src_ip"
+                    ]
                 )
                 if pd.notna(
-                    row["src_ip"]
+                    row[
+                        "src_ip"
+                    ]
                 )
                 else None
             ),
@@ -1055,17 +1579,22 @@ def build_local_flow_context(
         "dst_ip":
             (
                 str(
-                    row["dst_ip"]
+                    row[
+                        "dst_ip"
+                    ]
                 )
                 if pd.notna(
-                    row["dst_ip"]
+                    row[
+                        "dst_ip"
+                    ]
                 )
                 else None
             ),
     }
 
-    # src_port / dst_port are model features and therefore are
-    # already present in the test dataset.
+    # --------------------------------------------------------
+    # src_port / dst_port are already ML features.
+    # --------------------------------------------------------
 
     if "src_port" in test_df.columns:
 
@@ -1107,6 +1636,81 @@ def build_local_flow_context(
 
 
 # ============================================================
+# Dataset summary helper
+# ============================================================
+
+def build_dataset_summary(
+    test_df,
+):
+    """
+    Build dataset-level provenance and label-availability
+    information for shap_summary.json.
+    """
+
+    results = []
+
+    dataset_names = (
+        test_df[
+            "dataset_file"
+        ]
+        .drop_duplicates()
+        .tolist()
+    )
+
+    for dataset_name in dataset_names:
+
+        subset = test_df[
+            test_df[
+                "dataset_file"
+            ]
+            .eq(
+                dataset_name
+            )
+        ]
+
+        label_available = bool(
+            subset[
+                "label_available"
+            ]
+            .iloc[
+                0
+            ]
+        )
+
+        labelled_rows = int(
+            subset[
+                config.LABEL_COLUMN
+            ]
+            .notna()
+            .sum()
+        )
+
+        results.append(
+            {
+                "dataset_file":
+                    str(
+                        dataset_name
+                    ),
+
+                "rows":
+                    int(
+                        len(
+                            subset
+                        )
+                    ),
+
+                "label_available":
+                    label_available,
+
+                "labelled_rows":
+                    labelled_rows,
+            }
+        )
+
+    return results
+
+
+# ============================================================
 # Main
 # ============================================================
 
@@ -1125,7 +1729,7 @@ def main():
         type=int,
         default=DEFAULT_SAMPLE_SIZE,
         help=(
-            "Number of held-out test rows used for "
+            "Number of unseen test rows used for "
             "global SHAP explanation."
         ),
     )
@@ -1136,7 +1740,7 @@ def main():
         default=None,
         help=(
             "Optional zero-based row position from the "
-            "test dataset for local SHAP waterfall output."
+            "combined unseen test scope for local SHAP."
         ),
     )
 
@@ -1215,22 +1819,26 @@ def main():
     )
 
     # ========================================================
-    # 2. Load held-out test data
+    # 2. Discover + load unseen test scope
     # ========================================================
 
     print_section(
-        "[2/5] Loading held-out test dataset"
+        "[2/5] Loading unseen test scope"
     )
 
-    test_df = load_test_dataset(
-        TEST_FILE
+    test_files = (
+        discover_test_files()
+    )
+
+    test_df = (
+        load_test_scope(
+            test_files
+        )
     )
 
     validate_features(
         test_df
     )
-
-    # ==================== CHANGED / ADDED ====================
 
     validate_local_metadata(
         test_df
@@ -1251,7 +1859,7 @@ def main():
     )
 
     # ========================================================
-    # Validate optional local row
+    # Optional local row validation
     # ========================================================
 
     if (
@@ -1269,13 +1877,14 @@ def main():
         ):
 
             raise ValueError(
-                "--local-row is outside the test dataset.\n"
+                "--local-row is outside the combined "
+                "unseen test scope.\n"
                 f"Valid range: "
                 f"0 to {len(X_test) - 1}"
             )
 
     # ========================================================
-    # 3. Sample global explanation rows
+    # 3. Sample + compute SHAP
     # ========================================================
 
     print_section(
@@ -1342,7 +1951,10 @@ def main():
     )
 
     explainer = shap.TreeExplainer(
-        model, feature_perturbation="tree_path_dependent"
+        model,
+        feature_perturbation=(
+            "tree_path_dependent"
+        ),
     )
 
     print(
@@ -1485,7 +2097,7 @@ def main():
     )
 
     # --------------------------------------------------------
-    # Console output
+    # Console top features
     # --------------------------------------------------------
 
     top_count = min(
@@ -1605,7 +2217,7 @@ def main():
     plt.close()
 
     # --------------------------------------------------------
-    # Beeswarm
+    # Global beeswarm
     # --------------------------------------------------------
 
     plt.figure()
@@ -1732,17 +2344,36 @@ def main():
             )[0]
         )
 
-        actual_label = int(
+        # ====================================================
+        # Optional ground truth
+        # ====================================================
+
+        actual_value = (
             y_test.iloc[
                 local_position
             ]
         )
 
+        if pd.isna(
+            actual_value
+        ):
+
+            actual_label = None
+
+        else:
+
+            actual_label = int(
+                actual_value
+            )
+
+        actual_display = (
+            label_to_text(
+                actual_label
+            )
+        )
+
         # ====================================================
-        # ==================== CHANGED / ADDED ================
-        #
-        # Retrieve the flow identity/context separately from
-        # the model feature vector.
+        # Flow traceability
         # ====================================================
 
         flow_context = (
@@ -1785,11 +2416,6 @@ def main():
             show=False,
         )
 
-        # ====================================================
-        # ==================== CHANGED / ADDED ================
-        # Show flow_id in the waterfall title.
-        # ====================================================
-
         flow_id_display = (
             flow_context.get(
                 "flow_id"
@@ -1798,12 +2424,19 @@ def main():
             "Unknown Flow"
         )
 
+        dataset_display = (
+            flow_context.get(
+                "dataset_file"
+            )
+            or
+            "Unknown Dataset"
+        )
+
         plt.title(
             "Local SHAP Explanation\n"
-            f"Flow: "
-            f"{flow_id_display} | "
-            f"Actual: "
-            f"{label_to_text(actual_label)} | "
+            f"Dataset: {dataset_display} | "
+            f"Flow: {flow_id_display}\n"
+            f"Actual: {actual_display} | "
             f"Predicted: "
             f"{label_to_text(prediction)} | "
             f"P(Attack): "
@@ -1826,16 +2459,28 @@ def main():
         plt.close()
 
         # ====================================================
-        # ==================== CHANGED / ADDED ================
-        #
-        # Store network-flow traceability together with the
-        # local prediction information.
+        # Local summary
         # ====================================================
 
         local_summary = {
 
             "test_row":
                 local_position,
+
+            "dataset_file":
+                flow_context.get(
+                    "dataset_file"
+                ),
+
+            "label_available":
+                flow_context.get(
+                    "label_available"
+                ),
+
+            "day":
+                flow_context.get(
+                    "day"
+                ),
 
             "flow_id":
                 flow_context.get(
@@ -1871,9 +2516,7 @@ def main():
                 actual_label,
 
             "actual_label_text":
-                label_to_text(
-                    actual_label
-                ),
+                actual_display,
 
             "predicted_label":
                 prediction,
@@ -1900,6 +2543,23 @@ def main():
         )
 
         print(
+            f"  Dataset file    : "
+            f"{flow_context.get('dataset_file')}"
+        )
+
+        if (
+            flow_context.get(
+                "day"
+            )
+            is not None
+        ):
+
+            print(
+                f"  Day             : "
+                f"{flow_context.get('day')}"
+            )
+
+        print(
             f"  Flow ID         : "
             f"{flow_context.get('flow_id')}"
         )
@@ -1922,8 +2582,13 @@ def main():
         )
 
         print(
+            f"  Ground truth    : "
+            f"{'Available' if flow_context.get('label_available') else 'Unavailable'}"
+        )
+
+        print(
             f"  Actual          : "
-            f"{label_to_text(actual_label)}"
+            f"{actual_display}"
         )
 
         print(
@@ -1951,9 +2616,49 @@ def main():
             "  Global SHAP outputs only."
         )
 
-    # --------------------------------------------------------
+    # ========================================================
+    # Dataset-level label information
+    # ========================================================
+
+    dataset_summary = (
+        build_dataset_summary(
+            test_df
+        )
+    )
+
+    labelled_dataset_count = sum(
+        1
+        for item in dataset_summary
+        if item[
+            "label_available"
+        ]
+    )
+
+    unlabelled_dataset_count = (
+        len(
+            dataset_summary
+        )
+        - labelled_dataset_count
+    )
+
+    labelled_row_count = int(
+        test_df[
+            config.LABEL_COLUMN
+        ]
+        .notna()
+        .sum()
+    )
+
+    unlabelled_row_count = (
+        len(
+            test_df
+        )
+        - labelled_row_count
+    )
+
+    # ========================================================
     # Summary JSON
-    # --------------------------------------------------------
+    # ========================================================
 
     summary = {
 
@@ -1965,10 +2670,73 @@ def main():
                 config.RANDOM_FOREST_MODEL_FILE
             ),
 
-        "test_dataset":
+        "test_scope":
             str(
-                config.TEST_DATASET_FILE
+                config.TEST_DIR
             ),
+
+        "test_dataset_pattern":
+            getattr(
+                config,
+                "TEST_FLOW_GLOB",
+                "*_flow.csv",
+            ),
+
+        "additional_test_datasets":
+            [
+                str(
+                    path
+                )
+                for path
+                in getattr(
+                    config,
+                    "TEST_ADDITIONAL_FLOW_FILES",
+                    [],
+                )
+            ],
+
+        "test_dataset_files":
+            [
+                path.name
+                for path
+                in test_files
+            ],
+
+        "test_dataset_count":
+            len(
+                test_files
+            ),
+
+        "test_rows":
+            int(
+                len(
+                    test_df
+                )
+            ),
+
+        "ground_truth": {
+
+            "label_optional":
+                True,
+
+            "label_column":
+                config.LABEL_COLUMN,
+
+            "labelled_dataset_count":
+                labelled_dataset_count,
+
+            "unlabelled_dataset_count":
+                unlabelled_dataset_count,
+
+            "labelled_row_count":
+                labelled_row_count,
+
+            "unlabelled_row_count":
+                unlabelled_row_count,
+
+            "datasets":
+                dataset_summary,
+        },
 
         "shap_version":
             shap.__version__,
@@ -2001,6 +2769,12 @@ def main():
 
         "nan_cells_in_sample":
             nan_cells_in_sample,
+
+        "sampling_policy":
+            (
+                "Uniform random row sampling across the combined "
+                "unseen test flow population"
+            ),
 
         "additivity_check": {
 
@@ -2081,8 +2855,23 @@ def main():
     )
 
     print(
+        f"Test datasets   : "
+        f"{len(test_files)}"
+    )
+
+    print(
         f"Test rows       : "
         f"{len(X_test):,}"
+    )
+
+    print(
+        f"Labelled rows   : "
+        f"{labelled_row_count:,}"
+    )
+
+    print(
+        f"Unlabelled rows : "
+        f"{unlabelled_row_count:,}"
     )
 
     print(
@@ -2106,13 +2895,15 @@ def main():
     )
 
     print(
-        f"NaN imputation : "
-        f"None"
+        "NaN imputation : None"
     )
 
     print(
-        f"Additivity      : "
-        f"PASS"
+        "Ground truth    : Optional"
+    )
+
+    print(
+        "Additivity      : PASS"
     )
 
     print(

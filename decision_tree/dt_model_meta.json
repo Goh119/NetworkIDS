@@ -1,0 +1,114 @@
+{
+  "model_type": "DecisionTreeClassifier",
+  "comparison_role": "Single-tree baseline for Random Forest comparison",
+  "feature_count": 42,
+  "features": [
+    "frame_length_mean",
+    "eth_type",
+    "vlan_id",
+    "vlan_priority",
+    "ip_version",
+    "ip_dscp",
+    "ip_ecn",
+    "ip_total_length_mean",
+    "ip_id_mean",
+    "ip_df",
+    "ip_mf",
+    "fragment_offset",
+    "ttl_mean",
+    "ip_protocol",
+    "ip_header_length",
+    "ip_checksum_valid",
+    "src_port",
+    "dst_port",
+    "tcp_window_mean",
+    "tcp_header_length_mean",
+    "l4_checksum_valid",
+    "flow_duration",
+    "flow_packet_count",
+    "flow_byte_count",
+    "forward_packet_count",
+    "reverse_packet_count",
+    "forward_byte_count",
+    "reverse_byte_count",
+    "iat_min",
+    "iat_mean",
+    "iat_max",
+    "iat_std",
+    "byte_rate",
+    "flow_direction",
+    "syn_count",
+    "ack_count",
+    "fin_count",
+    "rst_count",
+    "psh_count",
+    "syn_seen",
+    "syn_ack_seen",
+    "ack_after_syn_ack"
+  ],
+  "label_column": "label",
+  "label_mapping": {
+    "0": "Benign",
+    "1": "Attack"
+  },
+  "model_classes": [
+    0,
+    1
+  ],
+  "parameters": {
+    "criterion": "gini",
+    "max_depth": 20,
+    "min_samples_split": 2,
+    "min_samples_leaf": 1,
+    "class_weight": "balanced",
+    "random_state": 42
+  },
+  "trained_tree": {
+    "actual_depth": 20,
+    "leaf_nodes": 5892
+  },
+  "comparison_design": {
+    "purpose": "Evaluate a single Decision Tree against the primary Random Forest.",
+    "controlled_conditions": "The Decision Tree uses the same final training dataset, held-out test dataset, 42 ML features, binary labels and class weighting as the Random Forest. max_depth=20 is also aligned with the Random Forest configuration."
+  },
+  "dataset": {
+    "train_file": "C:\\FYP\\NetworkIDS\\data\\train\\training_dataset.csv",
+    "test_file": "C:\\FYP\\NetworkIDS\\data\\test\\test_multiday.csv",
+    "train_rows": 3484498,
+    "test_rows": 745724,
+    "train_attack_rate": 0.3423635197953909,
+    "test_attack_rate": 0.2393566520589387
+  },
+  "split_strategy": "Training and evaluation use predefined CSV datasets. The held-out test dataset is not used for model fitting. The same final train and test datasets are used for the Random Forest and Decision Tree comparison.",
+  "preprocessing": {
+    "feature_dtype": "float32",
+    "label_dtype": "int8",
+    "missing_value_policy": "NaN retained; no imputation",
+    "infinite_values": "rejected"
+  },
+  "evaluation": {
+    "accuracy": 0.9855348627642398,
+    "precision": 0.9483305263720694,
+    "recall": 0.9937084719934564,
+    "f1": 0.9704893455785998,
+    "auc_roc": 0.9953217700110941,
+    "fpr": 0.017037180685083652,
+    "fnr": 0.006291528006543637,
+    "confusion_matrix": [
+      [
+        557566,
+        9664
+      ],
+      [
+        1123,
+        177371
+      ]
+    ]
+  },
+  "software": {
+    "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+    "scikit_learn": "1.9.1",
+    "numpy": "2.5.3",
+    "pandas": "3.0.5"
+  }
+}

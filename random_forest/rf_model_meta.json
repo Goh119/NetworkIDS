@@ -66,14 +66,14 @@
     "rationale": "For the SOC-oriented IDS use case, missed attacks are considered more critical than false-positive alerts. False positives can be reviewed through analyst triage."
   },
   "dataset": {
-    "train_file": "C:\\FYP\\NetworkIDS\\data\\processed\\multiday_split\\train_multiday.csv",
-    "test_file": "C:\\FYP\\NetworkIDS\\data\\processed\\multiday_split\\test_multiday.csv",
-    "train_rows": 2982890,
+    "train_file": "C:\\FYP\\NetworkIDS\\data\\train\\training_dataset.csv",
+    "test_file": "C:\\FYP\\NetworkIDS\\data\\test\\test_multiday.csv",
+    "train_rows": 3484498,
     "test_rows": 745724,
-    "train_attack_rate": 0.23935679827281597,
+    "train_attack_rate": 0.3423635197953909,
     "test_attack_rate": 0.2393566520589387
   },
-  "split_strategy": "Five-day merged dataset; identical ML-feature-vector grouped StratifiedGroupKFold; first fold used as fixed holdout test set.",
+  "split_strategy": "Training and evaluation use predefined CSV datasets. The held-out test dataset is not used for model fitting. The original CIC-IDS2017 train/test split was created using grouped identical ML-feature vectors with StratifiedGroupKFold; additional selected labeled training datasets may be included through the supplied training file.",
   "preprocessing": {
     "feature_dtype": "float32",
     "label_dtype": "int8",
@@ -81,21 +81,21 @@
     "infinite_values": "rejected"
   },
   "evaluation": {
-    "accuracy": 0.9839149604947675,
-    "precision": 0.9377520704614171,
-    "recall": 0.9991204186135109,
-    "f1": 0.96746403955852,
-    "auc_roc": 0.9985432743623884,
-    "fpr": 0.02086984115790773,
-    "fnr": 0.0008795813864891817,
+    "accuracy": 0.9839350751752659,
+    "precision": 0.9384716663155678,
+    "recall": 0.9983360785236478,
+    "f1": 0.9674787037087308,
+    "auc_roc": 0.9984828425586083,
+    "fpr": 0.020596583396505826,
+    "fnr": 0.0016639214763521464,
     "confusion_matrix": [
       [
-        555392,
-        11838
+        555547,
+        11683
       ],
       [
-        157,
-        178337
+        297,
+        178197
       ]
     ]
   },

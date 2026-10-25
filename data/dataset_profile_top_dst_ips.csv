@@ -1,0 +1,1219 @@
+location,flow_file,attack_family,rank,dst_ip,flow_count,percent_of_file
+processed,attack_bruteforce_dictionary-ssh_ap_flow.csv,Bruteforce,1,192.168.1.205,148,32.38512
+processed,attack_bruteforce_dictionary-ssh_ap_flow.csv,Bruteforce,2,8.8.8.8,77,16.849015
+processed,attack_bruteforce_dictionary-ssh_ap_flow.csv,Bruteforce,3,8.8.4.4,75,16.411379
+processed,attack_bruteforce_dictionary-ssh_ap_flow.csv,Bruteforce,4,192.168.1.100,71,15.536105
+processed,attack_bruteforce_dictionary-ssh_ap_flow.csv,Bruteforce,5,255.255.255.255,15,3.282276
+processed,attack_bruteforce_dictionary-ssh_ap_flow.csv,Bruteforce,6,192.168.1.193,14,3.063457
+processed,attack_bruteforce_dictionary-ssh_ap_flow.csv,Bruteforce,7,192.168.1.1,9,1.969365
+processed,attack_bruteforce_dictionary-ssh_ap_flow.csv,Bruteforce,8,192.168.1.52,7,1.531729
+processed,attack_bruteforce_dictionary-ssh_ap_flow.csv,Bruteforce,9,224.0.0.251,7,1.531729
+processed,attack_bruteforce_dictionary-ssh_ap_flow.csv,Bruteforce,10,192.168.1.255,4,0.875274
+processed,attack_bruteforce_dictionary-ssh_ap_flow.csv,Bruteforce,11,239.255.255.250,3,0.656455
+processed,attack_bruteforce_dictionary-ssh_ap_flow.csv,Bruteforce,12,54.188.109.168,2,0.437637
+processed,attack_bruteforce_dictionary-ssh_ap_flow.csv,Bruteforce,13,52.12.196.80,2,0.437637
+processed,attack_bruteforce_dictionary-ssh_ap_flow.csv,Bruteforce,14,35.162.13.26,2,0.437637
+processed,attack_bruteforce_dictionary-ssh_ap_flow.csv,Bruteforce,15,34.213.103.51,2,0.437637
+processed,attack_bruteforce_dictionary-ssh_ap_flow.csv,Bruteforce,16,192.168.1.87,1,0.218818
+processed,attack_bruteforce_dictionary-ssh_ap_flow.csv,Bruteforce,17,54.69.37.156,1,0.218818
+processed,attack_bruteforce_dictionary-ssh_ap_flow.csv,Bruteforce,18,129.146.120.172,1,0.218818
+processed,attack_bruteforce_dictionary-ssh_ap_flow.csv,Bruteforce,19,192.168.230.7,1,0.218818
+processed,attack_bruteforce_dictionary-ssh_ap_flow.csv,Bruteforce,20,129.146.59.211,1,0.218818
+processed,attack_bruteforce_dictionary-ssh_edge1_flow.csv,Bruteforce,1,192.168.1.193,165,33.40081
+processed,attack_bruteforce_dictionary-ssh_edge1_flow.csv,Bruteforce,2,224.0.0.251,74,14.979757
+processed,attack_bruteforce_dictionary-ssh_edge1_flow.csv,Bruteforce,3,192.168.1.195,58,11.740891
+processed,attack_bruteforce_dictionary-ssh_edge1_flow.csv,Bruteforce,4,192.168.1.100,29,5.870445
+processed,attack_bruteforce_dictionary-ssh_edge1_flow.csv,Bruteforce,5,192.168.1.52,18,3.643725
+processed,attack_bruteforce_dictionary-ssh_edge1_flow.csv,Bruteforce,6,192.168.1.1,16,3.238866
+processed,attack_bruteforce_dictionary-ssh_edge1_flow.csv,Bruteforce,7,255.255.255.255,16,3.238866
+processed,attack_bruteforce_dictionary-ssh_edge1_flow.csv,Bruteforce,8,192.168.1.255,10,2.024291
+processed,attack_bruteforce_dictionary-ssh_edge1_flow.csv,Bruteforce,9,239.255.255.250,7,1.417004
+processed,attack_bruteforce_dictionary-ssh_edge1_flow.csv,Bruteforce,10,8.8.8.8,3,0.607287
+processed,attack_bruteforce_dictionary-ssh_edge1_flow.csv,Bruteforce,11,192.168.1.55,3,0.607287
+processed,attack_bruteforce_dictionary-ssh_edge1_flow.csv,Bruteforce,12,192.168.1.54,3,0.607287
+processed,attack_bruteforce_dictionary-ssh_edge1_flow.csv,Bruteforce,13,192.168.1.205,2,0.404858
+processed,attack_bruteforce_dictionary-ssh_edge1_flow.csv,Bruteforce,14,192.168.1.23,2,0.404858
+processed,attack_bruteforce_dictionary-ssh_edge1_flow.csv,Bruteforce,15,192.168.1.85,2,0.404858
+processed,attack_bruteforce_dictionary-ssh_edge1_flow.csv,Bruteforce,16,192.168.1.92,2,0.404858
+processed,attack_bruteforce_dictionary-ssh_edge1_flow.csv,Bruteforce,17,192.168.1.21,2,0.404858
+processed,attack_bruteforce_dictionary-ssh_edge1_flow.csv,Bruteforce,18,192.168.1.14,2,0.404858
+processed,attack_bruteforce_dictionary-ssh_edge1_flow.csv,Bruteforce,19,192.168.1.80,2,0.404858
+processed,attack_bruteforce_dictionary-ssh_edge1_flow.csv,Bruteforce,20,192.168.1.81,2,0.404858
+processed,attack_bruteforce_dictionary-ssh_mqtt-broker_flow.csv,Bruteforce,1,192.168.1.193,68,30.222222
+processed,attack_bruteforce_dictionary-ssh_mqtt-broker_flow.csv,Bruteforce,2,192.168.1.100,25,11.111111
+processed,attack_bruteforce_dictionary-ssh_mqtt-broker_flow.csv,Bruteforce,3,255.255.255.255,17,7.555556
+processed,attack_bruteforce_dictionary-ssh_mqtt-broker_flow.csv,Bruteforce,4,8.8.8.8,16,7.111111
+processed,attack_bruteforce_dictionary-ssh_mqtt-broker_flow.csv,Bruteforce,5,192.168.1.52,15,6.666667
+processed,attack_bruteforce_dictionary-ssh_mqtt-broker_flow.csv,Bruteforce,6,192.168.1.1,14,6.222222
+processed,attack_bruteforce_dictionary-ssh_mqtt-broker_flow.csv,Bruteforce,7,192.168.1.255,10,4.444444
+processed,attack_bruteforce_dictionary-ssh_mqtt-broker_flow.csv,Bruteforce,8,239.255.255.250,8,3.555556
+processed,attack_bruteforce_dictionary-ssh_mqtt-broker_flow.csv,Bruteforce,9,224.0.0.251,5,2.222222
+processed,attack_bruteforce_dictionary-ssh_mqtt-broker_flow.csv,Bruteforce,10,54.39.23.64,4,1.777778
+processed,attack_bruteforce_dictionary-ssh_mqtt-broker_flow.csv,Bruteforce,11,162.159.200.1,3,1.333333
+processed,attack_bruteforce_dictionary-ssh_mqtt-broker_flow.csv,Bruteforce,12,44.230.212.240,3,1.333333
+processed,attack_bruteforce_dictionary-ssh_mqtt-broker_flow.csv,Bruteforce,13,54.69.37.156,2,0.888889
+processed,attack_bruteforce_dictionary-ssh_mqtt-broker_flow.csv,Bruteforce,14,208.81.1.244,2,0.888889
+processed,attack_bruteforce_dictionary-ssh_mqtt-broker_flow.csv,Bruteforce,15,192.168.1.55,2,0.888889
+processed,attack_bruteforce_dictionary-ssh_mqtt-broker_flow.csv,Bruteforce,16,52.12.196.80,2,0.888889
+processed,attack_bruteforce_dictionary-ssh_mqtt-broker_flow.csv,Bruteforce,17,34.213.103.51,2,0.888889
+processed,attack_bruteforce_dictionary-ssh_mqtt-broker_flow.csv,Bruteforce,18,129.146.120.172,2,0.888889
+processed,attack_bruteforce_dictionary-ssh_mqtt-broker_flow.csv,Bruteforce,19,54.188.109.168,2,0.888889
+processed,attack_bruteforce_dictionary-ssh_mqtt-broker_flow.csv,Bruteforce,20,35.162.13.26,2,0.888889
+processed,attack_bruteforce_dictionary-ssh_router_flow.csv,Bruteforce,1,192.168.1.1,764,90.414201
+processed,attack_bruteforce_dictionary-ssh_router_flow.csv,Bruteforce,2,255.255.255.255,16,1.893491
+processed,attack_bruteforce_dictionary-ssh_router_flow.csv,Bruteforce,3,192.168.1.193,14,1.656805
+processed,attack_bruteforce_dictionary-ssh_router_flow.csv,Bruteforce,4,224.0.0.251,8,0.946746
+processed,attack_bruteforce_dictionary-ssh_router_flow.csv,Bruteforce,5,192.168.1.52,7,0.828402
+processed,attack_bruteforce_dictionary-ssh_router_flow.csv,Bruteforce,6,192.168.1.255,4,0.473373
+processed,attack_bruteforce_dictionary-ssh_router_flow.csv,Bruteforce,7,239.255.255.250,3,0.35503
+processed,attack_bruteforce_dictionary-ssh_router_flow.csv,Bruteforce,8,52.12.196.80,2,0.236686
+processed,attack_bruteforce_dictionary-ssh_router_flow.csv,Bruteforce,9,35.162.13.26,2,0.236686
+processed,attack_bruteforce_dictionary-ssh_router_flow.csv,Bruteforce,10,34.213.103.51,2,0.236686
+processed,attack_bruteforce_dictionary-ssh_router_flow.csv,Bruteforce,11,54.188.109.168,2,0.236686
+processed,attack_bruteforce_dictionary-ssh_router_flow.csv,Bruteforce,12,192.168.1.195,2,0.236686
+processed,attack_bruteforce_dictionary-ssh_router_flow.csv,Bruteforce,13,192.168.1.57,2,0.236686
+processed,attack_bruteforce_dictionary-ssh_router_flow.csv,Bruteforce,14,192.168.1.55,1,0.118343
+processed,attack_bruteforce_dictionary-ssh_router_flow.csv,Bruteforce,15,192.168.230.7,1,0.118343
+processed,attack_bruteforce_dictionary-ssh_router_flow.csv,Bruteforce,16,129.146.120.172,1,0.118343
+processed,attack_bruteforce_dictionary-ssh_router_flow.csv,Bruteforce,17,129.146.59.211,1,0.118343
+processed,attack_bruteforce_dictionary-ssh_router_flow.csv,Bruteforce,18,3.131.27.69,1,0.118343
+processed,attack_bruteforce_dictionary-ssh_router_flow.csv,Bruteforce,19,54.188.99.4,1,0.118343
+processed,attack_bruteforce_dictionary-ssh_router_flow.csv,Bruteforce,20,52.43.232.245,1,0.118343
+processed,attack_bruteforce_dictionary-ssh_switch_flow.csv,Bruteforce,1,192.168.1.200,723,87.742718
+processed,attack_bruteforce_dictionary-ssh_switch_flow.csv,Bruteforce,2,255.255.255.255,16,1.941748
+processed,attack_bruteforce_dictionary-ssh_switch_flow.csv,Bruteforce,3,192.168.1.193,14,1.699029
+processed,attack_bruteforce_dictionary-ssh_switch_flow.csv,Bruteforce,4,224.0.0.251,12,1.456311
+processed,attack_bruteforce_dictionary-ssh_switch_flow.csv,Bruteforce,5,192.168.1.52,7,0.849515
+processed,attack_bruteforce_dictionary-ssh_switch_flow.csv,Bruteforce,6,192.168.1.1,6,0.728155
+processed,attack_bruteforce_dictionary-ssh_switch_flow.csv,Bruteforce,7,239.255.255.250,4,0.485437
+processed,attack_bruteforce_dictionary-ssh_switch_flow.csv,Bruteforce,8,192.168.1.255,4,0.485437
+processed,attack_bruteforce_dictionary-ssh_switch_flow.csv,Bruteforce,9,34.213.103.51,2,0.242718
+processed,attack_bruteforce_dictionary-ssh_switch_flow.csv,Bruteforce,10,54.188.109.168,2,0.242718
+processed,attack_bruteforce_dictionary-ssh_switch_flow.csv,Bruteforce,11,52.12.196.80,2,0.242718
+processed,attack_bruteforce_dictionary-ssh_switch_flow.csv,Bruteforce,12,35.162.13.26,2,0.242718
+processed,attack_bruteforce_dictionary-ssh_switch_flow.csv,Bruteforce,13,192.168.1.205,2,0.242718
+processed,attack_bruteforce_dictionary-ssh_switch_flow.csv,Bruteforce,14,192.168.1.23,2,0.242718
+processed,attack_bruteforce_dictionary-ssh_switch_flow.csv,Bruteforce,15,192.168.1.21,2,0.242718
+processed,attack_bruteforce_dictionary-ssh_switch_flow.csv,Bruteforce,16,192.168.1.14,2,0.242718
+processed,attack_bruteforce_dictionary-ssh_switch_flow.csv,Bruteforce,17,192.168.1.80,2,0.242718
+processed,attack_bruteforce_dictionary-ssh_switch_flow.csv,Bruteforce,18,54.187.112.38,1,0.121359
+processed,attack_bruteforce_dictionary-ssh_switch_flow.csv,Bruteforce,19,47.254.42.218,1,0.121359
+processed,attack_bruteforce_dictionary-ssh_switch_flow.csv,Bruteforce,20,47.252.29.207,1,0.121359
+processed,attack_bruteforce_dictionary-telnet_ap_flow.csv,Bruteforce,1,192.168.1.205,1900,88.992974
+processed,attack_bruteforce_dictionary-telnet_ap_flow.csv,Bruteforce,2,224.0.0.251,66,3.091335
+processed,attack_bruteforce_dictionary-telnet_ap_flow.csv,Bruteforce,3,192.168.1.52,17,0.796253
+processed,attack_bruteforce_dictionary-telnet_ap_flow.csv,Bruteforce,4,255.255.255.255,16,0.749415
+processed,attack_bruteforce_dictionary-telnet_ap_flow.csv,Bruteforce,5,192.168.1.193,16,0.749415
+processed,attack_bruteforce_dictionary-telnet_ap_flow.csv,Bruteforce,6,192.168.1.1,10,0.468384
+processed,attack_bruteforce_dictionary-telnet_ap_flow.csv,Bruteforce,7,192.168.1.255,10,0.468384
+processed,attack_bruteforce_dictionary-telnet_ap_flow.csv,Bruteforce,8,239.255.255.250,8,0.374707
+processed,attack_bruteforce_dictionary-telnet_ap_flow.csv,Bruteforce,9,192.168.1.55,4,0.187354
+processed,attack_bruteforce_dictionary-telnet_ap_flow.csv,Bruteforce,10,44.230.212.240,3,0.140515
+processed,attack_bruteforce_dictionary-telnet_ap_flow.csv,Bruteforce,11,192.168.1.54,3,0.140515
+processed,attack_bruteforce_dictionary-telnet_ap_flow.csv,Bruteforce,12,192.168.1.85,2,0.093677
+processed,attack_bruteforce_dictionary-telnet_ap_flow.csv,Bruteforce,13,192.168.1.92,2,0.093677
+processed,attack_bruteforce_dictionary-telnet_ap_flow.csv,Bruteforce,14,192.168.1.200,2,0.093677
+processed,attack_bruteforce_dictionary-telnet_ap_flow.csv,Bruteforce,15,192.168.1.81,2,0.093677
+processed,attack_bruteforce_dictionary-telnet_ap_flow.csv,Bruteforce,16,192.168.1.53,2,0.093677
+processed,attack_bruteforce_dictionary-telnet_ap_flow.csv,Bruteforce,17,192.168.1.16,2,0.093677
+processed,attack_bruteforce_dictionary-telnet_ap_flow.csv,Bruteforce,18,192.168.1.82,2,0.093677
+processed,attack_bruteforce_dictionary-telnet_ap_flow.csv,Bruteforce,19,192.168.1.17,2,0.093677
+processed,attack_bruteforce_dictionary-telnet_ap_flow.csv,Bruteforce,20,192.168.1.11,2,0.093677
+processed,attack_bruteforce_dictionary-telnet_edge1_flow.csv,Bruteforce,1,192.168.1.195,355,36.560247
+processed,attack_bruteforce_dictionary-telnet_edge1_flow.csv,Bruteforce,2,192.168.1.100,321,33.058702
+processed,attack_bruteforce_dictionary-telnet_edge1_flow.csv,Bruteforce,3,192.168.1.1,190,19.567456
+processed,attack_bruteforce_dictionary-telnet_edge1_flow.csv,Bruteforce,4,255.255.255.255,16,1.647786
+processed,attack_bruteforce_dictionary-telnet_edge1_flow.csv,Bruteforce,5,192.168.1.52,15,1.544799
+processed,attack_bruteforce_dictionary-telnet_edge1_flow.csv,Bruteforce,6,192.168.1.193,14,1.441813
+processed,attack_bruteforce_dictionary-telnet_edge1_flow.csv,Bruteforce,7,192.168.1.255,10,1.029866
+processed,attack_bruteforce_dictionary-telnet_edge1_flow.csv,Bruteforce,8,224.0.0.251,8,0.823893
+processed,attack_bruteforce_dictionary-telnet_edge1_flow.csv,Bruteforce,9,239.255.255.250,7,0.720906
+processed,attack_bruteforce_dictionary-telnet_edge1_flow.csv,Bruteforce,10,192.168.1.83,2,0.205973
+processed,attack_bruteforce_dictionary-telnet_edge1_flow.csv,Bruteforce,11,8.8.8.8,2,0.205973
+processed,attack_bruteforce_dictionary-telnet_edge1_flow.csv,Bruteforce,12,192.168.1.57,2,0.205973
+processed,attack_bruteforce_dictionary-telnet_edge1_flow.csv,Bruteforce,13,129.146.120.172,2,0.205973
+processed,attack_bruteforce_dictionary-telnet_edge1_flow.csv,Bruteforce,14,54.188.109.168,2,0.205973
+processed,attack_bruteforce_dictionary-telnet_edge1_flow.csv,Bruteforce,15,52.12.196.80,2,0.205973
+processed,attack_bruteforce_dictionary-telnet_edge1_flow.csv,Bruteforce,16,34.213.103.51,2,0.205973
+processed,attack_bruteforce_dictionary-telnet_edge1_flow.csv,Bruteforce,17,35.162.13.26,2,0.205973
+processed,attack_bruteforce_dictionary-telnet_edge1_flow.csv,Bruteforce,18,52.33.183.63,1,0.102987
+processed,attack_bruteforce_dictionary-telnet_edge1_flow.csv,Bruteforce,19,34.218.147.23,1,0.102987
+processed,attack_bruteforce_dictionary-telnet_edge1_flow.csv,Bruteforce,20,35.84.67.65,1,0.102987
+processed,attack_bruteforce_dictionary-telnet_mqtt-broker_flow.csv,Bruteforce,1,192.168.1.193,146,19.918145
+processed,attack_bruteforce_dictionary-telnet_mqtt-broker_flow.csv,Bruteforce,2,192.168.1.100,120,16.371078
+processed,attack_bruteforce_dictionary-telnet_mqtt-broker_flow.csv,Bruteforce,3,224.0.0.251,73,9.959072
+processed,attack_bruteforce_dictionary-telnet_mqtt-broker_flow.csv,Bruteforce,4,10.5.14.197,70,9.549795
+processed,attack_bruteforce_dictionary-telnet_mqtt-broker_flow.csv,Bruteforce,5,10.5.14.198,70,9.549795
+processed,attack_bruteforce_dictionary-telnet_mqtt-broker_flow.csv,Bruteforce,6,10.3.1.5,70,9.549795
+processed,attack_bruteforce_dictionary-telnet_mqtt-broker_flow.csv,Bruteforce,7,192.168.1.52,18,2.455662
+processed,attack_bruteforce_dictionary-telnet_mqtt-broker_flow.csv,Bruteforce,8,255.255.255.255,16,2.18281
+processed,attack_bruteforce_dictionary-telnet_mqtt-broker_flow.csv,Bruteforce,9,192.168.1.1,15,2.046385
+processed,attack_bruteforce_dictionary-telnet_mqtt-broker_flow.csv,Bruteforce,10,8.8.8.8,10,1.364256
+processed,attack_bruteforce_dictionary-telnet_mqtt-broker_flow.csv,Bruteforce,11,192.168.1.255,10,1.364256
+processed,attack_bruteforce_dictionary-telnet_mqtt-broker_flow.csv,Bruteforce,12,239.255.255.250,8,1.091405
+processed,attack_bruteforce_dictionary-telnet_mqtt-broker_flow.csv,Bruteforce,13,192.168.1.50,4,0.545703
+processed,attack_bruteforce_dictionary-telnet_mqtt-broker_flow.csv,Bruteforce,14,54.69.37.156,3,0.409277
+processed,attack_bruteforce_dictionary-telnet_mqtt-broker_flow.csv,Bruteforce,15,34.218.147.23,3,0.409277
+processed,attack_bruteforce_dictionary-telnet_mqtt-broker_flow.csv,Bruteforce,16,192.168.1.55,3,0.409277
+processed,attack_bruteforce_dictionary-telnet_mqtt-broker_flow.csv,Bruteforce,17,54.187.112.38,2,0.272851
+processed,attack_bruteforce_dictionary-telnet_mqtt-broker_flow.csv,Bruteforce,18,47.252.29.207,2,0.272851
+processed,attack_bruteforce_dictionary-telnet_mqtt-broker_flow.csv,Bruteforce,19,8.219.125.49,2,0.272851
+processed,attack_bruteforce_dictionary-telnet_mqtt-broker_flow.csv,Bruteforce,20,192.168.1.205,2,0.272851
+processed,attack_recon_host-disc-arp-ping_whole-network_flow.csv,Recon,1,192.168.1.205,1361,3.154333
+processed,attack_recon_host-disc-arp-ping_whole-network_flow.csv,Recon,2,192.168.1.1,1359,3.149698
+processed,attack_recon_host-disc-arp-ping_whole-network_flow.csv,Recon,3,192.168.1.50,1349,3.126521
+processed,attack_recon_host-disc-arp-ping_whole-network_flow.csv,Recon,4,192.168.1.193,1349,3.126521
+processed,attack_recon_host-disc-arp-ping_whole-network_flow.csv,Recon,5,192.168.1.55,1347,3.121886
+processed,attack_recon_host-disc-arp-ping_whole-network_flow.csv,Recon,6,192.168.1.195,1347,3.121886
+processed,attack_recon_host-disc-arp-ping_whole-network_flow.csv,Recon,7,192.168.1.54,1346,3.119568
+processed,attack_recon_host-disc-arp-ping_whole-network_flow.csv,Recon,8,192.168.1.52,1345,3.11725
+processed,attack_recon_host-disc-arp-ping_whole-network_flow.csv,Recon,9,192.168.1.101,1344,3.114933
+processed,attack_recon_host-disc-arp-ping_whole-network_flow.csv,Recon,10,192.168.1.104,1340,3.105662
+processed,attack_recon_host-disc-arp-ping_whole-network_flow.csv,Recon,11,192.168.1.53,1335,3.094074
+processed,attack_recon_host-disc-arp-ping_whole-network_flow.csv,Recon,12,192.168.1.105,1333,3.089438
+processed,attack_recon_host-disc-arp-ping_whole-network_flow.csv,Recon,13,192.168.1.102,1333,3.089438
+processed,attack_recon_host-disc-arp-ping_whole-network_flow.csv,Recon,14,192.168.1.57,1332,3.087121
+processed,attack_recon_host-disc-arp-ping_whole-network_flow.csv,Recon,15,192.168.1.103,1327,3.075532
+processed,attack_recon_host-disc-arp-ping_whole-network_flow.csv,Recon,16,192.168.1.81,1326,3.073215
+processed,attack_recon_host-disc-arp-ping_whole-network_flow.csv,Recon,17,192.168.1.91,1311,3.03845
+processed,attack_recon_host-disc-arp-ping_whole-network_flow.csv,Recon,18,192.168.1.21,1294,2.99905
+processed,attack_recon_host-disc-arp-ping_whole-network_flow.csv,Recon,19,192.168.1.14,1290,2.989779
+processed,attack_recon_host-disc-arp-ping_whole-network_flow.csv,Recon,20,192.168.1.92,1290,2.989779
+processed,attack_recon_host-disc-tcp-ack-ping_whole-network_flow.csv,Recon,1,192.168.1.202,1137,3.287933
+processed,attack_recon_host-disc-tcp-ack-ping_whole-network_flow.csv,Recon,2,192.168.1.12,1075,3.108643
+processed,attack_recon_host-disc-tcp-ack-ping_whole-network_flow.csv,Recon,3,192.168.1.91,1031,2.981406
+processed,attack_recon_host-disc-tcp-ack-ping_whole-network_flow.csv,Recon,4,192.168.1.90,1026,2.966947
+processed,attack_recon_host-disc-tcp-ack-ping_whole-network_flow.csv,Recon,5,192.168.1.18,1020,2.949597
+processed,attack_recon_host-disc-tcp-ack-ping_whole-network_flow.csv,Recon,6,192.168.1.13,1020,2.949597
+processed,attack_recon_host-disc-tcp-ack-ping_whole-network_flow.csv,Recon,7,192.168.1.23,1020,2.949597
+processed,attack_recon_host-disc-tcp-ack-ping_whole-network_flow.csv,Recon,8,192.168.1.19,1019,2.946705
+processed,attack_recon_host-disc-tcp-ack-ping_whole-network_flow.csv,Recon,9,192.168.1.10,1018,2.943813
+processed,attack_recon_host-disc-tcp-ack-ping_whole-network_flow.csv,Recon,10,192.168.1.20,1018,2.943813
+processed,attack_recon_host-disc-tcp-ack-ping_whole-network_flow.csv,Recon,11,192.168.1.22,1017,2.940921
+processed,attack_recon_host-disc-tcp-ack-ping_whole-network_flow.csv,Recon,12,192.168.1.16,1016,2.93803
+processed,attack_recon_host-disc-tcp-ack-ping_whole-network_flow.csv,Recon,13,192.168.1.15,1015,2.935138
+processed,attack_recon_host-disc-tcp-ack-ping_whole-network_flow.csv,Recon,14,192.168.1.193,1014,2.932246
+processed,attack_recon_host-disc-tcp-ack-ping_whole-network_flow.csv,Recon,15,192.168.1.21,1014,2.932246
+processed,attack_recon_host-disc-tcp-ack-ping_whole-network_flow.csv,Recon,16,192.168.1.14,1012,2.926463
+processed,attack_recon_host-disc-tcp-ack-ping_whole-network_flow.csv,Recon,17,192.168.1.17,1012,2.926463
+processed,attack_recon_host-disc-tcp-ack-ping_whole-network_flow.csv,Recon,18,192.168.1.11,1011,2.923571
+processed,attack_recon_host-disc-tcp-ack-ping_whole-network_flow.csv,Recon,19,192.168.1.1,1009,2.917787
+processed,attack_recon_host-disc-tcp-ack-ping_whole-network_flow.csv,Recon,20,192.168.1.92,1005,2.90622
+processed,attack_recon_host-disc-tcp-syn-ping_whole-network_flow.csv,Recon,1,192.168.1.14,1509,3.037134
+processed,attack_recon_host-disc-tcp-syn-ping_whole-network_flow.csv,Recon,2,192.168.1.1,1507,3.033109
+processed,attack_recon_host-disc-tcp-syn-ping_whole-network_flow.csv,Recon,3,192.168.1.53,1505,3.029083
+processed,attack_recon_host-disc-tcp-syn-ping_whole-network_flow.csv,Recon,4,192.168.1.57,1504,3.027071
+processed,attack_recon_host-disc-tcp-syn-ping_whole-network_flow.csv,Recon,5,192.168.1.205,1503,3.025058
+processed,attack_recon_host-disc-tcp-syn-ping_whole-network_flow.csv,Recon,6,192.168.1.193,1503,3.025058
+processed,attack_recon_host-disc-tcp-syn-ping_whole-network_flow.csv,Recon,7,192.168.1.13,1503,3.025058
+processed,attack_recon_host-disc-tcp-syn-ping_whole-network_flow.csv,Recon,8,192.168.1.19,1494,3.006944
+processed,attack_recon_host-disc-tcp-syn-ping_whole-network_flow.csv,Recon,9,192.168.1.52,1493,3.004931
+processed,attack_recon_host-disc-tcp-syn-ping_whole-network_flow.csv,Recon,10,192.168.1.50,1489,2.99688
+processed,attack_recon_host-disc-tcp-syn-ping_whole-network_flow.csv,Recon,11,192.168.1.55,1488,2.994868
+processed,attack_recon_host-disc-tcp-syn-ping_whole-network_flow.csv,Recon,12,192.168.1.195,1486,2.990842
+processed,attack_recon_host-disc-tcp-syn-ping_whole-network_flow.csv,Recon,13,192.168.1.15,1485,2.98883
+processed,attack_recon_host-disc-tcp-syn-ping_whole-network_flow.csv,Recon,14,192.168.1.101,1483,2.984804
+processed,attack_recon_host-disc-tcp-syn-ping_whole-network_flow.csv,Recon,15,192.168.1.11,1483,2.984804
+processed,attack_recon_host-disc-tcp-syn-ping_whole-network_flow.csv,Recon,16,192.168.1.105,1482,2.982792
+processed,attack_recon_host-disc-tcp-syn-ping_whole-network_flow.csv,Recon,17,192.168.1.104,1480,2.978766
+processed,attack_recon_host-disc-tcp-syn-ping_whole-network_flow.csv,Recon,18,192.168.1.20,1477,2.972728
+processed,attack_recon_host-disc-tcp-syn-ping_whole-network_flow.csv,Recon,19,192.168.1.103,1476,2.970716
+processed,attack_recon_host-disc-tcp-syn-ping_whole-network_flow.csv,Recon,20,192.168.1.102,1472,2.962665
+processed,attack_recon_host-disc-tcp-syn-stealth_whole-network_flow.csv,Recon,1,192.168.1.1,1476,3.273453
+processed,attack_recon_host-disc-tcp-syn-stealth_whole-network_flow.csv,Recon,2,192.168.1.81,1468,3.255711
+processed,attack_recon_host-disc-tcp-syn-stealth_whole-network_flow.csv,Recon,3,192.168.1.193,1461,3.240186
+processed,attack_recon_host-disc-tcp-syn-stealth_whole-network_flow.csv,Recon,4,192.168.1.195,1459,3.235751
+processed,attack_recon_host-disc-tcp-syn-stealth_whole-network_flow.csv,Recon,5,192.168.1.205,1455,3.22688
+processed,attack_recon_host-disc-tcp-syn-stealth_whole-network_flow.csv,Recon,6,192.168.1.50,1453,3.222444
+processed,attack_recon_host-disc-tcp-syn-stealth_whole-network_flow.csv,Recon,7,192.168.1.52,1448,3.211355
+processed,attack_recon_host-disc-tcp-syn-stealth_whole-network_flow.csv,Recon,8,192.168.1.21,1447,3.209137
+processed,attack_recon_host-disc-tcp-syn-stealth_whole-network_flow.csv,Recon,9,192.168.1.103,1445,3.204702
+processed,attack_recon_host-disc-tcp-syn-stealth_whole-network_flow.csv,Recon,10,192.168.1.53,1441,3.195831
+processed,attack_recon_host-disc-tcp-syn-stealth_whole-network_flow.csv,Recon,11,192.168.1.22,1441,3.195831
+processed,attack_recon_host-disc-tcp-syn-stealth_whole-network_flow.csv,Recon,12,192.168.1.101,1440,3.193613
+processed,attack_recon_host-disc-tcp-syn-stealth_whole-network_flow.csv,Recon,13,192.168.1.57,1439,3.191395
+processed,attack_recon_host-disc-tcp-syn-stealth_whole-network_flow.csv,Recon,14,192.168.1.55,1434,3.180306
+processed,attack_recon_host-disc-tcp-syn-stealth_whole-network_flow.csv,Recon,15,192.168.1.104,1433,3.178088
+processed,attack_recon_host-disc-tcp-syn-stealth_whole-network_flow.csv,Recon,16,192.168.1.80,1433,3.178088
+processed,attack_recon_host-disc-tcp-syn-stealth_whole-network_flow.csv,Recon,17,192.168.1.102,1431,3.173653
+processed,attack_recon_host-disc-tcp-syn-stealth_whole-network_flow.csv,Recon,18,192.168.1.105,1424,3.158128
+processed,attack_recon_host-disc-tcp-syn-stealth_whole-network_flow.csv,Recon,19,192.168.1.54,1401,3.107119
+processed,attack_recon_host-disc-tcp-syn-stealth_whole-network_flow.csv,Recon,20,192.168.1.23,1390,3.082723
+processed,attack_recon_host-disc-udp-ping_whole-network_flow.csv,Recon,1,192.168.1.202,1151,3.222555
+processed,attack_recon_host-disc-udp-ping_whole-network_flow.csv,Recon,2,192.168.1.12,1060,2.967774
+processed,attack_recon_host-disc-udp-ping_whole-network_flow.csv,Recon,3,192.168.1.10,1030,2.883781
+processed,attack_recon_host-disc-udp-ping_whole-network_flow.csv,Recon,4,192.168.1.15,1028,2.878181
+processed,attack_recon_host-disc-udp-ping_whole-network_flow.csv,Recon,5,192.168.1.54,1026,2.872582
+processed,attack_recon_host-disc-udp-ping_whole-network_flow.csv,Recon,6,192.168.1.18,1026,2.872582
+processed,attack_recon_host-disc-udp-ping_whole-network_flow.csv,Recon,7,192.168.1.13,1026,2.872582
+processed,attack_recon_host-disc-udp-ping_whole-network_flow.csv,Recon,8,192.168.1.17,1024,2.866982
+processed,attack_recon_host-disc-udp-ping_whole-network_flow.csv,Recon,9,192.168.1.23,1024,2.866982
+processed,attack_recon_host-disc-udp-ping_whole-network_flow.csv,Recon,10,192.168.1.21,1024,2.866982
+processed,attack_recon_host-disc-udp-ping_whole-network_flow.csv,Recon,11,192.168.1.14,1023,2.864182
+processed,attack_recon_host-disc-udp-ping_whole-network_flow.csv,Recon,12,192.168.1.1,1021,2.858583
+processed,attack_recon_host-disc-udp-ping_whole-network_flow.csv,Recon,13,192.168.1.91,1021,2.858583
+processed,attack_recon_host-disc-udp-ping_whole-network_flow.csv,Recon,14,192.168.1.19,1021,2.858583
+processed,attack_recon_host-disc-udp-ping_whole-network_flow.csv,Recon,15,192.168.1.20,1020,2.855783
+processed,attack_recon_host-disc-udp-ping_whole-network_flow.csv,Recon,16,192.168.1.11,1020,2.855783
+processed,attack_recon_host-disc-udp-ping_whole-network_flow.csv,Recon,17,192.168.1.16,1018,2.850183
+processed,attack_recon_host-disc-udp-ping_whole-network_flow.csv,Recon,18,192.168.1.22,1017,2.847384
+processed,attack_recon_host-disc-udp-ping_whole-network_flow.csv,Recon,19,192.168.1.193,1015,2.841784
+processed,attack_recon_host-disc-udp-ping_whole-network_flow.csv,Recon,20,192.168.1.92,1006,2.816586
+processed,attack_recon_os-scan_whole-network_flow.csv,Recon,1,192.168.1.202,1135,2.896369
+processed,attack_recon_os-scan_whole-network_flow.csv,Recon,2,192.168.1.91,1080,2.756016
+processed,attack_recon_os-scan_whole-network_flow.csv,Recon,3,192.168.1.12,1071,2.733049
+processed,attack_recon_os-scan_whole-network_flow.csv,Recon,4,192.168.1.16,1042,2.659045
+processed,attack_recon_os-scan_whole-network_flow.csv,Recon,5,192.168.1.23,1036,2.643734
+processed,attack_recon_os-scan_whole-network_flow.csv,Recon,6,192.168.1.15,1034,2.63863
+processed,attack_recon_os-scan_whole-network_flow.csv,Recon,7,192.168.1.13,1034,2.63863
+processed,attack_recon_os-scan_whole-network_flow.csv,Recon,8,192.168.1.11,1031,2.630975
+processed,attack_recon_os-scan_whole-network_flow.csv,Recon,9,192.168.1.193,1030,2.628423
+processed,attack_recon_os-scan_whole-network_flow.csv,Recon,10,192.168.1.18,1028,2.623319
+processed,attack_recon_os-scan_whole-network_flow.csv,Recon,11,192.168.1.10,1028,2.623319
+processed,attack_recon_os-scan_whole-network_flow.csv,Recon,12,192.168.1.22,1028,2.623319
+processed,attack_recon_os-scan_whole-network_flow.csv,Recon,13,192.168.1.14,1026,2.618215
+processed,attack_recon_os-scan_whole-network_flow.csv,Recon,14,192.168.1.90,1026,2.618215
+processed,attack_recon_os-scan_whole-network_flow.csv,Recon,15,192.168.1.21,1025,2.615663
+processed,attack_recon_os-scan_whole-network_flow.csv,Recon,16,192.168.1.20,1024,2.613111
+processed,attack_recon_os-scan_whole-network_flow.csv,Recon,17,192.168.1.1,1023,2.61056
+processed,attack_recon_os-scan_whole-network_flow.csv,Recon,18,192.168.1.54,1021,2.605456
+processed,attack_recon_os-scan_whole-network_flow.csv,Recon,19,192.168.1.17,1020,2.602904
+processed,attack_recon_os-scan_whole-network_flow.csv,Recon,20,192.168.1.80,1020,2.602904
+processed,attack_recon_ping-sweep_whole-network_flow.csv,Recon,1,255.255.255.255,15,12.931034
+processed,attack_recon_ping-sweep_whole-network_flow.csv,Recon,2,192.168.1.193,14,12.068966
+processed,attack_recon_ping-sweep_whole-network_flow.csv,Recon,3,192.168.1.202,8,6.896552
+processed,attack_recon_ping-sweep_whole-network_flow.csv,Recon,4,192.168.1.1,7,6.034483
+processed,attack_recon_ping-sweep_whole-network_flow.csv,Recon,5,52.92.188.18,4,3.448276
+processed,attack_recon_ping-sweep_whole-network_flow.csv,Recon,6,224.0.0.251,4,3.448276
+processed,attack_recon_ping-sweep_whole-network_flow.csv,Recon,7,192.168.1.52,4,3.448276
+processed,attack_recon_ping-sweep_whole-network_flow.csv,Recon,8,142.251.41.35,3,2.586207
+processed,attack_recon_ping-sweep_whole-network_flow.csv,Recon,9,239.255.255.250,3,2.586207
+processed,attack_recon_ping-sweep_whole-network_flow.csv,Recon,10,47.88.37.113,2,1.724138
+processed,attack_recon_ping-sweep_whole-network_flow.csv,Recon,11,192.168.1.55,2,1.724138
+processed,attack_recon_ping-sweep_whole-network_flow.csv,Recon,12,44.194.244.25,2,1.724138
+processed,attack_recon_ping-sweep_whole-network_flow.csv,Recon,13,35.161.158.54,2,1.724138
+processed,attack_recon_ping-sweep_whole-network_flow.csv,Recon,14,192.168.1.255,2,1.724138
+processed,attack_recon_ping-sweep_whole-network_flow.csv,Recon,15,192.168.1.90,2,1.724138
+processed,attack_recon_ping-sweep_whole-network_flow.csv,Recon,16,100.21.156.247,2,1.724138
+processed,attack_recon_ping-sweep_whole-network_flow.csv,Recon,17,100.20.212.253,2,1.724138
+processed,attack_recon_ping-sweep_whole-network_flow.csv,Recon,18,54.187.112.38,1,0.862069
+processed,attack_recon_ping-sweep_whole-network_flow.csv,Recon,19,192.168.1.53,1,0.862069
+processed,attack_recon_ping-sweep_whole-network_flow.csv,Recon,20,142.251.41.78,1,0.862069
+processed,attack_recon_port-scan_whole-network_flow.csv,Recon,1,192.168.1.202,1110,3.018765
+processed,attack_recon_port-scan_whole-network_flow.csv,Recon,2,192.168.1.12,1106,3.007887
+processed,attack_recon_port-scan_whole-network_flow.csv,Recon,3,192.168.1.16,1037,2.820234
+processed,attack_recon_port-scan_whole-network_flow.csv,Recon,4,192.168.1.92,1035,2.814795
+processed,attack_recon_port-scan_whole-network_flow.csv,Recon,5,192.168.1.90,1029,2.798477
+processed,attack_recon_port-scan_whole-network_flow.csv,Recon,6,192.168.1.13,1028,2.795757
+processed,attack_recon_port-scan_whole-network_flow.csv,Recon,7,192.168.1.91,1028,2.795757
+processed,attack_recon_port-scan_whole-network_flow.csv,Recon,8,192.168.1.23,1027,2.793038
+processed,attack_recon_port-scan_whole-network_flow.csv,Recon,9,192.168.1.19,1026,2.790318
+processed,attack_recon_port-scan_whole-network_flow.csv,Recon,10,192.168.1.15,1026,2.790318
+processed,attack_recon_port-scan_whole-network_flow.csv,Recon,11,192.168.1.14,1024,2.784879
+processed,attack_recon_port-scan_whole-network_flow.csv,Recon,12,192.168.1.10,1022,2.77944
+processed,attack_recon_port-scan_whole-network_flow.csv,Recon,13,192.168.1.21,1022,2.77944
+processed,attack_recon_port-scan_whole-network_flow.csv,Recon,14,192.168.1.18,1021,2.77672
+processed,attack_recon_port-scan_whole-network_flow.csv,Recon,15,192.168.1.17,1020,2.774001
+processed,attack_recon_port-scan_whole-network_flow.csv,Recon,16,192.168.1.11,1018,2.768561
+processed,attack_recon_port-scan_whole-network_flow.csv,Recon,17,192.168.1.20,1018,2.768561
+processed,attack_recon_port-scan_whole-network_flow.csv,Recon,18,192.168.1.22,1017,2.765842
+processed,attack_recon_port-scan_whole-network_flow.csv,Recon,19,192.168.1.1,1016,2.763122
+processed,attack_recon_port-scan_whole-network_flow.csv,Recon,20,192.168.1.193,1015,2.760403
+processed,attack_recon_vuln-scan_whole-network_flow.csv,Recon,1,192.168.1.16,1042,2.742322
+processed,attack_recon_vuln-scan_whole-network_flow.csv,Recon,2,192.168.1.10,1036,2.726531
+processed,attack_recon_vuln-scan_whole-network_flow.csv,Recon,3,192.168.1.13,1033,2.718636
+processed,attack_recon_vuln-scan_whole-network_flow.csv,Recon,4,192.168.1.17,1031,2.713372
+processed,attack_recon_vuln-scan_whole-network_flow.csv,Recon,5,192.168.1.23,1031,2.713372
+processed,attack_recon_vuln-scan_whole-network_flow.csv,Recon,6,192.168.1.18,1029,2.708109
+processed,attack_recon_vuln-scan_whole-network_flow.csv,Recon,7,192.168.1.19,1026,2.700213
+processed,attack_recon_vuln-scan_whole-network_flow.csv,Recon,8,192.168.1.20,1026,2.700213
+processed,attack_recon_vuln-scan_whole-network_flow.csv,Recon,9,192.168.1.14,1026,2.700213
+processed,attack_recon_vuln-scan_whole-network_flow.csv,Recon,10,192.168.1.21,1024,2.69495
+processed,attack_recon_vuln-scan_whole-network_flow.csv,Recon,11,192.168.1.11,1023,2.692318
+processed,attack_recon_vuln-scan_whole-network_flow.csv,Recon,12,192.168.1.193,1014,2.668632
+processed,attack_recon_vuln-scan_whole-network_flow.csv,Recon,13,192.168.1.22,1011,2.660736
+processed,attack_recon_vuln-scan_whole-network_flow.csv,Recon,14,192.168.1.90,1007,2.650209
+processed,attack_recon_vuln-scan_whole-network_flow.csv,Recon,15,192.168.1.80,1006,2.647577
+processed,attack_recon_vuln-scan_whole-network_flow.csv,Recon,16,192.168.1.54,1005,2.644946
+processed,attack_recon_vuln-scan_whole-network_flow.csv,Recon,17,192.168.1.1,1004,2.642314
+processed,attack_recon_vuln-scan_whole-network_flow.csv,Recon,18,192.168.1.84,1003,2.639682
+processed,attack_recon_vuln-scan_whole-network_flow.csv,Recon,19,192.168.1.50,1002,2.63705
+processed,attack_recon_vuln-scan_whole-network_flow.csv,Recon,20,192.168.1.55,1001,2.634419
+processed,benign_whole-network3_flow.csv,Benign,1,224.0.0.251,5812,25.696348
+processed,benign_whole-network3_flow.csv,Benign,2,192.168.1.52,2311,10.217526
+processed,benign_whole-network3_flow.csv,Benign,3,192.168.1.1,1842,8.143956
+processed,benign_whole-network3_flow.csv,Benign,4,192.168.1.255,1433,6.335662
+processed,benign_whole-network3_flow.csv,Benign,5,239.255.255.250,960,4.244407
+processed,benign_whole-network3_flow.csv,Benign,6,8.8.8.8,700,3.09488
+processed,benign_whole-network3_flow.csv,Benign,7,192.168.1.193,440,1.945353
+processed,benign_whole-network3_flow.csv,Benign,8,192.168.1.145,346,1.529755
+processed,benign_whole-network3_flow.csv,Benign,9,192.168.1.195,279,1.233531
+processed,benign_whole-network3_flow.csv,Benign,10,192.168.1.50,226,0.999204
+processed,benign_whole-network3_flow.csv,Benign,11,255.255.255.255,210,0.928464
+processed,benign_whole-network3_flow.csv,Benign,12,192.168.1.55,207,0.9152
+processed,benign_whole-network3_flow.csv,Benign,13,162.159.200.123,161,0.711822
+processed,benign_whole-network3_flow.csv,Benign,14,44.231.176.168,156,0.689716
+processed,benign_whole-network3_flow.csv,Benign,15,192.168.1.53,154,0.680874
+processed,benign_whole-network3_flow.csv,Benign,16,192.168.1.10,144,0.636661
+processed,benign_whole-network3_flow.csv,Benign,17,192.168.1.54,143,0.63224
+processed,benign_whole-network3_flow.csv,Benign,18,192.168.1.83,142,0.627819
+processed,benign_whole-network3_flow.csv,Benign,19,192.168.1.21,142,0.627819
+processed,benign_whole-network3_flow.csv,Benign,20,192.168.1.16,142,0.627819
+processed,MQTT-DDoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,1,192.168.137.250,4719298,70.639143
+processed,MQTT-DDoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,2,192.168.137.180,589958,8.830578
+processed,MQTT-DDoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,3,192.168.137.156,545111,8.159301
+processed,MQTT-DDoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,4,192.168.137.212,540410,8.088936
+processed,MQTT-DDoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,5,192.168.137.48,285922,4.279722
+processed,MQTT-DDoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,6,192.168.137.1,35,0.000524
+processed,MQTT-DDoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,7,10.0.0.254,30,0.000449
+processed,MQTT-DDoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,8,192.168.137.115,21,0.000314
+processed,MQTT-DDoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,9,255.255.255.255,11,0.000165
+processed,MQTT-DDoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,10,34.173.20.6,10,0.00015
+processed,MQTT-DDoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,11,239.255.255.250,6,9e-05
+processed,MQTT-DDoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,12,13.225.193.148,4,6e-05
+processed,MQTT-DDoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,13,44.230.212.240,4,6e-05
+processed,MQTT-DDoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,14,192.168.137.42,4,6e-05
+processed,MQTT-DDoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,15,ff02::1:2,4,6e-05
+processed,MQTT-DDoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,16,47.254.95.248,3,4.5e-05
+processed,MQTT-DDoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,17,35.224.21.224,3,4.5e-05
+processed,MQTT-DDoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,18,47.254.41.205,2,3e-05
+processed,MQTT-DDoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,19,192.168.137.172,2,3e-05
+processed,MQTT-DDoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,20,54.187.112.38,2,3e-05
+processed,MQTT-DDoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,1,192.168.137.180,221397,28.563853
+processed,MQTT-DDoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,2,192.168.137.212,217787,28.098104
+processed,MQTT-DDoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,3,192.168.137.156,212903,27.467988
+processed,MQTT-DDoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,4,192.168.137.250,107845,13.913778
+processed,MQTT-DDoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,5,192.168.137.48,15006,1.936021
+processed,MQTT-DDoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,6,192.168.137.1,32,0.004129
+processed,MQTT-DDoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,7,10.0.0.254,30,0.00387
+processed,MQTT-DDoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,8,192.168.137.115,23,0.002967
+processed,MQTT-DDoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,9,34.173.20.6,10,0.00129
+processed,MQTT-DDoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,10,255.255.255.255,10,0.00129
+processed,MQTT-DDoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,11,239.255.255.250,6,0.000774
+processed,MQTT-DDoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,12,224.0.0.251,5,0.000645
+processed,MQTT-DDoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,13,13.225.193.148,4,0.000516
+processed,MQTT-DDoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,14,ff02::fb,4,0.000516
+processed,MQTT-DDoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,15,ff02::1:2,4,0.000516
+processed,MQTT-DDoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,16,35.224.21.224,4,0.000516
+processed,MQTT-DDoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,17,54.164.8.26,2,0.000258
+processed,MQTT-DDoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,18,54.175.252.46,2,0.000258
+processed,MQTT-DDoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,19,54.187.112.38,2,0.000258
+processed,MQTT-DDoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,20,192.168.137.88,2,0.000258
+processed,MQTT-DoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,1,192.168.137.250,223839,77.694628
+processed,MQTT-DoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,2,192.168.137.48,64144,22.264414
+processed,MQTT-DoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,3,10.0.0.254,30,0.010413
+processed,MQTT-DoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,4,192.168.137.1,19,0.006595
+processed,MQTT-DoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,5,192.168.137.115,17,0.005901
+processed,MQTT-DoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,6,34.173.20.6,15,0.005207
+processed,MQTT-DoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,7,255.255.255.255,9,0.003124
+processed,MQTT-DoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,8,239.255.255.250,5,0.001736
+processed,MQTT-DoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,9,192.168.137.42,4,0.001388
+processed,MQTT-DoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,10,ff02::1:2,3,0.001041
+processed,MQTT-DoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,11,35.224.21.224,3,0.001041
+processed,MQTT-DoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,12,185.125.190.18,2,0.000694
+processed,MQTT-DoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,13,224.0.0.251,1,0.000347
+processed,MQTT-DoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,14,ff02::fb,1,0.000347
+processed,MQTT-DoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,15,ff02::c,1,0.000347
+processed,MQTT-DoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,16,169.254.255.255,1,0.000347
+processed,MQTT-DoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,17,47.254.41.205,1,0.000347
+processed,MQTT-DoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,18,52.40.210.103,1,0.000347
+processed,MQTT-DoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,19,74.125.69.206,1,0.000347
+processed,MQTT-DoS-Connect_Flood_train_flow.csv,MQTT DoS/DDoS,20,192.168.137.146,1,0.000347
+processed,MQTT-DoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,1,192.168.137.250,103,38.289963
+processed,MQTT-DoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,2,10.0.0.254,30,11.152416
+processed,MQTT-DoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,3,192.168.137.1,27,10.037175
+processed,MQTT-DoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,4,192.168.137.115,24,8.921933
+processed,MQTT-DoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,5,34.173.20.6,16,5.947955
+processed,MQTT-DoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,6,255.255.255.255,9,3.345725
+processed,MQTT-DoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,7,239.255.255.250,6,2.230483
+processed,MQTT-DoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,8,192.168.137.42,5,1.858736
+processed,MQTT-DoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,9,8.8.4.4,4,1.486989
+processed,MQTT-DoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,10,13.225.193.148,3,1.115242
+processed,MQTT-DoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,11,35.224.170.84,3,1.115242
+processed,MQTT-DoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,12,44.230.212.240,3,1.115242
+processed,MQTT-DoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,13,35.224.21.224,3,1.115242
+processed,MQTT-DoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,14,ff02::1:2,3,1.115242
+processed,MQTT-DoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,15,89.30.121.170,3,1.115242
+processed,MQTT-DoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,16,192.168.137.152,3,1.115242
+processed,MQTT-DoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,17,47.254.114.14,2,0.743494
+processed,MQTT-DoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,18,192.168.137.21,2,0.743494
+processed,MQTT-DoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,19,35.155.100.181,2,0.743494
+processed,MQTT-DoS-Publish_Flood_train_flow.csv,MQTT DoS/DDoS,20,ff02::c,2,0.743494
+test,"attack_malware_mirai-syn-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,1,192.168.1.205,8620,52.860735
+test,"attack_malware_mirai-syn-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,2,192.168.1.100,886,5.43325
+test,"attack_malware_mirai-syn-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,3,192.168.1.195,683,4.188385
+test,"attack_malware_mirai-syn-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,4,192.168.1.103,615,3.771387
+test,"attack_malware_mirai-syn-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,5,8.8.8.8,433,2.655301
+test,"attack_malware_mirai-syn-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,6,192.168.1.193,385,2.360949
+test,"attack_malware_mirai-syn-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,7,192.168.1.102,244,1.49629
+test,"attack_malware_mirai-syn-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,8,192.168.1.101,222,1.361379
+test,"attack_malware_mirai-syn-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,9,192.168.1.84,125,0.766542
+test,"attack_malware_mirai-syn-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,10,192.168.1.17,124,0.76041
+test,"attack_malware_mirai-syn-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,11,192.168.1.1,121,0.742013
+test,"attack_malware_mirai-syn-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,12,192.168.1.105,121,0.742013
+test,"attack_malware_mirai-syn-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,13,192.168.1.55,118,0.723616
+test,"attack_malware_mirai-syn-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,14,192.168.1.52,117,0.717483
+test,"attack_malware_mirai-syn-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,15,192.168.1.13,115,0.705219
+test,"attack_malware_mirai-syn-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,16,192.168.1.104,113,0.692954
+test,"attack_malware_mirai-syn-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,17,192.168.1.87,112,0.686822
+test,"attack_malware_mirai-syn-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,18,192.168.1.10,112,0.686822
+test,"attack_malware_mirai-syn-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,19,192.168.1.20,111,0.680689
+test,"attack_malware_mirai-syn-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,20,192.168.1.83,110,0.674557
+test,"attack_malware_mirai-syn-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,1,192.168.1.21,12167,69.581379
+test,"attack_malware_mirai-syn-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,2,192.168.1.100,599,3.425598
+test,"attack_malware_mirai-syn-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,3,192.168.1.195,460,2.630676
+test,"attack_malware_mirai-syn-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,4,192.168.1.103,361,2.064509
+test,"attack_malware_mirai-syn-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,5,192.168.1.193,336,1.921537
+test,"attack_malware_mirai-syn-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,6,8.8.8.8,267,1.526936
+test,"attack_malware_mirai-syn-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,7,192.168.1.102,214,1.223836
+test,"attack_malware_mirai-syn-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,8,192.168.1.101,176,1.00652
+test,"attack_malware_mirai-syn-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,9,192.168.1.16,91,0.520416
+test,"attack_malware_mirai-syn-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,10,192.168.1.84,89,0.508979
+test,"attack_malware_mirai-syn-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,11,192.168.1.54,86,0.491822
+test,"attack_malware_mirai-syn-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,12,192.168.1.20,85,0.486103
+test,"attack_malware_mirai-syn-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,13,192.168.1.15,84,0.480384
+test,"attack_malware_mirai-syn-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,14,192.168.1.87,83,0.474665
+test,"attack_malware_mirai-syn-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,15,192.168.1.50,80,0.457509
+test,"attack_malware_mirai-syn-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,16,192.168.1.53,80,0.457509
+test,"attack_malware_mirai-syn-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,17,192.168.1.205,79,0.45179
+test,"attack_malware_mirai-syn-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,18,192.168.1.11,79,0.45179
+test,"attack_malware_mirai-syn-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,19,192.168.1.13,78,0.446071
+test,"attack_malware_mirai-syn-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,20,192.168.1.57,78,0.446071
+test,attack_malware_mirai-syn-flood_mqtt-broker--edge1_flow.csv,Mirai,1,192.168.1.193,7911,57.630946
+test,attack_malware_mirai-syn-flood_mqtt-broker--edge1_flow.csv,Mirai,2,192.168.1.100,687,5.004735
+test,attack_malware_mirai-syn-flood_mqtt-broker--edge1_flow.csv,Mirai,3,192.168.1.195,550,4.006702
+test,attack_malware_mirai-syn-flood_mqtt-broker--edge1_flow.csv,Mirai,4,192.168.1.103,517,3.7663
+test,attack_malware_mirai-syn-flood_mqtt-broker--edge1_flow.csv,Mirai,5,8.8.8.8,335,2.440446
+test,attack_malware_mirai-syn-flood_mqtt-broker--edge1_flow.csv,Mirai,6,192.168.1.101,194,1.413273
+test,attack_malware_mirai-syn-flood_mqtt-broker--edge1_flow.csv,Mirai,7,192.168.1.102,180,1.311284
+test,attack_malware_mirai-syn-flood_mqtt-broker--edge1_flow.csv,Mirai,8,192.168.1.145,105,0.764916
+test,attack_malware_mirai-syn-flood_mqtt-broker--edge1_flow.csv,Mirai,9,192.168.1.15,97,0.706637
+test,attack_malware_mirai-syn-flood_mqtt-broker--edge1_flow.csv,Mirai,10,192.168.1.57,95,0.692067
+test,attack_malware_mirai-syn-flood_mqtt-broker--edge1_flow.csv,Mirai,11,192.168.1.85,92,0.670212
+test,attack_malware_mirai-syn-flood_mqtt-broker--edge1_flow.csv,Mirai,12,192.168.1.105,90,0.655642
+test,attack_malware_mirai-syn-flood_mqtt-broker--edge1_flow.csv,Mirai,13,192.168.1.10,87,0.633787
+test,attack_malware_mirai-syn-flood_mqtt-broker--edge1_flow.csv,Mirai,14,192.168.1.104,87,0.633787
+test,attack_malware_mirai-syn-flood_mqtt-broker--edge1_flow.csv,Mirai,15,192.168.1.86,86,0.626503
+test,attack_malware_mirai-syn-flood_mqtt-broker--edge1_flow.csv,Mirai,16,192.168.1.1,85,0.619218
+test,attack_malware_mirai-syn-flood_mqtt-broker--edge1_flow.csv,Mirai,17,192.168.1.81,85,0.619218
+test,attack_malware_mirai-syn-flood_mqtt-broker--edge1_flow.csv,Mirai,18,192.168.1.11,85,0.619218
+test,attack_malware_mirai-syn-flood_mqtt-broker--edge1_flow.csv,Mirai,19,192.168.1.22,85,0.619218
+test,attack_malware_mirai-syn-flood_mqtt-broker--edge1_flow.csv,Mirai,20,192.168.1.54,84,0.611933
+test,"attack_malware_mirai-syn-flood_router--edge1,mqtt-broker_flow.csv",Mirai,1,192.168.1.1,10051,62.502332
+test,"attack_malware_mirai-syn-flood_router--edge1,mqtt-broker_flow.csv",Mirai,2,192.168.1.100,672,4.178845
+test,"attack_malware_mirai-syn-flood_router--edge1,mqtt-broker_flow.csv",Mirai,3,192.168.1.195,561,3.488589
+test,"attack_malware_mirai-syn-flood_router--edge1,mqtt-broker_flow.csv",Mirai,4,192.168.1.103,455,2.829426
+test,"attack_malware_mirai-syn-flood_router--edge1,mqtt-broker_flow.csv",Mirai,5,8.8.8.8,318,1.977489
+test,"attack_malware_mirai-syn-flood_router--edge1,mqtt-broker_flow.csv",Mirai,6,192.168.1.193,309,1.921522
+test,"attack_malware_mirai-syn-flood_router--edge1,mqtt-broker_flow.csv",Mirai,7,192.168.1.101,211,1.312107
+test,"attack_malware_mirai-syn-flood_router--edge1,mqtt-broker_flow.csv",Mirai,8,192.168.1.102,198,1.231267
+test,"attack_malware_mirai-syn-flood_router--edge1,mqtt-broker_flow.csv",Mirai,9,192.168.1.145,141,0.876811
+test,"attack_malware_mirai-syn-flood_router--edge1,mqtt-broker_flow.csv",Mirai,10,192.168.1.205,101,0.62807
+test,"attack_malware_mirai-syn-flood_router--edge1,mqtt-broker_flow.csv",Mirai,11,192.168.1.105,97,0.603196
+test,"attack_malware_mirai-syn-flood_router--edge1,mqtt-broker_flow.csv",Mirai,12,192.168.1.84,94,0.584541
+test,"attack_malware_mirai-syn-flood_router--edge1,mqtt-broker_flow.csv",Mirai,13,192.168.1.80,94,0.584541
+test,"attack_malware_mirai-syn-flood_router--edge1,mqtt-broker_flow.csv",Mirai,14,192.168.1.15,89,0.553448
+test,"attack_malware_mirai-syn-flood_router--edge1,mqtt-broker_flow.csv",Mirai,15,192.168.1.57,88,0.54723
+test,"attack_malware_mirai-syn-flood_router--edge1,mqtt-broker_flow.csv",Mirai,16,192.168.1.88,88,0.54723
+test,"attack_malware_mirai-syn-flood_router--edge1,mqtt-broker_flow.csv",Mirai,17,192.168.1.12,88,0.54723
+test,"attack_malware_mirai-syn-flood_router--edge1,mqtt-broker_flow.csv",Mirai,18,192.168.1.14,86,0.534793
+test,"attack_malware_mirai-syn-flood_router--edge1,mqtt-broker_flow.csv",Mirai,19,192.168.1.13,85,0.528574
+test,"attack_malware_mirai-syn-flood_router--edge1,mqtt-broker_flow.csv",Mirai,20,192.168.1.10,85,0.528574
+test,"attack_malware_mirai-syn-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,1,192.168.1.13,13852,72.962865
+test,"attack_malware_mirai-syn-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,2,192.168.1.100,543,2.860153
+test,"attack_malware_mirai-syn-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,3,192.168.1.195,467,2.459837
+test,"attack_malware_mirai-syn-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,4,192.168.1.193,356,1.875165
+test,"attack_malware_mirai-syn-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,5,192.168.1.103,314,1.653937
+test,"attack_malware_mirai-syn-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,6,8.8.8.8,245,1.290492
+test,"attack_malware_mirai-syn-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,7,192.168.1.101,166,0.874375
+test,"attack_malware_mirai-syn-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,8,192.168.1.102,160,0.842771
+test,"attack_malware_mirai-syn-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,9,192.168.1.1,94,0.495128
+test,"attack_malware_mirai-syn-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,10,192.168.1.52,86,0.452989
+test,"attack_malware_mirai-syn-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,11,192.168.1.55,85,0.447722
+test,"attack_malware_mirai-syn-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,12,192.168.1.20,85,0.447722
+test,"attack_malware_mirai-syn-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,13,192.168.1.88,85,0.447722
+test,"attack_malware_mirai-syn-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,14,192.168.1.200,84,0.442455
+test,"attack_malware_mirai-syn-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,15,192.168.1.104,82,0.43192
+test,"attack_malware_mirai-syn-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,16,192.168.1.82,81,0.426653
+test,"attack_malware_mirai-syn-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,17,192.168.1.93,81,0.426653
+test,"attack_malware_mirai-syn-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,18,192.168.1.18,80,0.421385
+test,"attack_malware_mirai-syn-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,19,192.168.1.90,77,0.405583
+test,"attack_malware_mirai-syn-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,20,192.168.1.57,77,0.405583
+test,"attack_malware_mirai-syn-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,1,192.168.1.10,15863,74.698625
+test,"attack_malware_mirai-syn-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,2,192.168.1.100,584,2.750047
+test,"attack_malware_mirai-syn-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,3,192.168.1.195,430,2.024863
+test,"attack_malware_mirai-syn-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,4,192.168.1.193,355,1.67169
+test,"attack_malware_mirai-syn-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,5,192.168.1.103,335,1.57751
+test,"attack_malware_mirai-syn-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,6,8.8.8.8,255,1.200791
+test,"attack_malware_mirai-syn-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,7,192.168.1.101,185,0.871162
+test,"attack_malware_mirai-syn-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,8,192.168.1.102,171,0.805236
+test,"attack_malware_mirai-syn-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,9,192.168.1.80,93,0.437936
+test,"attack_malware_mirai-syn-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,10,192.168.1.15,93,0.437936
+test,"attack_malware_mirai-syn-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,11,192.168.1.55,91,0.428518
+test,"attack_malware_mirai-syn-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,12,192.168.1.52,91,0.428518
+test,"attack_malware_mirai-syn-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,13,192.168.1.13,90,0.423809
+test,"attack_malware_mirai-syn-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,14,192.168.1.1,88,0.414391
+test,"attack_malware_mirai-syn-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,15,192.168.1.20,87,0.409682
+test,"attack_malware_mirai-syn-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,16,192.168.1.87,87,0.409682
+test,"attack_malware_mirai-syn-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,17,192.168.1.14,86,0.404973
+test,"attack_malware_mirai-syn-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,18,192.168.1.105,86,0.404973
+test,"attack_malware_mirai-syn-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,19,192.168.1.17,85,0.400264
+test,"attack_malware_mirai-syn-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,20,192.168.1.50,84,0.395555
+test,"attack_malware_mirai-syn-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,1,192.168.1.57,12516,66.588636
+test,"attack_malware_mirai-syn-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,2,192.168.1.100,713,3.79336
+test,"attack_malware_mirai-syn-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,3,192.168.1.103,500,2.66014
+test,"attack_malware_mirai-syn-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,4,192.168.1.195,483,2.569696
+test,"attack_malware_mirai-syn-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,5,192.168.1.193,401,2.133433
+test,"attack_malware_mirai-syn-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,6,8.8.8.8,326,1.734412
+test,"attack_malware_mirai-syn-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,7,192.168.1.101,253,1.346031
+test,"attack_malware_mirai-syn-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,8,192.168.1.102,237,1.260907
+test,"attack_malware_mirai-syn-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,9,192.168.1.145,110,0.585231
+test,"attack_malware_mirai-syn-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,10,192.168.1.88,105,0.558629
+test,"attack_malware_mirai-syn-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,11,192.168.1.54,101,0.537348
+test,"attack_malware_mirai-syn-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,12,192.168.1.52,96,0.510747
+test,"attack_malware_mirai-syn-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,13,192.168.1.22,95,0.505427
+test,"attack_malware_mirai-syn-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,14,192.168.1.1,92,0.489466
+test,"attack_malware_mirai-syn-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,15,192.168.1.15,92,0.489466
+test,"attack_malware_mirai-syn-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,16,192.168.1.23,92,0.489466
+test,"attack_malware_mirai-syn-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,17,192.168.1.50,90,0.478825
+test,"attack_malware_mirai-syn-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,18,192.168.1.53,88,0.468185
+test,"attack_malware_mirai-syn-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,19,192.168.1.55,88,0.468185
+test,"attack_malware_mirai-syn-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,20,192.168.1.91,87,0.462864
+test,"attack_malware_mirai-syn-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,1,192.168.1.50,11838,71.45099
+test,"attack_malware_mirai-syn-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,2,192.168.1.100,511,3.084259
+test,"attack_malware_mirai-syn-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,3,192.168.1.195,409,2.468614
+test,"attack_malware_mirai-syn-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,4,192.168.1.193,300,1.810719
+test,"attack_malware_mirai-syn-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,5,192.168.1.103,286,1.726219
+test,"attack_malware_mirai-syn-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,6,8.8.8.8,223,1.345968
+test,"attack_malware_mirai-syn-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,7,192.168.1.102,182,1.098503
+test,"attack_malware_mirai-syn-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,8,192.168.1.101,138,0.832931
+test,"attack_malware_mirai-syn-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,9,192.168.1.90,86,0.519073
+test,"attack_malware_mirai-syn-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,10,192.168.1.200,81,0.488894
+test,"attack_malware_mirai-syn-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,11,192.168.1.87,80,0.482859
+test,"attack_malware_mirai-syn-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,12,192.168.1.105,78,0.470787
+test,"attack_malware_mirai-syn-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,13,192.168.1.14,78,0.470787
+test,"attack_malware_mirai-syn-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,14,192.168.1.81,77,0.464751
+test,"attack_malware_mirai-syn-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,15,192.168.1.54,76,0.458716
+test,"attack_malware_mirai-syn-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,16,192.168.1.10,74,0.446644
+test,"attack_malware_mirai-syn-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,17,192.168.1.57,74,0.446644
+test,"attack_malware_mirai-syn-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,18,192.168.1.205,73,0.440608
+test,"attack_malware_mirai-syn-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,19,192.168.1.104,72,0.434573
+test,"attack_malware_mirai-syn-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,20,192.168.1.1,72,0.434573
+test,"attack_malware_mirai-udp-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,1,192.168.1.205,9591,57.211883
+test,"attack_malware_mirai-udp-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,2,192.168.1.100,895,5.338821
+test,"attack_malware_mirai-udp-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,3,192.168.1.195,684,4.080172
+test,"attack_malware_mirai-udp-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,4,192.168.1.103,497,2.964686
+test,"attack_malware_mirai-udp-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,5,192.168.1.193,467,2.785731
+test,"attack_malware_mirai-udp-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,6,8.8.8.8,395,2.35624
+test,"attack_malware_mirai-udp-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,7,192.168.1.101,281,1.676211
+test,"attack_malware_mirai-udp-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,8,192.168.1.102,234,1.395848
+test,"attack_malware_mirai-udp-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,9,192.168.1.57,116,0.691959
+test,"attack_malware_mirai-udp-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,10,192.168.1.50,114,0.680029
+test,"attack_malware_mirai-udp-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,11,192.168.1.81,114,0.680029
+test,"attack_malware_mirai-udp-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,12,192.168.1.52,113,0.674063
+test,"attack_malware_mirai-udp-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,13,192.168.1.200,109,0.650203
+test,"attack_malware_mirai-udp-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,14,192.168.1.86,107,0.638272
+test,"attack_malware_mirai-udp-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,15,192.168.1.54,106,0.632307
+test,"attack_malware_mirai-udp-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,16,192.168.1.20,106,0.632307
+test,"attack_malware_mirai-udp-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,17,192.168.1.17,106,0.632307
+test,"attack_malware_mirai-udp-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,18,192.168.1.105,105,0.626342
+test,"attack_malware_mirai-udp-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,19,192.168.1.90,105,0.626342
+test,"attack_malware_mirai-udp-flood_ap--edge1,mqtt-broker_flow.csv",Mirai,20,192.168.1.53,104,0.620377
+test,"attack_malware_mirai-udp-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,1,192.168.1.21,8220,58.409721
+test,"attack_malware_mirai-udp-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,2,192.168.1.100,713,5.066439
+test,"attack_malware_mirai-udp-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,3,192.168.1.195,558,3.965039
+test,"attack_malware_mirai-udp-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,4,192.168.1.193,420,2.984438
+test,"attack_malware_mirai-udp-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,5,192.168.1.103,332,2.359127
+test,"attack_malware_mirai-udp-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,6,8.8.8.8,318,2.259646
+test,"attack_malware_mirai-udp-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,7,192.168.1.102,230,1.634335
+test,"attack_malware_mirai-udp-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,8,192.168.1.101,197,1.399844
+test,"attack_malware_mirai-udp-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,9,192.168.1.145,115,0.817168
+test,"attack_malware_mirai-udp-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,10,192.168.1.200,92,0.653734
+test,"attack_malware_mirai-udp-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,11,192.168.1.93,90,0.639522
+test,"attack_malware_mirai-udp-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,12,192.168.1.17,88,0.625311
+test,"attack_malware_mirai-udp-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,13,192.168.1.50,87,0.618205
+test,"attack_malware_mirai-udp-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,14,192.168.1.52,87,0.618205
+test,"attack_malware_mirai-udp-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,15,192.168.1.83,87,0.618205
+test,"attack_malware_mirai-udp-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,16,192.168.1.104,87,0.618205
+test,"attack_malware_mirai-udp-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,17,192.168.1.11,85,0.603993
+test,"attack_malware_mirai-udp-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,18,192.168.1.205,84,0.596888
+test,"attack_malware_mirai-udp-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,19,192.168.1.84,83,0.589782
+test,"attack_malware_mirai-udp-flood_motion-sensor--edge1,mqtt-broker_flow.csv",Mirai,20,192.168.1.80,83,0.589782
+test,attack_malware_mirai-udp-flood_mqtt-broker--edge1_flow.csv,Mirai,1,192.168.1.193,7056,51.851852
+test,attack_malware_mirai-udp-flood_mqtt-broker--edge1_flow.csv,Mirai,2,192.168.1.100,834,6.128748
+test,attack_malware_mirai-udp-flood_mqtt-broker--edge1_flow.csv,Mirai,3,192.168.1.103,672,4.938272
+test,attack_malware_mirai-udp-flood_mqtt-broker--edge1_flow.csv,Mirai,4,192.168.1.195,638,4.688419
+test,attack_malware_mirai-udp-flood_mqtt-broker--edge1_flow.csv,Mirai,5,8.8.8.8,373,2.741035
+test,attack_malware_mirai-udp-flood_mqtt-broker--edge1_flow.csv,Mirai,6,192.168.1.101,236,1.734274
+test,attack_malware_mirai-udp-flood_mqtt-broker--edge1_flow.csv,Mirai,7,192.168.1.102,205,1.506467
+test,attack_malware_mirai-udp-flood_mqtt-broker--edge1_flow.csv,Mirai,8,192.168.1.90,125,0.918577
+test,attack_malware_mirai-udp-flood_mqtt-broker--edge1_flow.csv,Mirai,9,192.168.1.80,104,0.764256
+test,attack_malware_mirai-udp-flood_mqtt-broker--edge1_flow.csv,Mirai,10,192.168.1.17,103,0.756908
+test,attack_malware_mirai-udp-flood_mqtt-broker--edge1_flow.csv,Mirai,11,192.168.1.50,103,0.756908
+test,attack_malware_mirai-udp-flood_mqtt-broker--edge1_flow.csv,Mirai,12,192.168.1.20,101,0.74221
+test,attack_malware_mirai-udp-flood_mqtt-broker--edge1_flow.csv,Mirai,13,192.168.1.81,101,0.74221
+test,attack_malware_mirai-udp-flood_mqtt-broker--edge1_flow.csv,Mirai,14,192.168.1.10,100,0.734862
+test,attack_malware_mirai-udp-flood_mqtt-broker--edge1_flow.csv,Mirai,15,192.168.1.83,100,0.734862
+test,attack_malware_mirai-udp-flood_mqtt-broker--edge1_flow.csv,Mirai,16,192.168.1.54,98,0.720165
+test,attack_malware_mirai-udp-flood_mqtt-broker--edge1_flow.csv,Mirai,17,192.168.1.13,97,0.712816
+test,attack_malware_mirai-udp-flood_mqtt-broker--edge1_flow.csv,Mirai,18,192.168.1.86,97,0.712816
+test,attack_malware_mirai-udp-flood_mqtt-broker--edge1_flow.csv,Mirai,19,192.168.1.200,96,0.705467
+test,attack_malware_mirai-udp-flood_mqtt-broker--edge1_flow.csv,Mirai,20,192.168.1.52,96,0.705467
+test,"attack_malware_mirai-udp-flood_router--edge1,mqtt-broker_flow.csv",Mirai,1,192.168.1.1,8470,58.13315
+test,"attack_malware_mirai-udp-flood_router--edge1,mqtt-broker_flow.csv",Mirai,2,192.168.1.100,702,4.818119
+test,"attack_malware_mirai-udp-flood_router--edge1,mqtt-broker_flow.csv",Mirai,3,192.168.1.195,568,3.898421
+test,"attack_malware_mirai-udp-flood_router--edge1,mqtt-broker_flow.csv",Mirai,4,192.168.1.193,430,2.95127
+test,"attack_malware_mirai-udp-flood_router--edge1,mqtt-broker_flow.csv",Mirai,5,192.168.1.103,412,2.827728
+test,"attack_malware_mirai-udp-flood_router--edge1,mqtt-broker_flow.csv",Mirai,6,8.8.8.8,315,2.161977
+test,"attack_malware_mirai-udp-flood_router--edge1,mqtt-broker_flow.csv",Mirai,7,192.168.1.102,217,1.489362
+test,"attack_malware_mirai-udp-flood_router--edge1,mqtt-broker_flow.csv",Mirai,8,192.168.1.101,175,1.201098
+test,"attack_malware_mirai-udp-flood_router--edge1,mqtt-broker_flow.csv",Mirai,9,192.168.1.13,101,0.693205
+test,"attack_malware_mirai-udp-flood_router--edge1,mqtt-broker_flow.csv",Mirai,10,192.168.1.85,96,0.658888
+test,"attack_malware_mirai-udp-flood_router--edge1,mqtt-broker_flow.csv",Mirai,11,192.168.1.92,94,0.645161
+test,"attack_malware_mirai-udp-flood_router--edge1,mqtt-broker_flow.csv",Mirai,12,192.168.1.145,94,0.645161
+test,"attack_malware_mirai-udp-flood_router--edge1,mqtt-broker_flow.csv",Mirai,13,192.168.1.55,93,0.638298
+test,"attack_malware_mirai-udp-flood_router--edge1,mqtt-broker_flow.csv",Mirai,14,192.168.1.105,93,0.638298
+test,"attack_malware_mirai-udp-flood_router--edge1,mqtt-broker_flow.csv",Mirai,15,192.168.1.18,92,0.631434
+test,"attack_malware_mirai-udp-flood_router--edge1,mqtt-broker_flow.csv",Mirai,16,192.168.1.57,91,0.624571
+test,"attack_malware_mirai-udp-flood_router--edge1,mqtt-broker_flow.csv",Mirai,17,192.168.1.86,91,0.624571
+test,"attack_malware_mirai-udp-flood_router--edge1,mqtt-broker_flow.csv",Mirai,18,192.168.1.52,91,0.624571
+test,"attack_malware_mirai-udp-flood_router--edge1,mqtt-broker_flow.csv",Mirai,19,192.168.1.104,89,0.610844
+test,"attack_malware_mirai-udp-flood_router--edge1,mqtt-broker_flow.csv",Mirai,20,192.168.1.22,88,0.603981
+test,"attack_malware_mirai-udp-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,1,192.168.1.13,9023,59.881869
+test,"attack_malware_mirai-udp-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,2,192.168.1.100,731,4.851341
+test,"attack_malware_mirai-udp-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,3,192.168.1.195,539,3.577117
+test,"attack_malware_mirai-udp-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,4,192.168.1.103,449,2.979825
+test,"attack_malware_mirai-udp-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,5,192.168.1.193,376,2.495354
+test,"attack_malware_mirai-udp-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,6,8.8.8.8,353,2.342713
+test,"attack_malware_mirai-udp-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,7,192.168.1.101,226,1.499867
+test,"attack_malware_mirai-udp-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,8,192.168.1.102,182,1.207858
+test,"attack_malware_mirai-udp-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,9,192.168.1.92,98,0.650385
+test,"attack_malware_mirai-udp-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,10,192.168.1.57,96,0.637112
+test,"attack_malware_mirai-udp-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,11,192.168.1.52,88,0.584019
+test,"attack_malware_mirai-udp-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,12,192.168.1.55,88,0.584019
+test,"attack_malware_mirai-udp-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,13,192.168.1.80,87,0.577383
+test,"attack_malware_mirai-udp-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,14,192.168.1.105,87,0.577383
+test,"attack_malware_mirai-udp-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,15,192.168.1.104,87,0.577383
+test,"attack_malware_mirai-udp-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,16,192.168.1.81,86,0.570746
+test,"attack_malware_mirai-udp-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,17,192.168.1.50,86,0.570746
+test,"attack_malware_mirai-udp-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,18,192.168.1.88,85,0.564109
+test,"attack_malware_mirai-udp-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,19,192.168.1.10,84,0.557473
+test,"attack_malware_mirai-udp-flood_steam-sensor--edge1,mqtt-broker_flow.csv",Mirai,20,192.168.1.53,82,0.5442
+test,"attack_malware_mirai-udp-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,1,192.168.1.10,8155,60.953733
+test,"attack_malware_mirai-udp-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,2,192.168.1.100,601,4.492115
+test,"attack_malware_mirai-udp-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,3,192.168.1.103,440,3.288736
+test,"attack_malware_mirai-udp-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,4,192.168.1.195,382,2.855221
+test,"attack_malware_mirai-udp-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,5,192.168.1.193,281,2.100306
+test,"attack_malware_mirai-udp-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,6,8.8.8.8,271,2.025562
+test,"attack_malware_mirai-udp-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,7,192.168.1.101,196,1.464982
+test,"attack_malware_mirai-udp-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,8,192.168.1.102,159,1.18843
+test,"attack_malware_mirai-udp-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,9,192.168.1.52,92,0.687645
+test,"attack_malware_mirai-udp-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,10,192.168.1.1,87,0.650273
+test,"attack_malware_mirai-udp-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,11,192.168.1.11,85,0.635324
+test,"attack_malware_mirai-udp-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,12,192.168.1.85,84,0.62785
+test,"attack_malware_mirai-udp-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,13,192.168.1.14,84,0.62785
+test,"attack_malware_mirai-udp-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,14,192.168.1.82,81,0.605426
+test,"attack_malware_mirai-udp-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,15,192.168.1.18,80,0.597952
+test,"attack_malware_mirai-udp-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,16,192.168.1.22,80,0.597952
+test,"attack_malware_mirai-udp-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,17,192.168.1.90,79,0.590478
+test,"attack_malware_mirai-udp-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,18,192.168.1.83,78,0.583003
+test,"attack_malware_mirai-udp-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,19,192.168.1.57,77,0.575529
+test,"attack_malware_mirai-udp-flood_weather-sensor--edge1,mqtt-broker_flow.csv",Mirai,20,192.168.1.91,77,0.575529
+test,"attack_malware_mirai-udp-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,1,192.168.1.57,8529,59.159326
+test,"attack_malware_mirai-udp-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,2,192.168.1.100,712,4.938614
+test,"attack_malware_mirai-udp-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,3,192.168.1.103,496,3.440383
+test,"attack_malware_mirai-udp-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,4,192.168.1.195,458,3.176805
+test,"attack_malware_mirai-udp-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,5,192.168.1.193,375,2.601096
+test,"attack_malware_mirai-udp-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,6,8.8.8.8,328,2.275092
+test,"attack_malware_mirai-udp-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,7,192.168.1.101,268,1.858917
+test,"attack_malware_mirai-udp-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,8,192.168.1.102,218,1.512104
+test,"attack_malware_mirai-udp-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,9,192.168.1.92,100,0.693626
+test,"attack_malware_mirai-udp-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,10,192.168.1.88,91,0.631199
+test,"attack_malware_mirai-udp-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,11,192.168.1.53,90,0.624263
+test,"attack_malware_mirai-udp-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,12,192.168.1.55,89,0.617327
+test,"attack_malware_mirai-udp-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,13,192.168.1.18,89,0.617327
+test,"attack_malware_mirai-udp-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,14,192.168.1.205,87,0.603454
+test,"attack_malware_mirai-udp-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,15,192.168.1.82,85,0.589582
+test,"attack_malware_mirai-udp-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,16,192.168.1.15,85,0.589582
+test,"attack_malware_mirai-udp-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,17,192.168.1.104,83,0.575709
+test,"attack_malware_mirai-udp-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,18,192.168.1.84,82,0.568773
+test,"attack_malware_mirai-udp-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,19,192.168.1.52,82,0.568773
+test,"attack_malware_mirai-udp-flood_wisenet-camera--edge1,mqtt-broker_flow.csv",Mirai,20,192.168.1.11,82,0.568773
+test,"attack_malware_mirai-udp-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,1,192.168.1.50,9013,60.812361
+test,"attack_malware_mirai-udp-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,2,192.168.1.100,688,4.642062
+test,"attack_malware_mirai-udp-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,3,192.168.1.193,511,3.447811
+test,"attack_malware_mirai-udp-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,4,192.168.1.195,428,2.887794
+test,"attack_malware_mirai-udp-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,5,192.168.1.103,362,2.44248
+test,"attack_malware_mirai-udp-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,6,8.8.8.8,307,2.071385
+test,"attack_malware_mirai-udp-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,7,192.168.1.102,201,1.356184
+test,"attack_malware_mirai-udp-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,8,192.168.1.101,199,1.342689
+test,"attack_malware_mirai-udp-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,9,192.168.1.1,97,0.654477
+test,"attack_malware_mirai-udp-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,10,192.168.1.105,93,0.627488
+test,"attack_malware_mirai-udp-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,11,192.168.1.13,91,0.613994
+test,"attack_malware_mirai-udp-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,12,192.168.1.83,88,0.593752
+test,"attack_malware_mirai-udp-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,13,192.168.1.104,88,0.593752
+test,"attack_malware_mirai-udp-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,14,192.168.1.55,87,0.587005
+test,"attack_malware_mirai-udp-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,15,192.168.1.205,87,0.587005
+test,"attack_malware_mirai-udp-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,16,192.168.1.23,87,0.587005
+test,"attack_malware_mirai-udp-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,17,192.168.1.91,87,0.587005
+test,"attack_malware_mirai-udp-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,18,192.168.1.19,86,0.580258
+test,"attack_malware_mirai-udp-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,19,192.168.1.145,85,0.573511
+test,"attack_malware_mirai-udp-flood_yi-camera--edge1,mqtt-broker_flow.csv",Mirai,20,192.168.1.90,85,0.573511
+test,attack_mitm_impersonation_accelerometer-sensor_flow.csv,MITM Impersonation,1,192.168.1.193,24,22.429907
+test,attack_mitm_impersonation_accelerometer-sensor_flow.csv,MITM Impersonation,2,255.255.255.255,16,14.953271
+test,attack_mitm_impersonation_accelerometer-sensor_flow.csv,MITM Impersonation,3,224.0.0.251,8,7.476636
+test,attack_mitm_impersonation_accelerometer-sensor_flow.csv,MITM Impersonation,4,8.8.8.8,5,4.672897
+test,attack_mitm_impersonation_accelerometer-sensor_flow.csv,MITM Impersonation,5,192.168.1.52,3,2.803738
+test,attack_mitm_impersonation_accelerometer-sensor_flow.csv,MITM Impersonation,6,192.168.1.1,2,1.869159
+test,attack_mitm_impersonation_accelerometer-sensor_flow.csv,MITM Impersonation,7,34.213.103.51,2,1.869159
+test,attack_mitm_impersonation_accelerometer-sensor_flow.csv,MITM Impersonation,8,129.146.120.172,2,1.869159
+test,attack_mitm_impersonation_accelerometer-sensor_flow.csv,MITM Impersonation,9,54.188.109.168,2,1.869159
+test,attack_mitm_impersonation_accelerometer-sensor_flow.csv,MITM Impersonation,10,207.34.48.31,2,1.869159
+test,attack_mitm_impersonation_accelerometer-sensor_flow.csv,MITM Impersonation,11,52.12.196.80,2,1.869159
+test,attack_mitm_impersonation_accelerometer-sensor_flow.csv,MITM Impersonation,12,239.255.255.250,2,1.869159
+test,attack_mitm_impersonation_accelerometer-sensor_flow.csv,MITM Impersonation,13,192.168.1.255,2,1.869159
+test,attack_mitm_impersonation_accelerometer-sensor_flow.csv,MITM Impersonation,14,35.162.13.26,2,1.869159
+test,attack_mitm_impersonation_accelerometer-sensor_flow.csv,MITM Impersonation,15,192.168.1.23,2,1.869159
+test,attack_mitm_impersonation_accelerometer-sensor_flow.csv,MITM Impersonation,16,192.168.1.80,2,1.869159
+test,attack_mitm_impersonation_accelerometer-sensor_flow.csv,MITM Impersonation,17,192.168.1.14,2,1.869159
+test,attack_mitm_impersonation_accelerometer-sensor_flow.csv,MITM Impersonation,18,192.168.1.21,2,1.869159
+test,attack_mitm_impersonation_accelerometer-sensor_flow.csv,MITM Impersonation,19,192.168.1.92,2,1.869159
+test,attack_mitm_impersonation_accelerometer-sensor_flow.csv,MITM Impersonation,20,192.168.1.55,2,1.869159
+test,attack_mitm_impersonation_flame-sensor_flow.csv,MITM Impersonation,1,192.168.1.193,24,30.769231
+test,attack_mitm_impersonation_flame-sensor_flow.csv,MITM Impersonation,2,255.255.255.255,15,19.230769
+test,attack_mitm_impersonation_flame-sensor_flow.csv,MITM Impersonation,3,192.168.1.52,4,5.128205
+test,attack_mitm_impersonation_flame-sensor_flow.csv,MITM Impersonation,4,192.168.1.1,2,2.564103
+test,attack_mitm_impersonation_flame-sensor_flow.csv,MITM Impersonation,5,34.213.103.51,2,2.564103
+test,attack_mitm_impersonation_flame-sensor_flow.csv,MITM Impersonation,6,54.188.109.168,2,2.564103
+test,attack_mitm_impersonation_flame-sensor_flow.csv,MITM Impersonation,7,52.12.196.80,2,2.564103
+test,attack_mitm_impersonation_flame-sensor_flow.csv,MITM Impersonation,8,239.255.255.250,2,2.564103
+test,attack_mitm_impersonation_flame-sensor_flow.csv,MITM Impersonation,9,192.168.1.255,2,2.564103
+test,attack_mitm_impersonation_flame-sensor_flow.csv,MITM Impersonation,10,35.162.13.26,2,2.564103
+test,attack_mitm_impersonation_flame-sensor_flow.csv,MITM Impersonation,11,192.168.1.205,2,2.564103
+test,attack_mitm_impersonation_flame-sensor_flow.csv,MITM Impersonation,12,224.0.0.251,2,2.564103
+test,attack_mitm_impersonation_flame-sensor_flow.csv,MITM Impersonation,13,192.168.230.7,1,1.282051
+test,attack_mitm_impersonation_flame-sensor_flow.csv,MITM Impersonation,14,ff02::1:2,1,1.282051
+test,attack_mitm_impersonation_flame-sensor_flow.csv,MITM Impersonation,15,192.168.1.54,1,1.282051
+test,attack_mitm_impersonation_flame-sensor_flow.csv,MITM Impersonation,16,47.251.61.239,1,1.282051
+test,attack_mitm_impersonation_flame-sensor_flow.csv,MITM Impersonation,17,129.146.59.211,1,1.282051
+test,attack_mitm_impersonation_flame-sensor_flow.csv,MITM Impersonation,18,192.168.1.55,1,1.282051
+test,attack_mitm_impersonation_flame-sensor_flow.csv,MITM Impersonation,19,34.210.19.179,1,1.282051
+test,attack_mitm_impersonation_flame-sensor_flow.csv,MITM Impersonation,20,ff02::c,1,1.282051
+test,attack_mitm_impersonation_gas-sensor_flow.csv,MITM Impersonation,1,192.168.1.193,24,32.0
+test,attack_mitm_impersonation_gas-sensor_flow.csv,MITM Impersonation,2,255.255.255.255,16,21.333333
+test,attack_mitm_impersonation_gas-sensor_flow.csv,MITM Impersonation,3,192.168.1.52,3,4.0
+test,attack_mitm_impersonation_gas-sensor_flow.csv,MITM Impersonation,4,192.168.1.1,2,2.666667
+test,attack_mitm_impersonation_gas-sensor_flow.csv,MITM Impersonation,5,192.168.1.255,2,2.666667
+test,attack_mitm_impersonation_gas-sensor_flow.csv,MITM Impersonation,6,239.255.255.250,2,2.666667
+test,attack_mitm_impersonation_gas-sensor_flow.csv,MITM Impersonation,7,129.146.120.172,2,2.666667
+test,attack_mitm_impersonation_gas-sensor_flow.csv,MITM Impersonation,8,34.213.103.51,2,2.666667
+test,attack_mitm_impersonation_gas-sensor_flow.csv,MITM Impersonation,9,54.188.109.168,2,2.666667
+test,attack_mitm_impersonation_gas-sensor_flow.csv,MITM Impersonation,10,35.162.13.26,2,2.666667
+test,attack_mitm_impersonation_gas-sensor_flow.csv,MITM Impersonation,11,52.12.196.80,2,2.666667
+test,attack_mitm_impersonation_gas-sensor_flow.csv,MITM Impersonation,12,192.168.230.7,1,1.333333
+test,attack_mitm_impersonation_gas-sensor_flow.csv,MITM Impersonation,13,54.148.153.241,1,1.333333
+test,attack_mitm_impersonation_gas-sensor_flow.csv,MITM Impersonation,14,18.225.0.144,1,1.333333
+test,attack_mitm_impersonation_gas-sensor_flow.csv,MITM Impersonation,15,ff02::c,1,1.333333
+test,attack_mitm_impersonation_gas-sensor_flow.csv,MITM Impersonation,16,129.146.59.211,1,1.333333
+test,attack_mitm_impersonation_gas-sensor_flow.csv,MITM Impersonation,17,34.211.189.2,1,1.333333
+test,attack_mitm_impersonation_gas-sensor_flow.csv,MITM Impersonation,18,47.251.61.239,1,1.333333
+test,attack_mitm_impersonation_gas-sensor_flow.csv,MITM Impersonation,19,ff02::1:2,1,1.333333
+test,attack_mitm_impersonation_gas-sensor_flow.csv,MITM Impersonation,20,47.254.42.218,1,1.333333
+test,attack_mitm_impersonation_light-sensor_flow.csv,MITM Impersonation,1,192.168.1.193,24,30.769231
+test,attack_mitm_impersonation_light-sensor_flow.csv,MITM Impersonation,2,255.255.255.255,15,19.230769
+test,attack_mitm_impersonation_light-sensor_flow.csv,MITM Impersonation,3,192.168.1.1,4,5.128205
+test,attack_mitm_impersonation_light-sensor_flow.csv,MITM Impersonation,4,192.168.1.52,3,3.846154
+test,attack_mitm_impersonation_light-sensor_flow.csv,MITM Impersonation,5,35.162.13.26,2,2.564103
+test,attack_mitm_impersonation_light-sensor_flow.csv,MITM Impersonation,6,192.168.1.255,2,2.564103
+test,attack_mitm_impersonation_light-sensor_flow.csv,MITM Impersonation,7,239.255.255.250,2,2.564103
+test,attack_mitm_impersonation_light-sensor_flow.csv,MITM Impersonation,8,129.146.120.172,2,2.564103
+test,attack_mitm_impersonation_light-sensor_flow.csv,MITM Impersonation,9,224.0.0.251,2,2.564103
+test,attack_mitm_impersonation_light-sensor_flow.csv,MITM Impersonation,10,34.213.103.51,2,2.564103
+test,attack_mitm_impersonation_light-sensor_flow.csv,MITM Impersonation,11,54.188.109.168,2,2.564103
+test,attack_mitm_impersonation_light-sensor_flow.csv,MITM Impersonation,12,52.12.196.80,2,2.564103
+test,attack_mitm_impersonation_light-sensor_flow.csv,MITM Impersonation,13,192.168.230.7,1,1.282051
+test,attack_mitm_impersonation_light-sensor_flow.csv,MITM Impersonation,14,47.251.61.239,1,1.282051
+test,attack_mitm_impersonation_light-sensor_flow.csv,MITM Impersonation,15,ff02::1:2,1,1.282051
+test,attack_mitm_impersonation_light-sensor_flow.csv,MITM Impersonation,16,ff02::c,1,1.282051
+test,attack_mitm_impersonation_light-sensor_flow.csv,MITM Impersonation,17,54.148.153.241,1,1.282051
+test,attack_mitm_impersonation_light-sensor_flow.csv,MITM Impersonation,18,129.146.59.211,1,1.282051
+test,attack_mitm_impersonation_light-sensor_flow.csv,MITM Impersonation,19,47.254.42.218,1,1.282051
+test,attack_mitm_impersonation_light-sensor_flow.csv,MITM Impersonation,20,47.252.29.207,1,1.282051
+test,attack_mitm_impersonation_motion-sensor_flow.csv,MITM Impersonation,1,192.168.1.193,24,31.168831
+test,attack_mitm_impersonation_motion-sensor_flow.csv,MITM Impersonation,2,255.255.255.255,15,19.480519
+test,attack_mitm_impersonation_motion-sensor_flow.csv,MITM Impersonation,3,192.168.1.1,3,3.896104
+test,attack_mitm_impersonation_motion-sensor_flow.csv,MITM Impersonation,4,239.255.255.250,3,3.896104
+test,attack_mitm_impersonation_motion-sensor_flow.csv,MITM Impersonation,5,192.168.1.52,3,3.896104
+test,attack_mitm_impersonation_motion-sensor_flow.csv,MITM Impersonation,6,129.146.120.172,2,2.597403
+test,attack_mitm_impersonation_motion-sensor_flow.csv,MITM Impersonation,7,34.213.103.51,2,2.597403
+test,attack_mitm_impersonation_motion-sensor_flow.csv,MITM Impersonation,8,54.188.109.168,2,2.597403
+test,attack_mitm_impersonation_motion-sensor_flow.csv,MITM Impersonation,9,52.12.196.80,2,2.597403
+test,attack_mitm_impersonation_motion-sensor_flow.csv,MITM Impersonation,10,192.168.1.255,2,2.597403
+test,attack_mitm_impersonation_motion-sensor_flow.csv,MITM Impersonation,11,35.162.13.26,2,2.597403
+test,attack_mitm_impersonation_motion-sensor_flow.csv,MITM Impersonation,12,192.168.230.7,1,1.298701
+test,attack_mitm_impersonation_motion-sensor_flow.csv,MITM Impersonation,13,129.146.59.211,1,1.298701
+test,attack_mitm_impersonation_motion-sensor_flow.csv,MITM Impersonation,14,192.168.1.54,1,1.298701
+test,attack_mitm_impersonation_motion-sensor_flow.csv,MITM Impersonation,15,192.168.1.55,1,1.298701
+test,attack_mitm_impersonation_motion-sensor_flow.csv,MITM Impersonation,16,ff02::1:2,1,1.298701
+test,attack_mitm_impersonation_motion-sensor_flow.csv,MITM Impersonation,17,47.251.61.239,1,1.298701
+test,attack_mitm_impersonation_motion-sensor_flow.csv,MITM Impersonation,18,47.254.42.218,1,1.298701
+test,attack_mitm_impersonation_motion-sensor_flow.csv,MITM Impersonation,19,47.252.29.207,1,1.298701
+test,attack_mitm_impersonation_motion-sensor_flow.csv,MITM Impersonation,20,8.219.125.49,1,1.298701
+test,attack_mitm_impersonation_proximity-collision-sensor_flow.csv,MITM Impersonation,1,192.168.1.193,24,26.086957
+test,attack_mitm_impersonation_proximity-collision-sensor_flow.csv,MITM Impersonation,2,255.255.255.255,15,16.304348
+test,attack_mitm_impersonation_proximity-collision-sensor_flow.csv,MITM Impersonation,3,224.0.0.251,8,8.695652
+test,attack_mitm_impersonation_proximity-collision-sensor_flow.csv,MITM Impersonation,4,192.168.1.52,4,4.347826
+test,attack_mitm_impersonation_proximity-collision-sensor_flow.csv,MITM Impersonation,5,192.168.1.1,2,2.173913
+test,attack_mitm_impersonation_proximity-collision-sensor_flow.csv,MITM Impersonation,6,192.168.1.86,2,2.173913
+test,attack_mitm_impersonation_proximity-collision-sensor_flow.csv,MITM Impersonation,7,35.162.13.26,2,2.173913
+test,attack_mitm_impersonation_proximity-collision-sensor_flow.csv,MITM Impersonation,8,239.255.255.250,2,2.173913
+test,attack_mitm_impersonation_proximity-collision-sensor_flow.csv,MITM Impersonation,9,192.168.1.255,2,2.173913
+test,attack_mitm_impersonation_proximity-collision-sensor_flow.csv,MITM Impersonation,10,192.168.1.195,2,2.173913
+test,attack_mitm_impersonation_proximity-collision-sensor_flow.csv,MITM Impersonation,11,192.168.1.57,2,2.173913
+test,attack_mitm_impersonation_proximity-collision-sensor_flow.csv,MITM Impersonation,12,34.213.103.51,2,2.173913
+test,attack_mitm_impersonation_proximity-collision-sensor_flow.csv,MITM Impersonation,13,54.188.109.168,2,2.173913
+test,attack_mitm_impersonation_proximity-collision-sensor_flow.csv,MITM Impersonation,14,52.12.196.80,2,2.173913
+test,attack_mitm_impersonation_proximity-collision-sensor_flow.csv,MITM Impersonation,15,8.8.8.8,2,2.173913
+test,attack_mitm_impersonation_proximity-collision-sensor_flow.csv,MITM Impersonation,16,54.69.37.156,1,1.086957
+test,attack_mitm_impersonation_proximity-collision-sensor_flow.csv,MITM Impersonation,17,47.254.42.218,1,1.086957
+test,attack_mitm_impersonation_proximity-collision-sensor_flow.csv,MITM Impersonation,18,47.252.29.207,1,1.086957
+test,attack_mitm_impersonation_proximity-collision-sensor_flow.csv,MITM Impersonation,19,8.219.125.49,1,1.086957
+test,attack_mitm_impersonation_proximity-collision-sensor_flow.csv,MITM Impersonation,20,192.168.230.7,1,1.086957
+test,attack_mitm_impersonation_rfid-sensor_flow.csv,MITM Impersonation,1,192.168.1.193,24,30.0
+test,attack_mitm_impersonation_rfid-sensor_flow.csv,MITM Impersonation,2,255.255.255.255,15,18.75
+test,attack_mitm_impersonation_rfid-sensor_flow.csv,MITM Impersonation,3,192.168.1.1,4,5.0
+test,attack_mitm_impersonation_rfid-sensor_flow.csv,MITM Impersonation,4,192.168.1.52,3,3.75
+test,attack_mitm_impersonation_rfid-sensor_flow.csv,MITM Impersonation,5,129.146.120.172,2,2.5
+test,attack_mitm_impersonation_rfid-sensor_flow.csv,MITM Impersonation,6,224.0.0.251,2,2.5
+test,attack_mitm_impersonation_rfid-sensor_flow.csv,MITM Impersonation,7,34.213.103.51,2,2.5
+test,attack_mitm_impersonation_rfid-sensor_flow.csv,MITM Impersonation,8,54.188.109.168,2,2.5
+test,attack_mitm_impersonation_rfid-sensor_flow.csv,MITM Impersonation,9,52.12.196.80,2,2.5
+test,attack_mitm_impersonation_rfid-sensor_flow.csv,MITM Impersonation,10,239.255.255.250,2,2.5
+test,attack_mitm_impersonation_rfid-sensor_flow.csv,MITM Impersonation,11,35.162.13.26,2,2.5
+test,attack_mitm_impersonation_rfid-sensor_flow.csv,MITM Impersonation,12,8.8.8.8,2,2.5
+test,attack_mitm_impersonation_rfid-sensor_flow.csv,MITM Impersonation,13,192.168.230.7,1,1.25
+test,attack_mitm_impersonation_rfid-sensor_flow.csv,MITM Impersonation,14,47.254.42.218,1,1.25
+test,attack_mitm_impersonation_rfid-sensor_flow.csv,MITM Impersonation,15,47.252.29.207,1,1.25
+test,attack_mitm_impersonation_rfid-sensor_flow.csv,MITM Impersonation,16,8.219.125.49,1,1.25
+test,attack_mitm_impersonation_rfid-sensor_flow.csv,MITM Impersonation,17,54.148.153.241,1,1.25
+test,attack_mitm_impersonation_rfid-sensor_flow.csv,MITM Impersonation,18,34.211.189.2,1,1.25
+test,attack_mitm_impersonation_rfid-sensor_flow.csv,MITM Impersonation,19,129.146.59.211,1,1.25
+test,attack_mitm_impersonation_rfid-sensor_flow.csv,MITM Impersonation,20,18.225.0.144,1,1.25
+test,attack_mitm_impersonation_soil-sensor_flow.csv,MITM Impersonation,1,192.168.1.193,24,31.578947
+test,attack_mitm_impersonation_soil-sensor_flow.csv,MITM Impersonation,2,255.255.255.255,16,21.052632
+test,attack_mitm_impersonation_soil-sensor_flow.csv,MITM Impersonation,3,239.255.255.250,3,3.947368
+test,attack_mitm_impersonation_soil-sensor_flow.csv,MITM Impersonation,4,192.168.1.52,3,3.947368
+test,attack_mitm_impersonation_soil-sensor_flow.csv,MITM Impersonation,5,192.168.1.1,2,2.631579
+test,attack_mitm_impersonation_soil-sensor_flow.csv,MITM Impersonation,6,192.168.1.255,2,2.631579
+test,attack_mitm_impersonation_soil-sensor_flow.csv,MITM Impersonation,7,129.146.120.172,2,2.631579
+test,attack_mitm_impersonation_soil-sensor_flow.csv,MITM Impersonation,8,34.213.103.51,2,2.631579
+test,attack_mitm_impersonation_soil-sensor_flow.csv,MITM Impersonation,9,54.188.109.168,2,2.631579
+test,attack_mitm_impersonation_soil-sensor_flow.csv,MITM Impersonation,10,35.162.13.26,2,2.631579
+test,attack_mitm_impersonation_soil-sensor_flow.csv,MITM Impersonation,11,52.12.196.80,2,2.631579
+test,attack_mitm_impersonation_soil-sensor_flow.csv,MITM Impersonation,12,3.214.41.87,1,1.315789
+test,attack_mitm_impersonation_soil-sensor_flow.csv,MITM Impersonation,13,192.168.230.7,1,1.315789
+test,attack_mitm_impersonation_soil-sensor_flow.csv,MITM Impersonation,14,ff02::1:2,1,1.315789
+test,attack_mitm_impersonation_soil-sensor_flow.csv,MITM Impersonation,15,47.251.61.239,1,1.315789
+test,attack_mitm_impersonation_soil-sensor_flow.csv,MITM Impersonation,16,18.225.0.144,1,1.315789
+test,attack_mitm_impersonation_soil-sensor_flow.csv,MITM Impersonation,17,129.146.59.211,1,1.315789
+test,attack_mitm_impersonation_soil-sensor_flow.csv,MITM Impersonation,18,192.168.1.55,1,1.315789
+test,attack_mitm_impersonation_soil-sensor_flow.csv,MITM Impersonation,19,54.148.153.241,1,1.315789
+test,attack_mitm_impersonation_soil-sensor_flow.csv,MITM Impersonation,20,ff02::c,1,1.315789
+test,attack_mitm_impersonation_sound-sensor_flow.csv,MITM Impersonation,1,192.168.1.193,24,25.806452
+test,attack_mitm_impersonation_sound-sensor_flow.csv,MITM Impersonation,2,255.255.255.255,15,16.129032
+test,attack_mitm_impersonation_sound-sensor_flow.csv,MITM Impersonation,3,224.0.0.251,8,8.602151
+test,attack_mitm_impersonation_sound-sensor_flow.csv,MITM Impersonation,4,192.168.1.52,5,5.376344
+test,attack_mitm_impersonation_sound-sensor_flow.csv,MITM Impersonation,5,239.255.255.250,3,3.225806
+test,attack_mitm_impersonation_sound-sensor_flow.csv,MITM Impersonation,6,192.168.1.1,2,2.150538
+test,attack_mitm_impersonation_sound-sensor_flow.csv,MITM Impersonation,7,34.213.103.51,2,2.150538
+test,attack_mitm_impersonation_sound-sensor_flow.csv,MITM Impersonation,8,54.188.109.168,2,2.150538
+test,attack_mitm_impersonation_sound-sensor_flow.csv,MITM Impersonation,9,192.168.1.255,2,2.150538
+test,attack_mitm_impersonation_sound-sensor_flow.csv,MITM Impersonation,10,35.162.13.26,2,2.150538
+test,attack_mitm_impersonation_sound-sensor_flow.csv,MITM Impersonation,11,52.12.196.80,2,2.150538
+test,attack_mitm_impersonation_sound-sensor_flow.csv,MITM Impersonation,12,192.168.1.23,2,2.150538
+test,attack_mitm_impersonation_sound-sensor_flow.csv,MITM Impersonation,13,192.168.1.21,2,2.150538
+test,attack_mitm_impersonation_sound-sensor_flow.csv,MITM Impersonation,14,192.168.1.14,2,2.150538
+test,attack_mitm_impersonation_sound-sensor_flow.csv,MITM Impersonation,15,192.168.1.80,2,2.150538
+test,attack_mitm_impersonation_sound-sensor_flow.csv,MITM Impersonation,16,54.69.37.156,1,1.075269
+test,attack_mitm_impersonation_sound-sensor_flow.csv,MITM Impersonation,17,129.146.59.211,1,1.075269
+test,attack_mitm_impersonation_sound-sensor_flow.csv,MITM Impersonation,18,192.168.230.7,1,1.075269
+test,attack_mitm_impersonation_sound-sensor_flow.csv,MITM Impersonation,19,34.211.189.2,1,1.075269
+test,attack_mitm_impersonation_sound-sensor_flow.csv,MITM Impersonation,20,ff02::1:2,1,1.075269
+test,attack_mitm_impersonation_steam-sensor_flow.csv,MITM Impersonation,1,192.168.1.193,24,28.235294
+test,attack_mitm_impersonation_steam-sensor_flow.csv,MITM Impersonation,2,255.255.255.255,15,17.647059
+test,attack_mitm_impersonation_steam-sensor_flow.csv,MITM Impersonation,3,192.168.1.1,6,7.058824
+test,attack_mitm_impersonation_steam-sensor_flow.csv,MITM Impersonation,4,224.0.0.251,4,4.705882
+test,attack_mitm_impersonation_steam-sensor_flow.csv,MITM Impersonation,5,192.168.1.52,4,4.705882
+test,attack_mitm_impersonation_steam-sensor_flow.csv,MITM Impersonation,6,35.162.13.26,2,2.352941
+test,attack_mitm_impersonation_steam-sensor_flow.csv,MITM Impersonation,7,192.168.1.255,2,2.352941
+test,attack_mitm_impersonation_steam-sensor_flow.csv,MITM Impersonation,8,239.255.255.250,2,2.352941
+test,attack_mitm_impersonation_steam-sensor_flow.csv,MITM Impersonation,9,34.213.103.51,2,2.352941
+test,attack_mitm_impersonation_steam-sensor_flow.csv,MITM Impersonation,10,54.188.109.168,2,2.352941
+test,attack_mitm_impersonation_steam-sensor_flow.csv,MITM Impersonation,11,52.12.196.80,2,2.352941
+test,attack_mitm_impersonation_steam-sensor_flow.csv,MITM Impersonation,12,54.69.37.156,1,1.176471
+test,attack_mitm_impersonation_steam-sensor_flow.csv,MITM Impersonation,13,192.168.1.55,1,1.176471
+test,attack_mitm_impersonation_steam-sensor_flow.csv,MITM Impersonation,14,192.168.230.7,1,1.176471
+test,attack_mitm_impersonation_steam-sensor_flow.csv,MITM Impersonation,15,192.168.1.54,1,1.176471
+test,attack_mitm_impersonation_steam-sensor_flow.csv,MITM Impersonation,16,ff02::1:2,1,1.176471
+test,attack_mitm_impersonation_steam-sensor_flow.csv,MITM Impersonation,17,47.251.61.239,1,1.176471
+test,attack_mitm_impersonation_steam-sensor_flow.csv,MITM Impersonation,18,129.146.59.211,1,1.176471
+test,attack_mitm_impersonation_steam-sensor_flow.csv,MITM Impersonation,19,54.148.153.241,1,1.176471
+test,attack_mitm_impersonation_steam-sensor_flow.csv,MITM Impersonation,20,ff02::c,1,1.176471
+test,attack_mitm_impersonation_ultrasonic-sensor_flow.csv,MITM Impersonation,1,192.168.1.193,24,31.168831
+test,attack_mitm_impersonation_ultrasonic-sensor_flow.csv,MITM Impersonation,2,255.255.255.255,15,19.480519
+test,attack_mitm_impersonation_ultrasonic-sensor_flow.csv,MITM Impersonation,3,192.168.1.52,3,3.896104
+test,attack_mitm_impersonation_ultrasonic-sensor_flow.csv,MITM Impersonation,4,192.168.1.1,2,2.597403
+test,attack_mitm_impersonation_ultrasonic-sensor_flow.csv,MITM Impersonation,5,35.162.13.26,2,2.597403
+test,attack_mitm_impersonation_ultrasonic-sensor_flow.csv,MITM Impersonation,6,47.254.42.218,2,2.597403
+test,attack_mitm_impersonation_ultrasonic-sensor_flow.csv,MITM Impersonation,7,47.252.29.207,2,2.597403
+test,attack_mitm_impersonation_ultrasonic-sensor_flow.csv,MITM Impersonation,8,8.219.125.49,2,2.597403
+test,attack_mitm_impersonation_ultrasonic-sensor_flow.csv,MITM Impersonation,9,192.168.1.255,2,2.597403
+test,attack_mitm_impersonation_ultrasonic-sensor_flow.csv,MITM Impersonation,10,239.255.255.250,2,2.597403
+test,attack_mitm_impersonation_ultrasonic-sensor_flow.csv,MITM Impersonation,11,129.146.120.172,2,2.597403
+test,attack_mitm_impersonation_ultrasonic-sensor_flow.csv,MITM Impersonation,12,34.213.103.51,2,2.597403
+test,attack_mitm_impersonation_ultrasonic-sensor_flow.csv,MITM Impersonation,13,54.188.109.168,2,2.597403
+test,attack_mitm_impersonation_ultrasonic-sensor_flow.csv,MITM Impersonation,14,52.12.196.80,2,2.597403
+test,attack_mitm_impersonation_ultrasonic-sensor_flow.csv,MITM Impersonation,15,192.168.1.54,1,1.298701
+test,attack_mitm_impersonation_ultrasonic-sensor_flow.csv,MITM Impersonation,16,192.168.230.7,1,1.298701
+test,attack_mitm_impersonation_ultrasonic-sensor_flow.csv,MITM Impersonation,17,52.43.232.245,1,1.298701
+test,attack_mitm_impersonation_ultrasonic-sensor_flow.csv,MITM Impersonation,18,192.168.1.55,1,1.298701
+test,attack_mitm_impersonation_ultrasonic-sensor_flow.csv,MITM Impersonation,19,129.146.59.211,1,1.298701
+test,attack_mitm_impersonation_ultrasonic-sensor_flow.csv,MITM Impersonation,20,47.251.61.239,1,1.298701
+test,attack_mitm_impersonation_vibration-sensor_flow.csv,MITM Impersonation,1,192.168.1.193,24,21.052632
+test,attack_mitm_impersonation_vibration-sensor_flow.csv,MITM Impersonation,2,224.0.0.251,20,17.54386
+test,attack_mitm_impersonation_vibration-sensor_flow.csv,MITM Impersonation,3,255.255.255.255,16,14.035088
+test,attack_mitm_impersonation_vibration-sensor_flow.csv,MITM Impersonation,4,192.168.1.52,4,3.508772
+test,attack_mitm_impersonation_vibration-sensor_flow.csv,MITM Impersonation,5,192.168.1.1,2,1.754386
+test,attack_mitm_impersonation_vibration-sensor_flow.csv,MITM Impersonation,6,54.188.109.168,2,1.754386
+test,attack_mitm_impersonation_vibration-sensor_flow.csv,MITM Impersonation,7,192.168.1.255,2,1.754386
+test,attack_mitm_impersonation_vibration-sensor_flow.csv,MITM Impersonation,8,52.12.196.80,2,1.754386
+test,attack_mitm_impersonation_vibration-sensor_flow.csv,MITM Impersonation,9,35.162.13.26,2,1.754386
+test,attack_mitm_impersonation_vibration-sensor_flow.csv,MITM Impersonation,10,239.255.255.250,2,1.754386
+test,attack_mitm_impersonation_vibration-sensor_flow.csv,MITM Impersonation,11,192.168.1.84,2,1.754386
+test,attack_mitm_impersonation_vibration-sensor_flow.csv,MITM Impersonation,12,192.168.1.10,2,1.754386
+test,attack_mitm_impersonation_vibration-sensor_flow.csv,MITM Impersonation,13,192.168.1.13,2,1.754386
+test,attack_mitm_impersonation_vibration-sensor_flow.csv,MITM Impersonation,14,192.168.1.12,2,1.754386
+test,attack_mitm_impersonation_vibration-sensor_flow.csv,MITM Impersonation,15,192.168.1.83,2,1.754386
+test,attack_mitm_impersonation_vibration-sensor_flow.csv,MITM Impersonation,16,192.168.1.93,2,1.754386
+test,attack_mitm_impersonation_vibration-sensor_flow.csv,MITM Impersonation,17,192.168.1.86,2,1.754386
+test,attack_mitm_impersonation_vibration-sensor_flow.csv,MITM Impersonation,18,192.168.1.195,2,1.754386
+test,attack_mitm_impersonation_vibration-sensor_flow.csv,MITM Impersonation,19,192.168.1.57,2,1.754386
+test,attack_mitm_impersonation_vibration-sensor_flow.csv,MITM Impersonation,20,34.213.103.51,2,1.754386
+test,attack_mitm_impersonation_water-sensor_flow.csv,MITM Impersonation,1,192.168.1.193,24,21.428571
+test,attack_mitm_impersonation_water-sensor_flow.csv,MITM Impersonation,2,224.0.0.251,20,17.857143
+test,attack_mitm_impersonation_water-sensor_flow.csv,MITM Impersonation,3,255.255.255.255,15,13.392857
+test,attack_mitm_impersonation_water-sensor_flow.csv,MITM Impersonation,4,192.168.1.52,5,4.464286
+test,attack_mitm_impersonation_water-sensor_flow.csv,MITM Impersonation,5,192.168.1.1,2,1.785714
+test,attack_mitm_impersonation_water-sensor_flow.csv,MITM Impersonation,6,239.255.255.250,2,1.785714
+test,attack_mitm_impersonation_water-sensor_flow.csv,MITM Impersonation,7,34.213.103.51,2,1.785714
+test,attack_mitm_impersonation_water-sensor_flow.csv,MITM Impersonation,8,54.188.109.168,2,1.785714
+test,attack_mitm_impersonation_water-sensor_flow.csv,MITM Impersonation,9,35.162.13.26,2,1.785714
+test,attack_mitm_impersonation_water-sensor_flow.csv,MITM Impersonation,10,192.168.1.255,2,1.785714
+test,attack_mitm_impersonation_water-sensor_flow.csv,MITM Impersonation,11,52.12.196.80,2,1.785714
+test,attack_mitm_impersonation_water-sensor_flow.csv,MITM Impersonation,12,192.168.1.84,2,1.785714
+test,attack_mitm_impersonation_water-sensor_flow.csv,MITM Impersonation,13,192.168.1.83,2,1.785714
+test,attack_mitm_impersonation_water-sensor_flow.csv,MITM Impersonation,14,192.168.1.12,2,1.785714
+test,attack_mitm_impersonation_water-sensor_flow.csv,MITM Impersonation,15,192.168.1.13,2,1.785714
+test,attack_mitm_impersonation_water-sensor_flow.csv,MITM Impersonation,16,192.168.1.93,2,1.785714
+test,attack_mitm_impersonation_water-sensor_flow.csv,MITM Impersonation,17,192.168.1.10,2,1.785714
+test,attack_mitm_impersonation_water-sensor_flow.csv,MITM Impersonation,18,192.168.1.86,2,1.785714
+test,attack_mitm_impersonation_water-sensor_flow.csv,MITM Impersonation,19,192.168.1.195,2,1.785714
+test,attack_mitm_impersonation_water-sensor_flow.csv,MITM Impersonation,20,192.168.1.57,2,1.785714
+test,attack_mitm_impersonation_weather-sensor_flow.csv,MITM Impersonation,1,192.168.1.193,24,30.769231
+test,attack_mitm_impersonation_weather-sensor_flow.csv,MITM Impersonation,2,255.255.255.255,15,19.230769
+test,attack_mitm_impersonation_weather-sensor_flow.csv,MITM Impersonation,3,192.168.1.52,5,6.410256
+test,attack_mitm_impersonation_weather-sensor_flow.csv,MITM Impersonation,4,192.168.1.1,2,2.564103
+test,attack_mitm_impersonation_weather-sensor_flow.csv,MITM Impersonation,5,239.255.255.250,2,2.564103
+test,attack_mitm_impersonation_weather-sensor_flow.csv,MITM Impersonation,6,34.213.103.51,2,2.564103
+test,attack_mitm_impersonation_weather-sensor_flow.csv,MITM Impersonation,7,54.188.109.168,2,2.564103
+test,attack_mitm_impersonation_weather-sensor_flow.csv,MITM Impersonation,8,35.162.13.26,2,2.564103
+test,attack_mitm_impersonation_weather-sensor_flow.csv,MITM Impersonation,9,192.168.1.255,2,2.564103
+test,attack_mitm_impersonation_weather-sensor_flow.csv,MITM Impersonation,10,52.12.196.80,2,2.564103
+test,attack_mitm_impersonation_weather-sensor_flow.csv,MITM Impersonation,11,192.168.1.205,2,2.564103
+test,attack_mitm_impersonation_weather-sensor_flow.csv,MITM Impersonation,12,224.0.0.251,2,2.564103
+test,attack_mitm_impersonation_weather-sensor_flow.csv,MITM Impersonation,13,192.168.230.7,1,1.282051
+test,attack_mitm_impersonation_weather-sensor_flow.csv,MITM Impersonation,14,ff02::1:2,1,1.282051
+test,attack_mitm_impersonation_weather-sensor_flow.csv,MITM Impersonation,15,192.168.1.55,1,1.282051
+test,attack_mitm_impersonation_weather-sensor_flow.csv,MITM Impersonation,16,ff02::c,1,1.282051
+test,attack_mitm_impersonation_weather-sensor_flow.csv,MITM Impersonation,17,129.146.59.211,1,1.282051
+test,attack_mitm_impersonation_weather-sensor_flow.csv,MITM Impersonation,18,47.254.42.218,1,1.282051
+test,attack_mitm_impersonation_weather-sensor_flow.csv,MITM Impersonation,19,47.252.29.207,1,1.282051
+test,attack_mitm_impersonation_weather-sensor_flow.csv,MITM Impersonation,20,8.219.125.49,1,1.282051
+test,attack_mitm_ip-spoofing_mqtt-broker--weather-sensor_flow.csv,IP Spoofing,1,192.168.1.193,17,22.666667
+test,attack_mitm_ip-spoofing_mqtt-broker--weather-sensor_flow.csv,IP Spoofing,2,255.255.255.255,16,21.333333
+test,attack_mitm_ip-spoofing_mqtt-broker--weather-sensor_flow.csv,IP Spoofing,3,44.231.176.168,3,4.0
+test,attack_mitm_ip-spoofing_mqtt-broker--weather-sensor_flow.csv,IP Spoofing,4,192.168.1.255,3,4.0
+test,attack_mitm_ip-spoofing_mqtt-broker--weather-sensor_flow.csv,IP Spoofing,5,192.168.1.52,3,4.0
+test,attack_mitm_ip-spoofing_mqtt-broker--weather-sensor_flow.csv,IP Spoofing,6,192.168.1.1,2,2.666667
+test,attack_mitm_ip-spoofing_mqtt-broker--weather-sensor_flow.csv,IP Spoofing,7,192.168.1.10,2,2.666667
+test,attack_mitm_ip-spoofing_mqtt-broker--weather-sensor_flow.csv,IP Spoofing,8,129.146.120.172,2,2.666667
+test,attack_mitm_ip-spoofing_mqtt-broker--weather-sensor_flow.csv,IP Spoofing,9,239.255.255.250,2,2.666667
+test,attack_mitm_ip-spoofing_mqtt-broker--weather-sensor_flow.csv,IP Spoofing,10,54.188.109.168,2,2.666667
+test,attack_mitm_ip-spoofing_mqtt-broker--weather-sensor_flow.csv,IP Spoofing,11,34.213.103.51,2,2.666667
+test,attack_mitm_ip-spoofing_mqtt-broker--weather-sensor_flow.csv,IP Spoofing,12,35.162.13.26,2,2.666667
+test,attack_mitm_ip-spoofing_mqtt-broker--weather-sensor_flow.csv,IP Spoofing,13,52.12.196.80,2,2.666667
+test,attack_mitm_ip-spoofing_mqtt-broker--weather-sensor_flow.csv,IP Spoofing,14,192.168.1.55,1,1.333333
+test,attack_mitm_ip-spoofing_mqtt-broker--weather-sensor_flow.csv,IP Spoofing,15,3.214.41.87,1,1.333333
+test,attack_mitm_ip-spoofing_mqtt-broker--weather-sensor_flow.csv,IP Spoofing,16,192.168.230.7,1,1.333333
+test,attack_mitm_ip-spoofing_mqtt-broker--weather-sensor_flow.csv,IP Spoofing,17,47.254.42.218,1,1.333333
+test,attack_mitm_ip-spoofing_mqtt-broker--weather-sensor_flow.csv,IP Spoofing,18,47.252.29.207,1,1.333333
+test,attack_mitm_ip-spoofing_mqtt-broker--weather-sensor_flow.csv,IP Spoofing,19,8.219.125.49,1,1.333333
+test,attack_mitm_ip-spoofing_mqtt-broker--weather-sensor_flow.csv,IP Spoofing,20,47.254.41.252,1,1.333333
+test,attack_mitm_ip-spoofing_router--edge1_flow.csv,IP Spoofing,1,255.255.255.255,15,23.076923
+test,attack_mitm_ip-spoofing_router--edge1_flow.csv,IP Spoofing,2,192.168.1.193,14,21.538462
+test,attack_mitm_ip-spoofing_router--edge1_flow.csv,IP Spoofing,3,192.168.1.200,2,3.076923
+test,attack_mitm_ip-spoofing_router--edge1_flow.csv,IP Spoofing,4,34.210.19.179,2,3.076923
+test,attack_mitm_ip-spoofing_router--edge1_flow.csv,IP Spoofing,5,129.146.120.172,2,3.076923
+test,attack_mitm_ip-spoofing_router--edge1_flow.csv,IP Spoofing,6,54.188.109.168,2,3.076923
+test,attack_mitm_ip-spoofing_router--edge1_flow.csv,IP Spoofing,7,52.12.196.80,2,3.076923
+test,attack_mitm_ip-spoofing_router--edge1_flow.csv,IP Spoofing,8,192.168.1.255,2,3.076923
+test,attack_mitm_ip-spoofing_router--edge1_flow.csv,IP Spoofing,9,239.255.255.250,2,3.076923
+test,attack_mitm_ip-spoofing_router--edge1_flow.csv,IP Spoofing,10,192.168.1.52,2,3.076923
+test,attack_mitm_ip-spoofing_router--edge1_flow.csv,IP Spoofing,11,35.162.13.26,2,3.076923
+test,attack_mitm_ip-spoofing_router--edge1_flow.csv,IP Spoofing,12,34.213.103.51,2,3.076923
+test,attack_mitm_ip-spoofing_router--edge1_flow.csv,IP Spoofing,13,192.168.230.7,1,1.538462
+test,attack_mitm_ip-spoofing_router--edge1_flow.csv,IP Spoofing,14,3.214.41.87,1,1.538462
+test,attack_mitm_ip-spoofing_router--edge1_flow.csv,IP Spoofing,15,129.146.59.211,1,1.538462
+test,attack_mitm_ip-spoofing_router--edge1_flow.csv,IP Spoofing,16,47.254.41.252,1,1.538462
+test,attack_mitm_ip-spoofing_router--edge1_flow.csv,IP Spoofing,17,ff02::1:2,1,1.538462
+test,attack_mitm_ip-spoofing_router--edge1_flow.csv,IP Spoofing,18,47.254.42.218,1,1.538462
+test,attack_mitm_ip-spoofing_router--edge1_flow.csv,IP Spoofing,19,47.252.29.207,1,1.538462
+test,attack_mitm_ip-spoofing_router--edge1_flow.csv,IP Spoofing,20,8.219.125.49,1,1.538462
+test,attack_mitm_ip-spoofing_router--mqtt-broker_flow.csv,IP Spoofing,1,255.255.255.255,15,16.129032
+test,attack_mitm_ip-spoofing_router--mqtt-broker_flow.csv,IP Spoofing,2,192.168.1.193,14,15.053763
+test,attack_mitm_ip-spoofing_router--mqtt-broker_flow.csv,IP Spoofing,3,224.0.0.251,11,11.827957
+test,attack_mitm_ip-spoofing_router--mqtt-broker_flow.csv,IP Spoofing,4,192.168.1.1,11,11.827957
+test,attack_mitm_ip-spoofing_router--mqtt-broker_flow.csv,IP Spoofing,5,192.168.1.52,4,4.301075
+test,attack_mitm_ip-spoofing_router--mqtt-broker_flow.csv,IP Spoofing,6,239.255.255.250,3,3.225806
+test,attack_mitm_ip-spoofing_router--mqtt-broker_flow.csv,IP Spoofing,7,192.168.1.200,2,2.150538
+test,attack_mitm_ip-spoofing_router--mqtt-broker_flow.csv,IP Spoofing,8,35.162.13.26,2,2.150538
+test,attack_mitm_ip-spoofing_router--mqtt-broker_flow.csv,IP Spoofing,9,54.188.109.168,2,2.150538
+test,attack_mitm_ip-spoofing_router--mqtt-broker_flow.csv,IP Spoofing,10,52.12.196.80,2,2.150538
+test,attack_mitm_ip-spoofing_router--mqtt-broker_flow.csv,IP Spoofing,11,192.168.1.255,2,2.150538
+test,attack_mitm_ip-spoofing_router--mqtt-broker_flow.csv,IP Spoofing,12,192.168.1.104,2,2.150538
+test,attack_mitm_ip-spoofing_router--mqtt-broker_flow.csv,IP Spoofing,13,192.168.1.103,2,2.150538
+test,attack_mitm_ip-spoofing_router--mqtt-broker_flow.csv,IP Spoofing,14,192.168.1.102,2,2.150538
+test,attack_mitm_ip-spoofing_router--mqtt-broker_flow.csv,IP Spoofing,15,34.213.103.51,2,2.150538
+test,attack_mitm_ip-spoofing_router--mqtt-broker_flow.csv,IP Spoofing,16,47.254.41.252,1,1.075269
+test,attack_mitm_ip-spoofing_router--mqtt-broker_flow.csv,IP Spoofing,17,192.168.230.7,1,1.075269
+test,attack_mitm_ip-spoofing_router--mqtt-broker_flow.csv,IP Spoofing,18,192.168.1.54,1,1.075269
+test,attack_mitm_ip-spoofing_router--mqtt-broker_flow.csv,IP Spoofing,19,129.146.59.211,1,1.075269
+test,attack_mitm_ip-spoofing_router--mqtt-broker_flow.csv,IP Spoofing,20,129.146.120.172,1,1.075269
+test,MQTT-DDoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,1,192.168.137.250,1155314,71.221552
+test,MQTT-DDoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,2,192.168.137.156,143950,8.874074
+test,MQTT-DDoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,3,192.168.137.180,143140,8.82414
+test,MQTT-DDoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,4,192.168.137.212,135009,8.322889
+test,MQTT-DDoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,5,192.168.137.48,44655,2.752843
+test,MQTT-DDoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,6,10.0.0.254,30,0.001849
+test,MQTT-DDoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,7,192.168.137.1,9,0.000555
+test,MQTT-DDoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,8,192.168.137.115,8,0.000493
+test,MQTT-DDoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,9,34.173.20.6,5,0.000308
+test,MQTT-DDoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,10,255.255.255.255,5,0.000308
+test,MQTT-DDoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,11,ff02::1:2,3,0.000185
+test,MQTT-DDoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,12,173.194.194.206,2,0.000123
+test,MQTT-DDoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,13,34.122.121.32,1,6.2e-05
+test,MQTT-DDoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,14,192.168.137.196,1,6.2e-05
+test,MQTT-DDoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,15,47.254.41.205,1,6.2e-05
+test,MQTT-DDoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,16,54.148.153.241,1,6.2e-05
+test,MQTT-DDoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,17,185.209.178.72,1,6.2e-05
+test,MQTT-DDoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,18,34.66.16.188,1,6.2e-05
+test,MQTT-DDoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,19,52.40.210.103,1,6.2e-05
+test,MQTT-DDoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,20,18.213.53.246,1,6.2e-05
+test,MQTT-DDoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,1,192.168.137.156,6843,35.175285
+test,MQTT-DDoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,2,192.168.137.180,4851,24.935746
+test,MQTT-DDoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,3,192.168.137.212,4295,22.077722
+test,MQTT-DDoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,4,192.168.137.250,3292,16.92197
+test,MQTT-DDoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,5,192.168.137.48,100,0.514033
+test,MQTT-DDoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,6,10.0.0.254,30,0.15421
+test,MQTT-DDoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,7,192.168.137.1,9,0.046263
+test,MQTT-DDoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,8,192.168.137.115,7,0.035982
+test,MQTT-DDoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,9,255.255.255.255,7,0.035982
+test,MQTT-DDoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,10,34.173.20.6,6,0.030842
+test,MQTT-DDoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,11,173.194.194.206,2,0.010281
+test,MQTT-DDoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,12,239.255.255.250,2,0.010281
+test,MQTT-DDoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,13,192.168.137.196,1,0.00514
+test,MQTT-DDoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,14,185.209.178.72,1,0.00514
+test,MQTT-DDoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,15,ff02::1:2,1,0.00514
+test,MQTT-DDoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,16,54.148.153.241,1,0.00514
+test,MQTT-DDoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,17,47.254.41.205,1,0.00514
+test,MQTT-DDoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,18,18.213.53.246,1,0.00514
+test,MQTT-DDoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,19,54.188.99.4,1,0.00514
+test,MQTT-DDoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,20,34.66.16.188,1,0.00514
+test,MQTT-DoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,1,192.168.137.250,49843,85.175502
+test,MQTT-DoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,2,192.168.137.48,8587,14.674117
+test,MQTT-DoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,3,10.0.0.254,30,0.051266
+test,MQTT-DoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,4,192.168.137.115,9,0.01538
+test,MQTT-DoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,5,192.168.137.1,9,0.01538
+test,MQTT-DoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,6,34.173.20.6,8,0.013671
+test,MQTT-DoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,7,255.255.255.255,7,0.011962
+test,MQTT-DoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,8,54.187.112.38,3,0.005127
+test,MQTT-DoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,9,44.230.212.240,3,0.005127
+test,MQTT-DoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,10,239.255.255.250,3,0.005127
+test,MQTT-DoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,11,185.125.190.48,2,0.003418
+test,MQTT-DoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,12,192.168.137.42,2,0.003418
+test,MQTT-DoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,13,192.168.137.88,1,0.001709
+test,MQTT-DoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,14,192.168.137.196,1,0.001709
+test,MQTT-DoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,15,192.168.137.146,1,0.001709
+test,MQTT-DoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,16,173.194.194.206,1,0.001709
+test,MQTT-DoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,17,74.125.69.206,1,0.001709
+test,MQTT-DoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,18,52.40.210.103,1,0.001709
+test,MQTT-DoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,19,44.235.194.199,1,0.001709
+test,MQTT-DoS-Connect_Flood_test_flow.csv,MQTT DoS/DDoS,20,47.254.41.205,1,0.001709
+test,MQTT-DoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,1,192.168.137.250,80,49.079755
+test,MQTT-DoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,2,10.0.0.254,30,18.404908
+test,MQTT-DoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,3,192.168.137.48,21,12.883436
+test,MQTT-DoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,4,255.255.255.255,6,3.680982
+test,MQTT-DoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,5,34.173.20.6,5,3.067485
+test,MQTT-DoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,6,192.168.137.1,5,3.067485
+test,MQTT-DoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,7,192.168.137.115,3,1.840491
+test,MQTT-DoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,8,192.168.137.42,2,1.226994
+test,MQTT-DoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,9,173.194.194.206,2,1.226994
+test,MQTT-DoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,10,192.168.137.196,1,0.613497
+test,MQTT-DoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,11,192.168.137.146,1,0.613497
+test,MQTT-DoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,12,47.254.41.205,1,0.613497
+test,MQTT-DoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,13,169.254.255.255,1,0.613497
+test,MQTT-DoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,14,34.66.16.188,1,0.613497
+test,MQTT-DoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,15,54.148.153.241,1,0.613497
+test,MQTT-DoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,16,52.40.210.103,1,0.613497
+test,MQTT-DoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,17,239.255.255.250,1,0.613497
+test,MQTT-DoS-Publish_Flood_test_flow.csv,MQTT DoS/DDoS,18,ff02::1:2,1,0.613497
+test,MQTT-Malformed_Data_test_flow.csv,MQTT Malformed,1,192.168.137.250,785,49.715009
+test,MQTT-Malformed_Data_test_flow.csv,MQTT Malformed,2,192.168.137.48,717,45.408486
+test,MQTT-Malformed_Data_test_flow.csv,MQTT Malformed,3,10.0.0.254,30,1.899937
+test,MQTT-Malformed_Data_test_flow.csv,MQTT Malformed,4,192.168.137.1,10,0.633312
+test,MQTT-Malformed_Data_test_flow.csv,MQTT Malformed,5,192.168.137.115,6,0.379987
+test,MQTT-Malformed_Data_test_flow.csv,MQTT Malformed,6,255.255.255.255,6,0.379987
+test,MQTT-Malformed_Data_test_flow.csv,MQTT Malformed,7,34.173.20.6,5,0.316656
+test,MQTT-Malformed_Data_test_flow.csv,MQTT Malformed,8,54.164.8.26,2,0.126662
+test,MQTT-Malformed_Data_test_flow.csv,MQTT Malformed,9,239.255.255.250,2,0.126662
+test,MQTT-Malformed_Data_test_flow.csv,MQTT Malformed,10,13.225.193.148,2,0.126662
+test,MQTT-Malformed_Data_test_flow.csv,MQTT Malformed,11,192.168.137.42,2,0.126662
+test,MQTT-Malformed_Data_test_flow.csv,MQTT Malformed,12,ff02::1:2,2,0.126662
+test,MQTT-Malformed_Data_test_flow.csv,MQTT Malformed,13,35.155.100.181,1,0.063331
+test,MQTT-Malformed_Data_test_flow.csv,MQTT Malformed,14,47.254.41.205,1,0.063331
+test,MQTT-Malformed_Data_test_flow.csv,MQTT Malformed,15,192.168.137.196,1,0.063331
+test,MQTT-Malformed_Data_test_flow.csv,MQTT Malformed,16,173.194.194.206,1,0.063331
+test,MQTT-Malformed_Data_test_flow.csv,MQTT Malformed,17,34.66.16.188,1,0.063331
+test,MQTT-Malformed_Data_test_flow.csv,MQTT Malformed,18,74.125.69.206,1,0.063331
+test,MQTT-Malformed_Data_test_flow.csv,MQTT Malformed,19,192.168.137.146,1,0.063331
+test,MQTT-Malformed_Data_test_flow.csv,MQTT Malformed,20,52.40.210.103,1,0.063331
+test,MQTT-Malformed_Data_train_flow.csv,MQTT Malformed,1,192.168.137.250,1267,48.599923
+test,MQTT-Malformed_Data_train_flow.csv,MQTT Malformed,2,192.168.137.48,1143,43.843498
+test,MQTT-Malformed_Data_train_flow.csv,MQTT Malformed,3,192.168.137.1,32,1.227465
+test,MQTT-Malformed_Data_train_flow.csv,MQTT Malformed,4,10.0.0.254,30,1.150748
+test,MQTT-Malformed_Data_train_flow.csv,MQTT Malformed,5,192.168.137.115,22,0.843882
+test,MQTT-Malformed_Data_train_flow.csv,MQTT Malformed,6,8.8.4.4,14,0.537016
+test,MQTT-Malformed_Data_train_flow.csv,MQTT Malformed,7,255.255.255.255,9,0.345224
+test,MQTT-Malformed_Data_train_flow.csv,MQTT Malformed,8,239.255.255.250,8,0.306866
+test,MQTT-Malformed_Data_train_flow.csv,MQTT Malformed,9,35.155.100.181,7,0.268508
+test,MQTT-Malformed_Data_train_flow.csv,MQTT Malformed,10,192.168.137.21,7,0.268508
+test,MQTT-Malformed_Data_train_flow.csv,MQTT Malformed,11,47.254.114.14,6,0.23015
+test,MQTT-Malformed_Data_train_flow.csv,MQTT Malformed,12,13.225.193.148,6,0.23015
+test,MQTT-Malformed_Data_train_flow.csv,MQTT Malformed,13,192.168.137.42,4,0.153433
+test,MQTT-Malformed_Data_train_flow.csv,MQTT Malformed,14,34.173.20.6,4,0.153433
+test,MQTT-Malformed_Data_train_flow.csv,MQTT Malformed,15,192.168.137.210,4,0.153433
+test,MQTT-Malformed_Data_train_flow.csv,MQTT Malformed,16,ff02::fb,3,0.115075
+test,MQTT-Malformed_Data_train_flow.csv,MQTT Malformed,17,224.0.0.251,3,0.115075
+test,MQTT-Malformed_Data_train_flow.csv,MQTT Malformed,18,35.224.21.224,3,0.115075
+test,MQTT-Malformed_Data_train_flow.csv,MQTT Malformed,19,15.254.17.107,3,0.115075
+test,MQTT-Malformed_Data_train_flow.csv,MQTT Malformed,20,ff02::1:2,3,0.115075

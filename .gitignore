@@ -15,3 +15,6 @@ models/*.joblib
 
 *.pcap
 *.pcapng
+# Generated integrity results and local model artifacts
+/integrity_checker/
+/models/

@@ -1,0 +1,16 @@
+flow_file,family,rule_id,src_ip,dst_ip,dst_port,ip_protocol,rule_status,notes
+attack_bruteforce_dictionary-ssh_ap_flow.csv,Bruteforce,BF_SSH_AP,192.168.1.100,192.168.1.205,22,6,CANDIDATE,Inspect suspected SSH brute-force traffic only
+attack_bruteforce_dictionary-ssh_edge1_flow.csv,Bruteforce,BF_SSH_EDGE1,192.168.1.100,192.168.1.195,22,6,CANDIDATE,Inspect suspected SSH brute-force traffic only
+attack_bruteforce_dictionary-ssh_mqtt-broker_flow.csv,Bruteforce,BF_SSH_MQTT,192.168.1.100,192.168.1.193,22,6,CANDIDATE,Inspect suspected SSH brute-force traffic only
+attack_bruteforce_dictionary-ssh_router_flow.csv,Bruteforce,BF_SSH_ROUTER,192.168.1.100,192.168.1.1,22,6,CANDIDATE,Inspect suspected SSH brute-force traffic only
+attack_bruteforce_dictionary-ssh_switch_flow.csv,Bruteforce,BF_SSH_SWITCH,192.168.1.100,192.168.1.200,22,6,CANDIDATE,Inspect suspected SSH brute-force traffic only
+attack_bruteforce_dictionary-telnet_ap_flow.csv,Bruteforce,BF_TELNET_AP,192.168.1.100,192.168.1.205,23,6,CANDIDATE,Inspect suspected Telnet brute-force traffic only
+attack_bruteforce_dictionary-telnet_edge1_flow.csv,Bruteforce,BF_TELNET_EDGE1,192.168.1.100,192.168.1.195,23,6,CANDIDATE,Inspect suspected Telnet brute-force traffic only
+attack_bruteforce_dictionary-telnet_mqtt-broker_flow.csv,Bruteforce,BF_TELNET_MQTT,192.168.1.100,192.168.1.193,23,6,CANDIDATE,Inspect suspected Telnet brute-force traffic only
+attack_recon_host-disc-tcp-ack-ping_whole-network_flow.csv,Recon,RECON_TCP_ACK,192.168.1.100,*,*,*,CANDIDATE,Inspect source-IP dominated recon capture
+attack_recon_host-disc-tcp-syn-ping_whole-network_flow.csv,Recon,RECON_TCP_SYN,192.168.1.100,*,*,*,CANDIDATE,Inspect source-IP dominated recon capture
+attack_recon_host-disc-tcp-syn-stealth_whole-network_flow.csv,Recon,RECON_TCP_STEALTH,192.168.1.100,*,*,*,CANDIDATE,Inspect source-IP dominated recon capture
+attack_recon_host-disc-udp-ping_whole-network_flow.csv,Recon,RECON_UDP_PING,192.168.1.100,*,*,*,CANDIDATE,Inspect source-IP dominated recon capture
+attack_recon_os-scan_whole-network_flow.csv,Recon,RECON_OS_SCAN,192.168.1.100,*,*,*,CANDIDATE,Inspect source-IP dominated recon capture
+attack_recon_port-scan_whole-network_flow.csv,Recon,RECON_PORT_SCAN,192.168.1.100,*,*,*,CANDIDATE,Inspect source-IP dominated recon capture
+attack_recon_vuln-scan_whole-network_flow.csv,Recon,RECON_VULN_SCAN,192.168.1.100,*,*,*,CANDIDATE,Inspect source-IP dominated recon capture

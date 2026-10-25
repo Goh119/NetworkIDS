@@ -312,8 +312,8 @@ def main():
     )
     ap.add_argument("--flows", default=str(config.FLOW_FEATURES_FILE),
                     help="Input flow-level CSV.")
-    ap.add_argument("--labels", default=str(config.LABELLED_WEDNESDAY_FILE),
-                    help="Official CIC-IDS2017 labelled flow CSV.")
+    ap.add_argument("--labels", required=True,
+        help="Official CIC-IDS2017 labelled flow CSV.")
     ap.add_argument("--out", default=str(config.FINAL_ML_DATASET_FILE),
                     help="Output labelled dataset CSV.")
     ap.add_argument("--report-only", action="store_true",

@@ -4,15 +4,18 @@ NetworkIDS - Primary Random Forest training and evaluation.
 Location:
     random_forest/train_rf.py
 
-Primary inputs:
+Default inputs:
     data/processed/multiday_split/train_multiday.csv
     data/processed/multiday_split/test_multiday.csv
 
-Primary outputs:
+Default outputs:
     random_forest/
         rf_model.joblib
         rf_model_meta.json
         rf_model_report.txt
+
+Alternative train/test datasets and output files can be supplied
+through command-line arguments.
 
 The Random Forest uses exactly the features currently defined in:
 
@@ -48,7 +51,9 @@ Optional:
     python random_forest/train_rf.py \
         --train path/to/train.csv \
         --test path/to/test.csv \
-        --model path/to/model.joblib
+        --model path/to/model.joblib \
+        --meta path/to/model_meta.json \
+        --report path/to/model_report.txt
 """
 
 import argparse
@@ -674,6 +679,8 @@ def calculate_rates(cm):
 
 def save_report(
     path,
+    train_file,
+    test_file,
     train_size,
     test_size,
     y_train,
@@ -810,6 +817,16 @@ def save_report(
         )
 
         report.write(
+            f"Training file      : "
+            f"{Path(train_file).resolve()}\n"
+        )
+
+        report.write(
+            f"Test file          : "
+            f"{Path(test_file).resolve()}\n"
+        )
+
+        report.write(
             f"Training rows      : {train_size:,}\n"
         )
 
@@ -818,9 +835,9 @@ def save_report(
         )
 
         report.write(
-            "Split              : "
-            "5-day merged dataset; identical ML-feature-vector "
-            "grouped StratifiedGroupKFold; first fold holdout\n"
+            "Evaluation         : "
+            "Predefined held-out test dataset; "
+            "test data was not used for model fitting.\n"
         )
 
         report.write(
@@ -1025,7 +1042,72 @@ def main():
         help="Output .joblib model path.",
     )
 
+    # ========================================================
+    # ADDED:
+    # Allow metadata output to be specified independently.
+    # ========================================================
+
+    parser.add_argument(
+        "--meta",
+        default=str(
+            config.RANDOM_FOREST_META_FILE
+        ),
+        help="Output metadata JSON path.",
+    )
+
+    # ========================================================
+    # ADDED:
+    # Allow report output to be specified independently.
+    # ========================================================
+
+    parser.add_argument(
+        "--report",
+        default=str(
+            config.RANDOM_FOREST_REPORT_FILE
+        ),
+        help="Output human-readable report path.",
+    )
+
     args = parser.parse_args()
+
+    # ========================================================
+    # ADDED:
+    # Output overwrite protection.
+    #
+    # Existing model artifacts are never overwritten
+    # automatically.
+    # ========================================================
+
+    output_paths = [
+        Path(
+            args.model
+        ),
+        Path(
+            args.meta
+        ),
+        Path(
+            args.report
+        ),
+    ]
+
+    existing_outputs = [
+
+        path
+
+        for path in output_paths
+
+        if path.exists()
+    ]
+
+    if existing_outputs:
+
+        raise FileExistsError(
+            "Refusing to overwrite existing Random Forest outputs:\n"
+            + "\n".join(
+                f"  - {path}"
+                for path in existing_outputs
+            )
+        )
 
     print(
         "=" * 70
@@ -1074,8 +1156,6 @@ def main():
         f"{args.test}"
     )
 
-    # ==================== CHANGED ============================
-
     print(
         f"  RF directory     : "
         f"{config.RANDOM_FOREST_DIR}"
@@ -1084,6 +1164,21 @@ def main():
     print(
         f"  Model output     : "
         f"{args.model}"
+    )
+
+    # ========================================================
+    # ADDED:
+    # Display metadata and report outputs.
+    # ========================================================
+
+    print(
+        f"  Metadata output  : "
+        f"{args.meta}"
+    )
+
+    print(
+        f"  Report output    : "
+        f"{args.report}"
     )
 
     # ========================================================
@@ -1448,7 +1543,7 @@ def main():
     # --------------------------------------------------------
 
     metadata_path = Path(
-        config.RANDOM_FOREST_META_FILE
+        args.meta
     )
 
     metadata_path.parent.mkdir(
@@ -1579,12 +1674,23 @@ def main():
                 ),
         },
 
+        # ====================================================
+        # CHANGED:
+        # Generic description that remains accurate when the
+        # supplied training file contains additional labeled
+        # training sources.
+        # ====================================================
+
         "split_strategy":
             (
-                "Five-day merged dataset; "
-                "identical ML-feature-vector grouped "
-                "StratifiedGroupKFold; first fold used "
-                "as fixed holdout test set."
+                "Training and evaluation use predefined CSV "
+                "datasets. The held-out test dataset is not "
+                "used for model fitting. The original "
+                "CIC-IDS2017 train/test split was created "
+                "using grouped identical ML-feature vectors "
+                "with StratifiedGroupKFold; additional "
+                "selected labeled training datasets may be "
+                "included through the supplied training file."
             ),
 
         "preprocessing": {
@@ -1681,12 +1787,16 @@ def main():
     # --------------------------------------------------------
 
     report_path = Path(
-        config.RANDOM_FOREST_REPORT_FILE
+        args.report
     )
 
     save_report(
 
         path=report_path,
+
+        train_file=args.train,
+
+        test_file=args.test,
 
         train_size=len(
             X_train
@@ -1792,6 +1902,7 @@ def main():
         f"Report : "
         f"{report_path}"
     )
+
 
 if __name__ == "__main__":
     main()

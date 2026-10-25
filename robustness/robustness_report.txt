@@ -1,0 +1,90 @@
+NetworkIDS - Random Forest Robustness Evaluation Report
+======================================================================
+
+Model: C:\FYP\NetworkIDS\random_forest\rf_model.joblib
+Test dataset: C:\FYP\NetworkIDS\data\test\test_multiday.csv
+Feature count: 42
+Sample size per class: 2,000
+Random state: 42
+Clean test accuracy: 0.983935
+
+Evaluation type: Controlled feature-level perturbation
+Packet-level PCAP modification: False
+NaN policy: NaN retained; no imputation
+
+Scenario Results
+----------------------------------------------------------------------
+Scenario: ttl_jitter_small
+Description: TTL +/- 5 random jitter
+Attack evasion rate: 12.5500% (251 / 2,000)
+Benign induction rate: 0.5500% (11 / 2,000)
+Mean P(Attack) drop - Attack: 0.217751
+Mean P(Attack) rise - Benign: 0.021341
+Mean absolute probability shift - Attack: 0.218167
+Mean absolute probability shift - Benign: 0.021914
+
+Scenario: ttl_jitter_large
+Description: TTL +/- 30 random jitter
+Attack evasion rate: 17.2500% (345 / 2,000)
+Benign induction rate: 0.4500% (9 / 2,000)
+Mean P(Attack) drop - Attack: 0.313332
+Mean P(Attack) rise - Benign: 0.029331
+Mean absolute probability shift - Attack: 0.313773
+Mean absolute probability shift - Benign: 0.030197
+
+Scenario: ttl_forced_normal
+Description: TTL forced to 128
+Attack evasion rate: 42.7500% (855 / 2,000)
+Benign induction rate: 0.0000% (0 / 2,000)
+Mean P(Attack) drop - Attack: 0.476789
+Mean P(Attack) rise - Benign: 0.014928
+Mean absolute probability shift - Attack: 0.476789
+Mean absolute probability shift - Benign: 0.017101
+
+Scenario: checksum_forced_valid
+Description: IP/L4 checksum validity forced valid
+Attack evasion rate: 0.0000% (0 / 2,000)
+Benign induction rate: 0.0000% (0 / 2,000)
+Mean P(Attack) drop - Attack: 0.011061
+Mean P(Attack) rise - Benign: 0.000081
+Mean absolute probability shift - Attack: 0.011066
+Mean absolute probability shift - Benign: 0.000083
+
+Scenario: checksum_forced_invalid
+Description: IP/L4 checksum validity forced invalid
+Attack evasion rate: 0.0000% (0 / 2,000)
+Benign induction rate: 0.3000% (6 / 2,000)
+Mean P(Attack) drop - Attack: -0.000098
+Mean P(Attack) rise - Benign: 0.036784
+Mean absolute probability shift - Attack: 0.006451
+Mean absolute probability shift - Benign: 0.036966
+
+Scenario: rst_count_zeroed
+Description: RST packet count zeroed
+Attack evasion rate: 9.7500% (195 / 2,000)
+Benign induction rate: 0.0000% (0 / 2,000)
+Mean P(Attack) drop - Attack: 0.208741
+Mean P(Attack) rise - Benign: 0.002485
+Mean absolute probability shift - Attack: 0.208741
+Mean absolute probability shift - Benign: 0.003495
+
+Scenario: syn_count_normalized
+Description: SYN count and SYN presence normalized
+Attack evasion rate: 0.0500% (1 / 2,000)
+Benign induction rate: 0.0000% (0 / 2,000)
+Mean P(Attack) drop - Attack: 0.100945
+Mean P(Attack) rise - Benign: 0.083346
+Mean absolute probability shift - Attack: 0.100945
+Mean absolute probability shift - Benign: 0.083436
+
+Scenario: combined_evasion
+Description: TTL + checksum + RST combined perturbation
+Attack evasion rate: 71.4000% (1,428 / 2,000)
+Benign induction rate: 0.0000% (0 / 2,000)
+Mean P(Attack) drop - Attack: 0.586185
+Mean P(Attack) rise - Benign: 0.016512
+Mean absolute probability shift - Attack: 0.586185
+Mean absolute probability shift - Benign: 0.019254
+
+======================================================================
+End of robustness evaluation report.

@@ -23,14 +23,16 @@ Attack            : 1
 
 Dataset
 ----------------------------------------------------------------------
-Training rows      : 2,982,890
+Training file      : C:\FYP\NetworkIDS\data\train\training_dataset.csv
+Test file          : C:\FYP\NetworkIDS\data\test\test_multiday.csv
+Training rows      : 3,484,498
 Test rows          : 745,724
-Split              : 5-day merged dataset; identical ML-feature-vector grouped StratifiedGroupKFold; first fold holdout
+Evaluation         : Predefined held-out test dataset; test data was not used for model fitting.
 
 Train Label Distribution
 ----------------------------------------------------------------------
-0 Benign       2,268,915
-1 Attack         713,975
+0 Benign       2,291,533
+1 Attack       1,192,965
 
 Test Label Distribution
 ----------------------------------------------------------------------
@@ -39,73 +41,73 @@ Test Label Distribution
 
 Classification Metrics
 ----------------------------------------------------------------------
-Accuracy            : 0.983915
-Precision           : 0.937752
-Recall              : 0.999120
-F1-score            : 0.967464
-AUC-ROC             : 0.998543
-False Positive Rate : 0.020870
-False Negative Rate : 0.000880
+Accuracy            : 0.983935
+Precision           : 0.938472
+Recall              : 0.998336
+F1-score            : 0.967479
+AUC-ROC             : 0.998483
+False Positive Rate : 0.020597
+False Negative Rate : 0.001664
 
 Confusion Matrix
 ----------------------------------------------------------------------
                  Predicted
                  Benign     Attack    
-Actual Benign      555,392     11,838
-Actual Attack          157    178,337
+Actual Benign      555,547     11,683
+Actual Attack          297    178,197
 
 Classification Report
 ----------------------------------------------------------------------
               precision    recall  f1-score   support
 
-      Benign   0.999717  0.979130  0.989317    567230
-      Attack   0.937752  0.999120  0.967464    178494
+      Benign   0.999466  0.979403  0.989333    567230
+      Attack   0.938472  0.998336  0.967479    178494
 
-    accuracy                       0.983915    745724
-   macro avg   0.968735  0.989125  0.978390    745724
-weighted avg   0.984886  0.983915  0.984086    745724
+    accuracy                       0.983935    745724
+   macro avg   0.968969  0.988870  0.978406    745724
+weighted avg   0.984866  0.983935  0.984102    745724
 
 Top Gini Feature Importances
 ----------------------------------------------------------------------
- 1. ttl_mean                            0.191418
- 2. tcp_window_mean                     0.107086
- 3. dst_port                            0.087531
- 4. rst_count                           0.065456
- 5. tcp_header_length_mean              0.054627
- 6. ip_total_length_mean                0.052615
- 7. src_port                            0.052301
- 8. frame_length_mean                   0.041983
- 9. ack_count                           0.040992
-10. flow_byte_count                     0.030567
-11. forward_byte_count                  0.028245
-12. reverse_byte_count                  0.027813
-13. ip_protocol                         0.019921
-14. iat_max                             0.019759
-15. forward_packet_count                0.019488
-16. iat_mean                            0.018887
-17. flow_packet_count                   0.016955
-18. byte_rate                           0.015506
-19. iat_std                             0.015185
-20. iat_min                             0.014648
-21. psh_count                           0.013444
-22. syn_count                           0.012115
-23. reverse_packet_count                0.011723
-24. fin_count                           0.009211
-25. flow_duration                       0.008245
-26. ip_df                               0.005331
-27. ip_dscp                             0.004658
-28. flow_direction                      0.004465
-29. syn_seen                            0.003149
-30. l4_checksum_valid                   0.002437
-31. ip_id_mean                          0.001813
-32. syn_ack_seen                        0.001398
-33. ack_after_syn_ack                   0.001031
-34. ip_ecn                              0.000000
-35. ip_checksum_valid                   0.000000
-36. vlan_id                             0.000000
-37. ip_version                          0.000000
-38. eth_type                            0.000000
-39. vlan_priority                       0.000000
-40. ip_mf                               0.000000
-41. ip_header_length                    0.000000
-42. fragment_offset                     0.000000
+ 1. tcp_window_mean                     0.094674
+ 2. ttl_mean                            0.092148
+ 3. rst_count                           0.086807
+ 4. dst_port                            0.076429
+ 5. frame_length_mean                   0.059814
+ 6. src_port                            0.051953
+ 7. tcp_header_length_mean              0.050406
+ 8. ip_total_length_mean                0.049870
+ 9. ack_count                           0.045966
+10. forward_byte_count                  0.034103
+11. flow_byte_count                     0.031766
+12. reverse_byte_count                  0.030910
+13. iat_max                             0.029589
+14. ip_id_mean                          0.025848
+15. ip_protocol                         0.024483
+16. flow_packet_count                   0.022033
+17. syn_count                           0.020741
+18. iat_std                             0.019784
+19. forward_packet_count                0.019389
+20. iat_min                             0.019160
+21. iat_mean                            0.018555
+22. syn_seen                            0.015322
+23. reverse_packet_count                0.014380
+24. byte_rate                           0.014251
+25. flow_duration                       0.011862
+26. psh_count                           0.010697
+27. fin_count                           0.009056
+28. flow_direction                      0.006629
+29. ip_dscp                             0.005960
+30. ip_df                               0.003747
+31. l4_checksum_valid                   0.002169
+32. syn_ack_seen                        0.000792
+33. ack_after_syn_ack                   0.000686
+34. ip_ecn                              0.000004
+35. ip_checksum_valid                   0.000003
+36. ip_version                          0.000003
+37. ip_header_length                    0.000003
+38. fragment_offset                     0.000003
+39. ip_mf                               0.000002
+40. eth_type                            0.000002
+41. vlan_priority                       0.000000
+42. vlan_id                             0.000000

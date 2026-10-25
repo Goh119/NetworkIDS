@@ -1,127 +1,627 @@
+"""
+robustness_evaluation.py
+------------------------
+NetworkIDS - Primary Random Forest Robustness Evaluation.
+
+This script evaluates the robustness of the trained primary
+Random Forest model under controlled feature perturbations.
+
+Primary inputs:
+    config.TEST_DATASET_FILE
+    config.RANDOM_FOREST_MODEL_FILE
+
+Primary output directory:
+    <model directory>/robustness/
+
+Default outputs:
+    robustness_results.csv
+    robustness_results_metadata.json
+
+Important:
+    The Random Forest uses exactly config.ML_FEATURES.
+
+    The number of ML features is dynamic and is NOT hard-coded.
+
+    NaN values are retained.
+
+    No imputation is performed.
+
+This evaluation uses correctly classified test samples as the
+baseline population:
+
+    Attack baseline population:
+        Ground truth = Attack
+        Clean prediction = Attack
+
+    Benign baseline population:
+        Ground truth = Benign
+        Clean prediction = Benign
+
+The same selected samples are reused across all scenarios.
+
+Metrics:
+
+    Attack Evasion Rate
+        Percentage of correctly detected Attack flows that become
+        Benign after perturbation.
+
+    Benign Induction Rate
+        Percentage of correctly classified Benign flows that become
+        Attack after perturbation.
+
+    Mean Attack Probability Drop
+        Average decrease in P(Attack) for Attack samples.
+
+    Mean Benign Probability Rise
+        Average increase in P(Attack) for Benign samples.
+
+Important interpretation:
+
+    This script performs controlled feature perturbation.
+
+    It does NOT directly modify the original PCAP packets.
+
+    Therefore, the results should be described as feature-level
+    robustness / perturbation evaluation unless a separate
+    packet-level perturbation pipeline is implemented.
+"""
+
 from pathlib import Path
 import argparse
 import json
+import sys
 
 import joblib
 import numpy as np
 import pandas as pd
 
-import config
+
+# ============================================================
+# Project import
+# ============================================================
+
+sys.path.append(
+    str(
+        Path(__file__).resolve().parents[1]
+    )
+)
+
+import src.config as config
 
 
 # ============================================================
 # Configuration
 # ============================================================
 
-TEST_FILE = config.PROCESSED_DIR / "split" / "test_dataset.csv"
-OUTPUT_DIR = config.MODELS_DIR / "robustness"
+TEST_FILE = (
+    config.TEST_DIR / "test_multiday.csv"
+)
+
+MODEL_FILE = (
+    config.RANDOM_FOREST_MODEL_FILE
+)
+
+# Keep robustness results beside the Random Forest model.
+#
+# Current expected structure:
+#
+# random_forest/
+#     rf_model.joblib
+#     rf_model_meta.json
+#     rf_model_report.txt
+#     robustness/
+#
+ROBUSTNESS_DIR = (
+    Path(MODEL_FILE).parent.parent
+    / "robustness"
+)
 
 RANDOM_STATE = 42
-SAMPLE_SIZE_PER_CLASS = 2000
+
+DEFAULT_SAMPLE_SIZE_PER_CLASS = 2000
+
+FEATURE_DTYPE = np.float32
+
+LABEL_DTYPE = np.int8
 
 
 # ============================================================
 # Utility functions
 # ============================================================
 
-def load_dataset():
-    """Load the fixed test dataset used for robustness evaluation."""
+def print_section(title):
+    print()
+    print("=" * 70)
+    print(title)
+    print("=" * 70)
 
-    if not TEST_FILE.exists():
-        raise FileNotFoundError(
-            f"Test dataset not found:\n{TEST_FILE}"
+
+def label_to_text(label):
+    """
+    Convert configured label value into readable text.
+
+    Numeric label mapping is taken from config.py.
+    """
+
+    label = int(label)
+
+    if label == config.LABEL_BENIGN:
+        return "Benign"
+
+    if label == config.LABEL_ATTACK:
+        return "Attack"
+
+    return str(label)
+
+
+def validate_config():
+    """
+    Validate the current ML feature configuration.
+
+    No fixed feature count is assumed.
+    """
+
+    config.validate_ml_features()
+
+    if not config.ML_FEATURES:
+        raise ValueError(
+            "config.ML_FEATURES is empty."
         )
 
-    df = pd.read_csv(TEST_FILE)
+    if len(
+        set(config.ML_FEATURES)
+    ) != len(config.ML_FEATURES):
 
-    required_columns = (
-        config.ML_FEATURES
-        + config.METADATA_COLUMNS
-        + [config.LABEL_COLUMN]
+        raise ValueError(
+            "Duplicate feature names detected in "
+            "config.ML_FEATURES."
+        )
+
+    print(
+        f"  ML feature count: "
+        f"{len(config.ML_FEATURES)}"
+    )
+
+
+def load_dataset():
+    """
+    Load the fixed held-out test dataset.
+
+    Only:
+        - ML features
+        - label
+
+    are required.
+
+    Traceability metadata is not required for robustness
+    calculations.
+    """
+
+    path = Path(TEST_FILE)
+
+    if not path.exists():
+        raise FileNotFoundError(
+            "Test dataset not found:\n"
+            f"{path}"
+        )
+
+    required_columns = [
+        *config.ML_FEATURES,
+        config.LABEL_COLUMN,
+    ]
+
+    required_columns = list(
+        dict.fromkeys(
+            required_columns
+        )
+    )
+
+    # --------------------------------------------------------
+    # Validate CSV header
+    # --------------------------------------------------------
+
+    header = pd.read_csv(
+        path,
+        nrows=0,
     )
 
     missing_columns = [
-        col for col in required_columns
-        if col not in df.columns
+        column
+        for column in required_columns
+        if column not in header.columns
     ]
 
     if missing_columns:
         raise ValueError(
-            "Missing required columns:\n"
-            + "\n".join(missing_columns)
+            "Test dataset is missing required columns:\n"
+            + "\n".join(
+                f"  - {column}"
+                for column in missing_columns
+            )
         )
+
+    # --------------------------------------------------------
+    # Dtypes
+    # --------------------------------------------------------
+
+    dtype_map = {
+        feature: FEATURE_DTYPE
+        for feature in config.ML_FEATURES
+    }
+
+    dtype_map[
+        config.LABEL_COLUMN
+    ] = LABEL_DTYPE
+
+    # --------------------------------------------------------
+    # Load
+    # --------------------------------------------------------
+
+    df = pd.read_csv(
+        path,
+        usecols=required_columns,
+        dtype=dtype_map,
+        low_memory=False,
+    )
+
+    print(
+        f"  Test rows: "
+        f"{len(df):,}"
+    )
 
     return df
 
 
-def validate_feature_count(df):
-    """Ensure exactly the configured ML feature set is used."""
+def validate_dataset(df):
+    """
+    Validate labels and ML feature values.
+    """
 
-    if len(config.ML_FEATURES) != 42:
-        raise ValueError(
-            f"Expected exactly 42 ML features, "
-            f"but config contains {len(config.ML_FEATURES)}."
-        )
+    # --------------------------------------------------------
+    # Label validation
+    # --------------------------------------------------------
 
-    missing = [
-        feature for feature in config.ML_FEATURES
-        if feature not in df.columns
+    y = df[
+        config.LABEL_COLUMN
     ]
 
-    if missing:
+    if y.isna().any():
+
         raise ValueError(
-            "Missing ML features:\n"
-            + "\n".join(missing)
+            "Test dataset contains NaN labels."
         )
+
+    expected_labels = {
+        config.LABEL_BENIGN,
+        config.LABEL_ATTACK,
+    }
+
+    actual_labels = set(
+        y.unique()
+        .tolist()
+    )
+
+    if not actual_labels.issubset(
+        expected_labels
+    ):
+
+        unexpected = (
+            actual_labels
+            - expected_labels
+        )
+
+        raise ValueError(
+            "Unexpected labels found:\n"
+            f"{sorted(unexpected)}"
+        )
+
+    if len(actual_labels) != 2:
+
+        raise ValueError(
+            "Both configured classes must be present."
+        )
+
+    # --------------------------------------------------------
+    # Feature validation
+    # --------------------------------------------------------
+
+    X = df[
+        config.ML_FEATURES
+    ]
+
+    nan_count = int(
+        X.isna()
+        .sum()
+        .sum()
+    )
+
+    infinite_count = 0
+
+    for feature in config.ML_FEATURES:
+
+        values = (
+            X[feature]
+            .to_numpy(
+                copy=False
+            )
+        )
+
+        infinite_count += int(
+            np.isinf(values)
+            .sum()
+        )
+
+    if infinite_count:
+
+        raise ValueError(
+            f"Found {infinite_count:,} "
+            "infinite ML feature values."
+        )
+
+    total_cells = (
+        X.shape[0]
+        * X.shape[1]
+    )
+
+    nan_percentage = (
+        nan_count
+        / total_cells
+        * 100.0
+        if total_cells
+        else 0.0
+    )
+
+    print(
+        f"  ML features: "
+        f"{len(config.ML_FEATURES)}"
+    )
+
+    print(
+        f"  NaN cells: "
+        f"{nan_count:,} "
+        f"({nan_percentage:.4f}%)"
+    )
+
+    print(
+        "  NaN values are retained."
+    )
+
+    print(
+        "  No feature imputation is applied."
+    )
 
 
 def load_model(model_path):
-    """Load the requested Random Forest model."""
+    """
+    Load the saved bare Random Forest model.
+    """
 
-    model_path = Path(model_path)
+    model_path = Path(
+        model_path
+    )
 
     if not model_path.exists():
+
         raise FileNotFoundError(
-            f"Model file not found:\n{model_path}"
+            "Model file not found:\n"
+            f"{model_path}"
         )
 
-    print(f"Loading model: {model_path}")
+    print(
+        f"  Model: "
+        f"{model_path}"
+    )
 
-    model = joblib.load(model_path)
+    model = joblib.load(
+        model_path
+    )
 
     return model
 
 
-def predict(model, X):
+def validate_model_compatibility(model):
     """
-    Return model predictions and attack probabilities.
-
-    Column order is preserved according to config.ML_FEATURES.
+    Ensure the model matches the current feature configuration.
     """
 
-    predictions = model.predict(X)
+    configured_features = list(
+        config.ML_FEATURES
+    )
 
-    probabilities = model.predict_proba(X)
+    configured_count = len(
+        configured_features
+    )
 
-    # Find probability column corresponding to Attack = 1.
-    attack_class_index = list(model.classes_).index(
+    # --------------------------------------------------------
+    # Feature count
+    # --------------------------------------------------------
+
+    if hasattr(
+        model,
+        "n_features_in_",
+    ):
+
+        model_feature_count = int(
+            model.n_features_in_
+        )
+
+        if (
+            model_feature_count
+            != configured_count
+        ):
+
+            raise RuntimeError(
+                "Model/config feature-count mismatch.\n"
+                f"Model expects : "
+                f"{model_feature_count}\n"
+                f"Config defines: "
+                f"{configured_count}"
+            )
+
+    # --------------------------------------------------------
+    # Feature order
+    # --------------------------------------------------------
+
+    if hasattr(
+        model,
+        "feature_names_in_",
+    ):
+
+        model_features = list(
+            model.feature_names_in_
+        )
+
+        if (
+            model_features
+            != configured_features
+        ):
+
+            raise RuntimeError(
+                "Model/config feature-order mismatch.\n"
+                "\nThe current config.ML_FEATURES does "
+                "not match the exact feature order used "
+                "during training."
+            )
+
+    print(
+        f"  Model/config features: "
+        f"OK ({configured_count})"
+    )
+
+
+def get_attack_class_index(model):
+    """
+    Locate the configured Attack class inside model.classes_.
+    """
+
+    if not hasattr(
+        model,
+        "classes_",
+    ):
+
+        raise RuntimeError(
+            "Loaded model does not contain classes_."
+        )
+
+    classes = list(
+        model.classes_
+    )
+
+    if (
+        config.LABEL_ATTACK
+        not in classes
+    ):
+
+        raise RuntimeError(
+            f"Configured Attack label "
+            f"{config.LABEL_ATTACK} was not found "
+            f"in model.classes_.\n"
+            f"Model classes: {classes}"
+        )
+
+    return classes.index(
         config.LABEL_ATTACK
     )
 
-    attack_probabilities = probabilities[:, attack_class_index]
 
-    return predictions, attack_probabilities
-
-
-# ============================================================
-# Perturbation functions
-# ============================================================
-
-def ttl_jitter_small(X, rng):
+def predict(
+    model,
+    X,
+    attack_class_index,
+):
     """
-    Add random TTL jitter in the range [-5, +5].
+    Generate predictions and P(Attack).
+
+    The Attack probability column is selected using
+    model.classes_ rather than assuming column index 1.
+    """
+
+    predictions = model.predict(
+        X
+    )
+
+    probabilities = model.predict_proba(
+        X
+    )
+
+    attack_probabilities = (
+        probabilities[
+            :,
+            attack_class_index
+        ]
+    )
+
+    return (
+        np.asarray(
+            predictions
+        ),
+        np.asarray(
+            attack_probabilities
+        ),
+    )
+
+
+# ============================================================
+# Perturbation helpers
+# ============================================================
+
+def apply_numeric_change(
+    X,
+    column,
+    transform,
+):
+    """
+    Apply a transformation only to non-NaN values.
+
+    NaN positions remain NaN.
+    """
+
+    if column not in X.columns:
+        return X
+
+    mask = X[column].notna()
+
+    if not mask.any():
+        return X
+
+    original = (
+        X.loc[
+            mask,
+            column
+        ]
+        .to_numpy(
+            dtype=np.float64
+        )
+    )
+
+    transformed = transform(
+        original
+    )
+
+    X.loc[
+        mask,
+        column
+    ] = transformed
+
+    return X
+
+
+# ============================================================
+# TTL perturbations
+# ============================================================
+
+def ttl_jitter_small(
+    X,
+    rng,
+):
+    """
+    Add random TTL jitter in [-5, +5].
 
     NaN values remain NaN.
+
+    The perturbed values are explicitly converted back
+    to float32 so they remain compatible with the model
+    feature dtype.
     """
 
     X_new = X.copy()
@@ -129,29 +629,61 @@ def ttl_jitter_small(X, rng):
     if "ttl_mean" not in X_new.columns:
         return X_new
 
-    mask = X_new["ttl_mean"].notna()
+    mask = (
+        X_new["ttl_mean"]
+        .notna()
+    )
+
+    count = int(
+        mask.sum()
+    )
+
+    if count == 0:
+        return X_new
 
     noise = rng.integers(
         low=-5,
         high=6,
-        size=mask.sum()
+        size=count,
     )
 
-    X_new.loc[mask, "ttl_mean"] = np.clip(
-        X_new.loc[mask, "ttl_mean"].to_numpy()
-        + noise,
-        1,
-        255
+    original = (
+        X_new.loc[
+            mask,
+            "ttl_mean"
+        ]
+        .to_numpy(
+            dtype=np.float32
+        )
     )
+
+    perturbed = np.clip(
+        original + noise,
+        1,
+        255,
+    ).astype(
+        np.float32
+    )
+
+    X_new.loc[
+        mask,
+        "ttl_mean"
+    ] = perturbed
 
     return X_new
 
 
-def ttl_jitter_large(X, rng):
+def ttl_jitter_large(
+    X,
+    rng,
+):
     """
-    Add random TTL jitter in the range [-30, +30].
+    Add random TTL jitter in [-30, +30].
 
     NaN values remain NaN.
+
+    The perturbed values are explicitly converted back
+    to float32.
     """
 
     X_new = X.copy()
@@ -159,27 +691,53 @@ def ttl_jitter_large(X, rng):
     if "ttl_mean" not in X_new.columns:
         return X_new
 
-    mask = X_new["ttl_mean"].notna()
+    mask = (
+        X_new["ttl_mean"]
+        .notna()
+    )
+
+    count = int(
+        mask.sum()
+    )
+
+    if count == 0:
+        return X_new
 
     noise = rng.integers(
         low=-30,
         high=31,
-        size=mask.sum()
+        size=count,
     )
 
-    X_new.loc[mask, "ttl_mean"] = np.clip(
-        X_new.loc[mask, "ttl_mean"].to_numpy()
-        + noise,
-        1,
-        255
+    original = (
+        X_new.loc[
+            mask,
+            "ttl_mean"
+        ]
+        .to_numpy(
+            dtype=np.float32
+        )
     )
+
+    perturbed = np.clip(
+        original + noise,
+        1,
+        255,
+    ).astype(
+        np.float32
+    )
+
+    X_new.loc[
+        mask,
+        "ttl_mean"
+    ] = perturbed
 
     return X_new
 
 
 def ttl_forced_normal(X):
     """
-    Force observed TTL values to 128.
+    Force non-NaN TTL values to 128.
 
     NaN values remain NaN.
     """
@@ -189,16 +747,28 @@ def ttl_forced_normal(X):
     if "ttl_mean" not in X_new.columns:
         return X_new
 
-    mask = X_new["ttl_mean"].notna()
+    mask = (
+        X_new["ttl_mean"]
+        .notna()
+    )
 
-    X_new.loc[mask, "ttl_mean"] = 128
+    X_new.loc[
+        mask,
+        "ttl_mean"
+    ] = np.float32(128.0)
 
     return X_new
 
 
-def checksum_forced_valid(X):
+# ============================================================
+# Checksum perturbations
+# ============================================================
+
+def checksum_forced_valid(
+    X,
+):
     """
-    Force observed IP and L4 checksum validity indicators to valid.
+    Force observed checksum-validity indicators to valid.
 
     NaN values remain NaN.
     """
@@ -209,18 +779,28 @@ def checksum_forced_valid(X):
         "ip_checksum_valid",
         "l4_checksum_valid",
     ]:
+
         if column not in X_new.columns:
             continue
 
-        mask = X_new[column].notna()
-        X_new.loc[mask, column] = 1
+        mask = (
+            X_new[column]
+            .notna()
+        )
+
+        X_new.loc[
+            mask,
+            column
+        ] = 1
 
     return X_new
 
 
-def checksum_forced_invalid(X):
+def checksum_forced_invalid(
+    X,
+):
     """
-    Force observed IP and L4 checksum validity indicators to invalid.
+    Force observed checksum-validity indicators to invalid.
 
     NaN values remain NaN.
     """
@@ -231,34 +811,54 @@ def checksum_forced_invalid(X):
         "ip_checksum_valid",
         "l4_checksum_valid",
     ]:
+
         if column not in X_new.columns:
             continue
 
-        mask = X_new[column].notna()
-        X_new.loc[mask, column] = 0
+        mask = (
+            X_new[column]
+            .notna()
+        )
+
+        X_new.loc[
+            mask,
+            column
+        ] = 0
 
     return X_new
 
 
-def rst_count_zeroed(X):
+# ============================================================
+# TCP / flow perturbations
+# ============================================================
+
+def rst_count_zeroed(
+    X,
+):
     """
     Set RST packet count to zero.
+
+    This is a flow-feature perturbation proxy for
+    removing observed reset behaviour.
     """
 
     X_new = X.copy()
 
     if "rst_count" in X_new.columns:
-        X_new["rst_count"] = 0
+        mask = X_new["rst_count"].notna()
+        X_new.loc[mask, "rst_count"] = np.float32(0.0)
 
     return X_new
 
 
-def syn_count_normalized(X):
+def syn_count_normalized(
+    X,
+):
     """
-    Normalize SYN-related features:
+    Normalize SYN-related flow features:
 
-    syn_count = 1
-    syn_seen = 1
+        syn_count = 1
+        syn_seen = 1
 
     Other features remain unchanged.
     """
@@ -266,42 +866,81 @@ def syn_count_normalized(X):
     X_new = X.copy()
 
     if "syn_count" in X_new.columns:
-        X_new["syn_count"] = 1
+        mask = X_new["syn_count"].notna()
+        X_new.loc[mask, "syn_count"] = np.float32(1.0)
 
     if "syn_seen" in X_new.columns:
-        X_new["syn_seen"] = 1
+        mask = X_new["syn_seen"].notna()
+        X_new.loc[mask, "syn_seen"] = np.float32(1.0)
 
     return X_new
 
 
-def combined_evasion(X):
-    """
-    Combined controlled perturbation:
+# ============================================================
+# Combined perturbation
+# ============================================================
 
-    - TTL forced to 128
-    - checksum validity forced to valid
-    - RST count zeroed
+def combined_evasion(
+    X,
+):
+    """
+    Combined controlled feature perturbation:
+
+        TTL -> 128
+        checksum validity -> valid
+        RST count -> 0
+
+    This is intentionally a feature-level stress test.
     """
 
     X_new = X.copy()
 
+    # --------------------------------------------------------
     # TTL
-    if "ttl_mean" in X_new.columns:
-        mask = X_new["ttl_mean"].notna()
-        X_new.loc[mask, "ttl_mean"] = 128
+    # --------------------------------------------------------
 
+    if "ttl_mean" in X_new.columns:
+
+        mask = (
+            X_new["ttl_mean"]
+            .notna()
+        )
+
+        X_new.loc[
+            mask,
+            "ttl_mean"
+        ] = np.float32(128.0)
+
+    # --------------------------------------------------------
     # Checksums
+    # --------------------------------------------------------
+
     for column in [
         "ip_checksum_valid",
         "l4_checksum_valid",
     ]:
-        if column in X_new.columns:
-            mask = X_new[column].notna()
-            X_new.loc[mask, column] = 1
 
+        if column not in X_new.columns:
+            continue
+
+        mask = (
+            X_new[column]
+            .notna()
+        )
+
+        X_new.loc[
+            mask,
+            column
+        ] = 1
+
+    # --------------------------------------------------------
     # RST
+    # --------------------------------------------------------
+
     if "rst_count" in X_new.columns:
-        X_new["rst_count"] = 0
+
+        mask = X_new["rst_count"].notna()
+        X_new.loc[mask, "rst_count"] = np.float32(0.0)
 
     return X_new
 
@@ -312,149 +951,319 @@ def combined_evasion(X):
 
 def build_scenarios():
     """
-    Return the fixed set of robustness scenarios.
+    Return the fixed robustness scenario set.
 
-    The same scenarios are used for baseline and robust models.
+    These scenarios are applied identically to the selected
+    Attack and Benign baseline populations.
     """
 
     return [
+
         (
             "ttl_jitter_small",
             "TTL +/- 5 random jitter",
-            lambda X, rng: ttl_jitter_small(X, rng),
+            lambda X, rng:
+                ttl_jitter_small(
+                    X,
+                    rng,
+                ),
         ),
+
         (
             "ttl_jitter_large",
             "TTL +/- 30 random jitter",
-            lambda X, rng: ttl_jitter_large(X, rng),
+            lambda X, rng:
+                ttl_jitter_large(
+                    X,
+                    rng,
+                ),
         ),
+
         (
             "ttl_forced_normal",
-            "TTL forced to 128 (common default TTL)",
-            lambda X, rng: ttl_forced_normal(X),
+            "TTL forced to 128",
+            lambda X, rng:
+                ttl_forced_normal(
+                    X,
+                ),
         ),
+
         (
             "checksum_forced_valid",
-            "IP/L4 checksum validity flags forced valid",
-            lambda X, rng: checksum_forced_valid(X),
+            "IP/L4 checksum validity forced valid",
+            lambda X, rng:
+                checksum_forced_valid(
+                    X,
+                ),
         ),
+
         (
             "checksum_forced_invalid",
-            "IP/L4 checksum validity flags forced invalid",
-            lambda X, rng: checksum_forced_invalid(X),
+            "IP/L4 checksum validity forced invalid",
+            lambda X, rng:
+                checksum_forced_invalid(
+                    X,
+                ),
         ),
+
         (
             "rst_count_zeroed",
             "RST packet count zeroed",
-            lambda X, rng: rst_count_zeroed(X),
+            lambda X, rng:
+                rst_count_zeroed(
+                    X,
+                ),
         ),
+
         (
             "syn_count_normalized",
-            "SYN count forced to 1 and SYN presence enabled",
-            lambda X, rng: syn_count_normalized(X),
+            "SYN count and SYN presence normalized",
+            lambda X, rng:
+                syn_count_normalized(
+                    X,
+                ),
         ),
+
         (
             "combined_evasion",
-            "TTL + checksum + RST evasion combined",
-            lambda X, rng: combined_evasion(X),
+            "TTL + checksum + RST combined perturbation",
+            lambda X, rng:
+                combined_evasion(
+                    X,
+                ),
         ),
     ]
 
 
 # ============================================================
-# Sampling
+# Baseline sample selection
 # ============================================================
 
 def select_correctly_classified_samples(
     df,
     model,
+    attack_class_index,
     sample_size,
     random_state,
 ):
     """
-    Select correctly classified attack and benign samples.
+    Select correctly classified Attack and Benign samples.
 
-    Attack:
-        Ground truth = Attack
-        Baseline prediction = Attack
+    Attack population:
+        actual = Attack
+        baseline prediction = Attack
 
-    Benign:
-        Ground truth = Benign
-        Baseline prediction = Benign
+    Benign population:
+        actual = Benign
+        baseline prediction = Benign
 
-    The same selected samples are used for every scenario.
+    The same rows are reused for every scenario.
     """
 
-    X = df[config.ML_FEATURES]
-    y = df[config.LABEL_COLUMN].astype(int)
+    X = (
+        df[
+            config.ML_FEATURES
+        ]
+        .copy()
+        .astype(
+            FEATURE_DTYPE
+        )
+    )
 
-    baseline_predictions, baseline_attack_probability = predict(
+    y = (
+        df[
+            config.LABEL_COLUMN
+        ]
+        .copy()
+        .astype(
+            LABEL_DTYPE
+        )
+    )
+
+    (
+        baseline_predictions,
+        baseline_attack_probability,
+    ) = predict(
         model,
         X,
+        attack_class_index,
+    )
+
+    y_array = (
+        y.to_numpy()
     )
 
     correct_attack_mask = (
-        (y == config.LABEL_ATTACK)
-        & (baseline_predictions == config.LABEL_ATTACK)
+        (y_array == config.LABEL_ATTACK)
+        &
+        (
+            baseline_predictions
+            == config.LABEL_ATTACK
+        )
     )
 
     correct_benign_mask = (
-        (y == config.LABEL_BENIGN)
-        & (baseline_predictions == config.LABEL_BENIGN)
+        (y_array == config.LABEL_BENIGN)
+        &
+        (
+            baseline_predictions
+            == config.LABEL_BENIGN
+        )
     )
 
-    attack_indices = df.index[correct_attack_mask].to_numpy()
-    benign_indices = df.index[correct_benign_mask].to_numpy()
+    attack_positions = np.flatnonzero(
+        correct_attack_mask
+    )
 
-    if len(attack_indices) < sample_size:
+    benign_positions = np.flatnonzero(
+        correct_benign_mask
+    )
+
+    if len(attack_positions) < sample_size:
+
         raise ValueError(
-            f"Not enough correctly classified Attack samples. "
-            f"Required={sample_size}, available={len(attack_indices)}"
+            "Not enough correctly classified "
+            "Attack samples.\n"
+            f"Required : {sample_size:,}\n"
+            f"Available: {len(attack_positions):,}"
         )
 
-    if len(benign_indices) < sample_size:
+    if len(benign_positions) < sample_size:
+
         raise ValueError(
-            f"Not enough correctly classified Benign samples. "
-            f"Required={sample_size}, available={len(benign_indices)}"
+            "Not enough correctly classified "
+            "Benign samples.\n"
+            f"Required : {sample_size:,}\n"
+            f"Available: {len(benign_positions):,}"
         )
 
-    rng = np.random.default_rng(random_state)
-
-    selected_attack_indices = rng.choice(
-        attack_indices,
-        size=sample_size,
-        replace=False,
+    rng = np.random.default_rng(
+        random_state
     )
 
-    selected_benign_indices = rng.choice(
-        benign_indices,
-        size=sample_size,
-        replace=False,
+    selected_attack_positions = (
+        rng.choice(
+            attack_positions,
+            size=sample_size,
+            replace=False,
+        )
     )
 
-    attack_X = df.loc[
-        selected_attack_indices,
-        config.ML_FEATURES
-    ].copy()
+    selected_benign_positions = (
+        rng.choice(
+            benign_positions,
+            size=sample_size,
+            replace=False,
+        )
+    )
 
-    benign_X = df.loc[
-        selected_benign_indices,
-        config.ML_FEATURES
-    ].copy()
+    attack_X = (
+        X.iloc[
+            selected_attack_positions
+        ]
+        .reset_index(
+            drop=True
+        )
+    )
 
-    attack_baseline_prob = baseline_attack_probability[
-        df.index.get_indexer(selected_attack_indices)
-    ]
+    benign_X = (
+        X.iloc[
+            selected_benign_positions
+        ]
+        .reset_index(
+            drop=True
+        )
+    )
 
-    benign_baseline_prob = baseline_attack_probability[
-        df.index.get_indexer(selected_benign_indices)
-    ]
+    attack_baseline_prob = (
+        baseline_attack_probability[
+            selected_attack_positions
+        ]
+    )
+
+    benign_baseline_prob = (
+        baseline_attack_probability[
+            selected_benign_positions
+        ]
+    )
 
     return (
         attack_X,
         benign_X,
         attack_baseline_prob,
         benign_baseline_prob,
+    )
+
+
+# ============================================================
+# Feature-change measurement
+# ============================================================
+
+def calculate_changed_cells(
+    original_X,
+    perturbed_X,
+):
+    """
+    Count changed non-NaN feature cells.
+
+    NaN -> NaN is not treated as a change.
+
+    Returns:
+        changed_cells
+        total_cells
+        changed_percentage
+    """
+
+    original = (
+        original_X
+        .to_numpy(
+            dtype=np.float64
+        )
+    )
+
+    perturbed = (
+        perturbed_X
+        .to_numpy(
+            dtype=np.float64
+        )
+    )
+
+    both_nan = (
+        np.isnan(original)
+        &
+        np.isnan(perturbed)
+    )
+
+    equal_values = (
+        original == perturbed
+    )
+
+    changed = (
+        ~both_nan
+        &
+        ~equal_values
+    )
+
+    changed_cells = int(
+        changed.sum()
+    )
+
+    total_cells = int(
+        changed.size
+    )
+
+    percentage = (
+        changed_cells
+        / total_cells
+        * 100.0
+        if total_cells
+        else 0.0
+    )
+
+    return (
+        changed_cells,
+        total_cells,
+        percentage,
     )
 
 
@@ -471,86 +1280,166 @@ def evaluate_scenario(
     perturbation,
     scenario_name,
     description,
-    rng,
+    random_state,
+    attack_class_index,
 ):
     """
-    Apply one perturbation scenario and calculate:
+    Apply one perturbation scenario.
 
-    - Attack Evasion Rate
-    - Benign Induction Rate
-    - Mean Probability Shift
-    - Mean Probability Drop for attacks
-    - Mean Probability Rise for benign samples
+    Ground-truth labels are never modified.
     """
 
-    attack_X_perturbed = perturbation(
-        attack_X.copy(),
-        rng,
+    # --------------------------------------------------------
+    # Independent deterministic RNG
+    # --------------------------------------------------------
+
+    rng = np.random.default_rng(
+        random_state
     )
 
-    benign_X_perturbed = perturbation(
-        benign_X.copy(),
-        rng,
+    # --------------------------------------------------------
+    # Perturb Attack samples
+    # --------------------------------------------------------
+
+    attack_X_perturbed = (
+        perturbation(
+            attack_X.copy(),
+            rng,
+        )
     )
 
-    attack_predictions, attack_perturbed_prob = predict(
-        model,
+    # --------------------------------------------------------
+    # Perturb Benign samples
+    # --------------------------------------------------------
+
+    benign_X_perturbed = (
+        perturbation(
+            benign_X.copy(),
+            rng,
+        )
+    )
+
+    # --------------------------------------------------------
+    # Measure feature changes
+    # --------------------------------------------------------
+
+    (
+        attack_changed_cells,
+        attack_total_cells,
+        attack_changed_percentage,
+    ) = calculate_changed_cells(
+        attack_X,
         attack_X_perturbed,
     )
 
-    benign_predictions, benign_perturbed_prob = predict(
+    (
+        benign_changed_cells,
+        benign_total_cells,
+        benign_changed_percentage,
+    ) = calculate_changed_cells(
+        benign_X,
+        benign_X_perturbed,
+    )
+
+    # --------------------------------------------------------
+    # Predict perturbed Attack samples
+    # --------------------------------------------------------
+
+    (
+        attack_predictions,
+        attack_perturbed_prob,
+    ) = predict(
+        model,
+        attack_X_perturbed,
+        attack_class_index,
+    )
+
+    # --------------------------------------------------------
+    # Predict perturbed Benign samples
+    # --------------------------------------------------------
+
+    (
+        benign_predictions,
+        benign_perturbed_prob,
+    ) = predict(
         model,
         benign_X_perturbed,
+        attack_class_index,
     )
 
     # --------------------------------------------------------
     # Attack Evasion Rate
     # --------------------------------------------------------
     #
-    # Ground truth remains Attack.
-    #
-    # If the perturbed model prediction becomes Benign,
-    # this is an evasion / false negative.
+    # Correctly detected Attack -> predicted Benign
     #
 
-    attack_evasion_rate = np.mean(
-        attack_predictions == config.LABEL_BENIGN
+    attack_evasion_rate = float(
+        np.mean(
+            attack_predictions
+            == config.LABEL_BENIGN
+        )
     )
 
     # --------------------------------------------------------
     # Benign Induction Rate
     # --------------------------------------------------------
     #
-    # Ground truth remains Benign.
-    #
-    # If the perturbed model prediction becomes Attack,
-    # this is benign induction / false positive.
+    # Correctly classified Benign -> predicted Attack
     #
 
-    benign_induction_rate = np.mean(
-        benign_predictions == config.LABEL_ATTACK
+    benign_induction_rate = float(
+        np.mean(
+            benign_predictions
+            == config.LABEL_ATTACK
+        )
     )
 
     # --------------------------------------------------------
+    # Prediction flip counts
+    # --------------------------------------------------------
+
+    attack_to_benign_count = int(
+        np.sum(
+            attack_predictions
+            == config.LABEL_BENIGN
+        )
+    )
+
+    benign_to_attack_count = int(
+        np.sum(
+            benign_predictions
+            == config.LABEL_ATTACK
+        )
+    )
+
     # Absolute probability shifts
     # --------------------------------------------------------
 
-    attack_probability_shift = np.abs(
-        attack_perturbed_prob
-        - attack_baseline_prob
+    attack_probability_shift = (
+        np.abs(
+            attack_perturbed_prob
+            - attack_baseline_prob
+        )
     )
 
-    benign_probability_shift = np.abs(
-        benign_perturbed_prob
-        - benign_baseline_prob
+    benign_probability_shift = (
+        np.abs(
+            benign_perturbed_prob
+            - benign_baseline_prob
+        )
     )
 
-    mean_prob_shift_attack = np.mean(
-        attack_probability_shift
+    mean_prob_shift_attack = float(
+        np.mean(
+            attack_probability_shift
+        )
     )
 
-    mean_prob_shift_benign = np.mean(
-        benign_probability_shift
+    mean_prob_shift_benign = float(
+        np.mean(
+            benign_probability_shift
+        )
     )
 
     # --------------------------------------------------------
@@ -558,9 +1447,9 @@ def evaluate_scenario(
     # --------------------------------------------------------
     #
     # Attack:
-    # baseline - perturbed
+    #   baseline - perturbed
     #
-    # Positive value means attack probability decreased.
+    # Positive = attack probability decreased.
     #
 
     attack_probability_drop = (
@@ -568,15 +1457,17 @@ def evaluate_scenario(
         - attack_perturbed_prob
     )
 
-    mean_prob_drop_attack = np.mean(
-        attack_probability_drop
+    mean_prob_drop_attack = float(
+        np.mean(
+            attack_probability_drop
+        )
     )
 
     # --------------------------------------------------------
     # Benign:
-    # perturbed - baseline
+    #   perturbed - baseline
     #
-    # Positive value means attack probability increased.
+    # Positive = attack probability increased.
     #
 
     benign_probability_rise = (
@@ -584,33 +1475,66 @@ def evaluate_scenario(
         - benign_baseline_prob
     )
 
-    mean_prob_rise_benign = np.mean(
-        benign_probability_rise
+    mean_prob_rise_benign = float(
+        np.mean(
+            benign_probability_rise
+        )
     )
 
     return {
-        "scenario": scenario_name,
-        "description": description,
-        "attack_evasion_rate": float(
-            attack_evasion_rate
-        ),
-        "benign_induction_rate": float(
-            benign_induction_rate
-        ),
-        "mean_prob_shift_attack": float(
-            mean_prob_shift_attack
-        ),
-        "mean_prob_shift_benign": float(
-            mean_prob_shift_benign
-        ),
-        "mean_prob_drop_attack": float(
-            mean_prob_drop_attack
-        ),
-        "mean_prob_rise_benign": float(
-            mean_prob_rise_benign
-        ),
-        "n_attack_tested": int(len(attack_X)),
-        "n_benign_tested": int(len(benign_X)),
+        "scenario":
+            scenario_name,
+
+        "description":
+            description,
+
+        "attack_evasion_rate":
+            attack_evasion_rate,
+
+        "benign_induction_rate":
+            benign_induction_rate,
+
+        "attack_to_benign_count":
+            attack_to_benign_count,
+
+        "benign_to_attack_count":
+            benign_to_attack_count,
+
+        "mean_prob_shift_attack":
+            mean_prob_shift_attack,
+
+        "mean_prob_shift_benign":
+            mean_prob_shift_benign,
+
+        "mean_prob_drop_attack":
+            mean_prob_drop_attack,
+
+        "mean_prob_rise_benign":
+            mean_prob_rise_benign,
+
+        "attack_changed_cells":
+            attack_changed_cells,
+
+        "attack_total_cells":
+            attack_total_cells,
+
+        "attack_changed_percentage":
+            attack_changed_percentage,
+
+        "benign_changed_cells":
+            benign_changed_cells,
+
+        "benign_total_cells":
+            benign_total_cells,
+
+        "benign_changed_percentage":
+            benign_changed_percentage,
+
+        "n_attack_tested":
+            int(len(attack_X)),
+
+        "n_benign_tested":
+            int(len(benign_X)),
     }
 
 
@@ -619,29 +1543,59 @@ def evaluate_scenario(
 # ============================================================
 
 def main():
+
     parser = argparse.ArgumentParser(
         description=(
             "Evaluate Random Forest robustness using "
-            "controlled flow-level feature perturbations."
+            "controlled feature-level perturbations."
         )
     )
 
     # --------------------------------------------------------
-    # Model argument
+    # Model
     # --------------------------------------------------------
 
     parser.add_argument(
         "--model",
         type=str,
-        default=str(config.RANDOM_FOREST_MODEL_FILE),
+        default=str(
+            MODEL_FILE
+        ),
         help=(
-            "Path to the model to evaluate "
-            "(default: baseline model)."
+            "Random Forest .joblib path. "
+            "Defaults to config.RANDOM_FOREST_MODEL_FILE."
         ),
     )
 
     # --------------------------------------------------------
-    # Output filename argument
+    # Sample size
+    # --------------------------------------------------------
+
+    parser.add_argument(
+        "--sample-size",
+        type=int,
+        default=(
+            DEFAULT_SAMPLE_SIZE_PER_CLASS
+        ),
+        help=(
+            "Correctly classified Attack and Benign "
+            "samples used per scenario."
+        ),
+    )
+
+    # --------------------------------------------------------
+    # Random state
+    # --------------------------------------------------------
+
+    parser.add_argument(
+        "--random-state",
+        type=int,
+        default=RANDOM_STATE,
+        help="Random seed for reproducible sampling.",
+    )
+
+    # --------------------------------------------------------
+    # Output name
     # --------------------------------------------------------
 
     parser.add_argument(
@@ -653,116 +1607,165 @@ def main():
 
     args = parser.parse_args()
 
-    # --------------------------------------------------------
-    # Prepare output directory
-    # --------------------------------------------------------
+    if args.sample_size <= 0:
 
-    OUTPUT_DIR.mkdir(
-        parents=True,
-        exist_ok=True,
+        raise ValueError(
+            "--sample-size must be greater than 0."
+        )
+
+    # ========================================================
+    # Header
+    # ========================================================
+
+    print(
+        "=" * 70
     )
 
-    # --------------------------------------------------------
-    # Load dataset
-    # --------------------------------------------------------
+    print(
+        "NetworkIDS - ROBUSTNESS EVALUATION"
+    )
 
-    print("=" * 70)
-    print("ROBUSTNESS EVALUATION")
-    print("=" * 70)
+    print(
+        "=" * 70
+    )
 
-    print(f"Test dataset: {TEST_FILE}")
+    # ========================================================
+    # 1. Configuration
+    # ========================================================
+
+    print_section(
+        "[1/6] Configuration"
+    )
+
+    validate_config()
+
+    print(
+        f"  Test dataset : "
+        f"{TEST_FILE}"
+    )
+
+    print(
+        f"  Model        : "
+        f"{args.model}"
+    )
+
+    print(
+        f"  Sample/class : "
+        f"{args.sample_size:,}"
+    )
+
+    print(
+        f"  Random state : "
+        f"{args.random_state}"
+    )
+
+    # ========================================================
+    # 2. Load dataset
+    # ========================================================
+
+    print_section(
+        "[2/6] Loading held-out test dataset"
+    )
 
     df = load_dataset()
 
-    print(
-        f"Loaded test dataset: "
-        f"{len(df):,} rows x {len(df.columns)} columns"
+    validate_dataset(
+        df
     )
 
-    validate_feature_count(df)
-
-    # --------------------------------------------------------
-    # Validate labels
-    # --------------------------------------------------------
-
-    if df[config.LABEL_COLUMN].isna().any():
-        raise ValueError(
-            "Test dataset contains NaN labels."
+    X = (
+        df[
+            config.ML_FEATURES
+        ]
+        .copy()
+        .astype(
+            FEATURE_DTYPE
         )
-
-    unique_labels = set(
-        df[config.LABEL_COLUMN].astype(int).unique()
     )
 
-    expected_labels = {
-        config.LABEL_BENIGN,
-        config.LABEL_ATTACK,
-    }
-
-    if unique_labels != expected_labels:
-        raise ValueError(
-            f"Unexpected labels: {unique_labels}. "
-            f"Expected: {expected_labels}"
+    y = (
+        df[
+            config.LABEL_COLUMN
+        ]
+        .copy()
+        .astype(
+            LABEL_DTYPE
         )
-
-    # --------------------------------------------------------
-    # Load model
-    # --------------------------------------------------------
-
-    model = load_model(args.model)
-
-    print(
-        f"Model classes: {list(model.classes_)}"
-    )
-
-    # --------------------------------------------------------
-    # Model feature check
-    # --------------------------------------------------------
-
-    if hasattr(model, "n_features_in_"):
-        if model.n_features_in_ != len(config.ML_FEATURES):
-            raise ValueError(
-                f"Model expects {model.n_features_in_} features, "
-                f"but config contains {len(config.ML_FEATURES)}."
-            )
-
-    # --------------------------------------------------------
-    # Prepare X / y
-    # --------------------------------------------------------
-
-    X = df[config.ML_FEATURES]
-    y = df[config.LABEL_COLUMN].astype(int)
-
-    print(
-        f"ML feature matrix: {X.shape}"
     )
 
     print(
-        f"NaN cells in test features: "
-        f"{int(X.isna().sum().sum()):,}"
+        f"  X shape: "
+        f"{X.shape}"
     )
 
-    # --------------------------------------------------------
-    # Baseline model predictions
-    # --------------------------------------------------------
+    # ========================================================
+    # 3. Load model
+    # ========================================================
 
-    baseline_predictions, baseline_probabilities = predict(
-        model,
-        X,
+    print_section(
+        "[3/6] Loading Random Forest"
     )
 
-    baseline_accuracy = np.mean(
-        baseline_predictions == y.to_numpy()
+    model = load_model(
+        args.model
+    )
+
+    validate_model_compatibility(
+        model
+    )
+
+    attack_class_index = (
+        get_attack_class_index(
+            model
+        )
     )
 
     print(
-        f"Model accuracy on clean test set: "
-        f"{baseline_accuracy:.4f}"
+        f"  Model classes      : "
+        f"{list(model.classes_)}"
+    )
+
+    print(
+        f"  Attack label       : "
+        f"{config.LABEL_ATTACK}"
+    )
+
+    print(
+        f"  Attack class index : "
+        f"{attack_class_index}"
     )
 
     # --------------------------------------------------------
-    # Select correctly classified samples
+    # Clean baseline
     # --------------------------------------------------------
+
+    baseline_predictions, baseline_probability = (
+        predict(
+            model,
+            X,
+            attack_class_index,
+        )
+    )
+
+    baseline_accuracy = float(
+        np.mean(
+            baseline_predictions
+            == y.to_numpy()
+        )
+    )
+
+    print(
+        f"  Clean test accuracy: "
+        f"{baseline_accuracy:.6f}"
+    )
+
+    # ========================================================
+    # 4. Select baseline-correct samples
+    # ========================================================
+
+    print_section(
+        "[4/6] Selecting baseline-correct samples"
+    )
 
     (
         attack_X,
@@ -772,57 +1775,67 @@ def main():
     ) = select_correctly_classified_samples(
         df=df,
         model=model,
-        sample_size=SAMPLE_SIZE_PER_CLASS,
-        random_state=RANDOM_STATE,
+        attack_class_index=attack_class_index,
+        sample_size=args.sample_size,
+        random_state=args.random_state,
     )
 
-    print()
-    print("Correctly classified sample pool:")
     print(
-        f"  Attack samples: "
+        f"  Correct Attack samples: "
         f"{len(attack_X):,}"
     )
+
     print(
-        f"  Benign samples: "
+        f"  Correct Benign samples: "
         f"{len(benign_X):,}"
     )
 
-    print()
     print(
-        "Robustness sample configuration:"
-    )
-    print(
-        f"  Samples per class: "
-        f"{SAMPLE_SIZE_PER_CLASS:,}"
-    )
-    print(
-        f"  Random state: "
-        f"{RANDOM_STATE}"
+        "  The same baseline-correct samples "
+        "are reused across all scenarios."
     )
 
-    # --------------------------------------------------------
-    # Run scenarios
-    # --------------------------------------------------------
+    # ========================================================
+    # 5. Run robustness scenarios
+    # ========================================================
 
-    scenarios = build_scenarios()
+    print_section(
+        "[5/6] Running perturbation scenarios"
+    )
+
+    scenarios = (
+        build_scenarios()
+    )
 
     results = []
 
     for (
-        scenario_name,
-        description,
-        perturbation,
-    ) in scenarios:
+        scenario_number,
+        (
+            scenario_name,
+            description,
+            perturbation,
+        ),
+    ) in enumerate(
+        scenarios,
+        start=1,
+    ):
 
-        print()
-        print("-" * 70)
-        print(f"Scenario: {scenario_name}")
-        print(f"Description: {description}")
+        print(
+            f"\n[{scenario_number}/"
+            f"{len(scenarios)}] "
+            f"{scenario_name}"
+        )
 
-        # Use the same deterministic random seed pattern
-        # for each scenario.
-        scenario_rng = np.random.default_rng(
-            RANDOM_STATE
+        print(
+            f"  {description}"
+        )
+
+        # Use a deterministic but different
+        # seed for every scenario.
+        scenario_seed = (
+            args.random_state
+            + scenario_number
         )
 
         result = evaluate_scenario(
@@ -834,115 +1847,316 @@ def main():
             perturbation=perturbation,
             scenario_name=scenario_name,
             description=description,
-            rng=scenario_rng,
+            random_state=scenario_seed,
+            attack_class_index=attack_class_index,
         )
 
-        results.append(result)
+        results.append(
+            result
+        )
 
         print(
-            f"Attack Evasion Rate: "
+            f"  Attack evasion rate : "
             f"{result['attack_evasion_rate']:.4%}"
         )
 
         print(
-            f"Benign Induction Rate: "
+            f"  Benign induction    : "
             f"{result['benign_induction_rate']:.4%}"
         )
 
         print(
-            f"Mean Attack Probability Shift: "
-            f"{result['mean_prob_shift_attack']:.4f}"
+            f"  Attack -> Benign    : "
+            f"{result['attack_to_benign_count']:,} / {result['n_attack_tested']:,}"
         )
 
         print(
-            f"Mean Benign Probability Shift: "
-            f"{result['mean_prob_shift_benign']:.4f}"
+            f"  Benign -> Attack    : "
+            f"{result['benign_to_attack_count']:,} / {result['n_benign_tested']:,}"
         )
 
         print(
-            f"Mean Attack Probability Drop: "
+            f"  Attack P drop       : "
             f"{result['mean_prob_drop_attack']:.4f}"
         )
 
         print(
-            f"Mean Benign Probability Rise: "
+            f"  Benign P rise       : "
             f"{result['mean_prob_rise_benign']:.4f}"
         )
 
-    # --------------------------------------------------------
-    # Save results
-    # --------------------------------------------------------
+        print(
+            f"  Attack changed cells: "
+            f"{result['attack_changed_percentage']:.4f}%"
+        )
 
-    results_df = pd.DataFrame(results)
+        print(
+            f"  Benign changed cells: "
+            f"{result['benign_changed_percentage']:.4f}%"
+        )
 
-    out_path = OUTPUT_DIR / args.out_name
+    # ========================================================
+    # 6. Save results
+    # ========================================================
+
+    print_section(
+        "[6/6] Saving robustness results"
+    )
+
+    ROBUSTNESS_DIR.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    results_df = pd.DataFrame(
+        results
+    )
+
+    output_path = (
+        ROBUSTNESS_DIR
+        / args.out_name
+    )
 
     results_df.to_csv(
-        out_path,
+        output_path,
         index=False,
     )
 
     # --------------------------------------------------------
-    # Save experiment metadata
+    # Metadata
     # --------------------------------------------------------
 
+    report_path = (
+        ROBUSTNESS_DIR
+        / "robustness_report.txt"
+    )
+
+    report_lines = [
+        "NetworkIDS - Random Forest Robustness Evaluation Report",
+        "=" * 70,
+        "",
+        f"Model: {Path(args.model).resolve()}",
+        f"Test dataset: {Path(TEST_FILE).resolve()}",
+        f"Feature count: {len(config.ML_FEATURES)}",
+        f"Sample size per class: {args.sample_size:,}",
+        f"Random state: {args.random_state}",
+        f"Clean test accuracy: {baseline_accuracy:.6f}",
+        "",
+        "Evaluation type: Controlled feature-level perturbation",
+        "Packet-level PCAP modification: False",
+        "NaN policy: NaN retained; no imputation",
+        "",
+        "Scenario Results",
+        "-" * 70,
+    ]
+
+    for row in results:
+        report_lines.extend([
+            f"Scenario: {row['scenario']}",
+            f"Description: {row['description']}",
+            f"Attack evasion rate: {row['attack_evasion_rate']:.4%} ({row['attack_to_benign_count']:,} / {row['n_attack_tested']:,})",
+            f"Benign induction rate: {row['benign_induction_rate']:.4%} ({row['benign_to_attack_count']:,} / {row['n_benign_tested']:,})",
+            f"Mean P(Attack) drop - Attack: {row['mean_prob_drop_attack']:.6f}",
+            f"Mean P(Attack) rise - Benign: {row['mean_prob_rise_benign']:.6f}",
+            f"Mean absolute probability shift - Attack: {row['mean_prob_shift_attack']:.6f}",
+            f"Mean absolute probability shift - Benign: {row['mean_prob_shift_benign']:.6f}",
+            "",
+        ])
+
+    report_lines += ["=" * 70, "End of robustness evaluation report."]
+    report_path.write_text("\n".join(report_lines), encoding="utf-8")
+
     metadata = {
-        "model_path": str(Path(args.model)),
-        "test_dataset": str(TEST_FILE),
-        "output_file": str(out_path),
-        "random_state": RANDOM_STATE,
-        "sample_size_per_class": SAMPLE_SIZE_PER_CLASS,
-        "n_ml_features": len(config.ML_FEATURES),
-        "n_scenarios": len(scenarios),
-        "attack_ground_truth_preserved": True,
-        "benign_ground_truth_preserved": True,
-        "baseline_model_reused_without_retraining": True,
+
+        "model":
+            "RandomForestClassifier",
+
+        "model_path":
+            str(
+                Path(
+                    args.model
+                ).resolve()
+            ),
+
+        "test_dataset":
+            str(
+                Path(
+                    TEST_FILE
+                ).resolve()
+            ),
+
+        "feature_count":
+            len(
+                config.ML_FEATURES
+            ),
+
+        "features":
+            list(
+                config.ML_FEATURES
+            ),
+
+        "labels": {
+            "benign":
+                int(
+                    config.LABEL_BENIGN
+                ),
+
+            "attack":
+                int(
+                    config.LABEL_ATTACK
+                ),
+        },
+
+        "sample_size_per_class":
+            int(
+                args.sample_size
+            ),
+
+        "random_state":
+            int(
+                args.random_state
+            ),
+
+        "scenarios":
+            len(
+                scenarios
+            ),
+
+        "baseline_clean_accuracy":
+            baseline_accuracy,
+
+        "sampling_policy":
+            (
+                "Correctly classified "
+                "Attack and Benign test samples; "
+                "same rows reused across scenarios."
+            ),
+
+        "ground_truth_policy":
+            (
+                "Ground-truth labels are retained "
+                "unchanged during perturbation."
+            ),
+
+        "nan_policy":
+            "NaN retained; no imputation",
+
+        "evaluation_type":
+            (
+                "Controlled feature-level "
+                "perturbation robustness evaluation"
+            ),
+
+        "packet_level_modification":
+            False,
+
+        "results_file":
+            str(
+                output_path.resolve()
+            ),
+
+        "report_file":
+            str(
+                report_path.resolve()
+            ),
     }
 
-    metadata_path = out_path.with_name(
-        out_path.stem + "_metadata.json"
+    metadata_path = (
+        ROBUSTNESS_DIR
+        / "robustness_results_metadata.json"
     )
 
     with open(
         metadata_path,
         "w",
         encoding="utf-8",
-    ) as f:
+    ) as file:
+
         json.dump(
             metadata,
-            f,
+            file,
             indent=2,
         )
 
-    # --------------------------------------------------------
+    # ========================================================
     # Final summary
-    # --------------------------------------------------------
+    # ========================================================
 
-    print()
-    print("=" * 70)
-    print("ROBUSTNESS EVALUATION SUMMARY")
-    print("=" * 70)
+    print(
+        "\n" + "=" * 70
+    )
 
-    for _, row in results_df.iterrows():
+    print(
+        "ROBUSTNESS EVALUATION SUMMARY"
+    )
+
+    print(
+        "=" * 70
+    )
+
+    print(
+        f"\nClean test accuracy: "
+        f"{baseline_accuracy:.6f}"
+    )
+
+    print(
+        "\nScenario results:"
+    )
+
+    for _, row in (
+        results_df.iterrows()
+    ):
 
         print(
-            f"{row['scenario']:<25} "
-            f"Attack Evasion: "
+            f"  {row['scenario']:<25} "
+            f"Attack Evasion="
             f"{row['attack_evasion_rate']:.2%} | "
-            f"Benign Induction: "
-            f"{row['benign_induction_rate']:.2%}"
+            f"Benign Induction="
+            f"{row['benign_induction_rate']:.2%} | "
+            f"A->B={row['attack_to_benign_count']:,} | "
+            f"B->A={row['benign_to_attack_count']:,}"
         )
 
-    print()
-    print(f"Results saved to:")
-    print(out_path)
+    print(
+        "\nResults:"
+    )
 
-    print()
-    print(f"Metadata saved to:")
-    print(metadata_path)
+    print(
+        f"  {output_path}"
+    )
 
-    print()
-    print("PASS: Robustness evaluation completed.")
+    print(
+        "\nMetadata:"
+    )
+
+    print(
+        f"  {metadata_path}"
+    )
+
+    print(
+        "\nReport:"
+    )
+
+    print(
+        f"  {report_path}"
+    )
+
+    print(
+        "\n" + "=" * 70
+    )
+
+    print(
+        "ROBUSTNESS EVALUATION COMPLETE"
+    )
+
+    print(
+        "=" * 70
+    )
+
+
+# ============================================================
+# Entry point
+# ============================================================
 
 if __name__ == "__main__":
     main()

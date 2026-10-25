@@ -7,30 +7,54 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
-DATA_DIR = PROJECT_ROOT / "data"
-RAW_DIR = DATA_DIR / "raw"
-PROCESSED_DIR = DATA_DIR / "processed"
-TEST_DIR = DATA_DIR / "test"
+DATA_DIR = (
+    PROJECT_ROOT
+    / "data"
+)
 
-MODELS_DIR = PROJECT_ROOT / "models"
+RAW_DIR = (
+    DATA_DIR
+    / "raw"
+)
+
+PROCESSED_DIR = (
+    DATA_DIR
+    / "processed"
+)
+
+TRAIN_DIR = (
+    DATA_DIR
+    / "train"
+)
+
+TEST_DIR = (
+    DATA_DIR
+    / "test"
+)
+
+MODELS_DIR = (
+    PROJECT_ROOT
+    / "models"
+)
 
 
 # ============================================================
-# ==================== ADDED ================================
-# Random Forest Directory
+# Model Directories
 #
-# Keep the Random Forest training script and all primary
-# Random Forest artifacts together in one dedicated folder:
+# Primary final model:
 #
 #     random_forest/
-#         train_rf.py
-#         rf_model.joblib
-#         rf_model_meta.json
-#         rf_model_report.txt
+#
+# Comparison models:
+#
+#     decision_tree/
+#     support_vector_machine/
 #
 # SHAP outputs remain under:
 #
 #     models/shap/
+#
+# No separate model-comparison directory is required.
 # ============================================================
 
 RANDOM_FOREST_DIR = (
@@ -38,9 +62,24 @@ RANDOM_FOREST_DIR = (
     / "random_forest"
 )
 
+DECISION_TREE_DIR = (
+    PROJECT_ROOT
+    / "decision_tree"
+)
+
+SUPPORT_VECTOR_MACHINE_DIR = (
+    PROJECT_ROOT
+    / "support_vector_machine"
+)
+
 
 # ============================================================
 # CIC-IDS2017 Days
+#
+# Used only by the historical multiday preparation pipeline.
+#
+# Raw CIC-IDS2017 PCAP files are no longer stored inside the
+# project repository.
 # ============================================================
 
 CIC_DAYS = [
@@ -53,68 +92,13 @@ CIC_DAYS = [
 
 
 # ============================================================
-# Raw CIC-IDS2017 PCAP Files
-#
-# These are source/reference files used during dataset
-# preparation.
-#
-# User-uploaded PCAP files must be supplied by the runtime
-# application and should NOT modify config.py.
-# ============================================================
-
-CIC_PCAP_FILES = {
-
-    "Monday":
-        RAW_DIR / "Monday-WorkingHours.pcap",
-
-    "Tuesday":
-        RAW_DIR / "Tuesday-WorkingHours.pcap",
-
-    "Wednesday":
-        RAW_DIR / "Wednesday-workingHours.pcap",
-
-    "Thursday":
-        RAW_DIR / "Thursday-WorkingHours.pcap",
-
-    "Friday":
-        RAW_DIR / "Friday-WorkingHours.pcap",
-}
-
-
-# Backward-compatible default/reference PCAP.
-#
-# This is only a default development input.
-# It is NOT the primary multiday training input.
-
-DEFAULT_CIC_DAY = "Wednesday"
-
-PCAP_FILE = CIC_PCAP_FILES[
-    DEFAULT_CIC_DAY
-]
-
-
-# ============================================================
-# Raw GeneratedLabelledFlows
-#
-# Original CIC-IDS2017 official label files.
-#
-# These are kept as source/provenance files.
-# ============================================================
-
-RAW_LABELLED_FLOWS_DIR = (
-    RAW_DIR
-    / "GeneratedLabelledFlows"
-    / "TrafficLabelling"
-)
-
-
-# ============================================================
 # Processed Multiday Labels
 #
-# These are the canonical label files used by the multiday
-# preparation pipeline.
+# Canonical CIC-IDS2017 label files used by the historical
+# multiday preparation pipeline.
 #
-# Thursday and Friday have already been combined.
+# These remain useful for reproducibility and rebuilding the
+# original CIC multiday split.
 # ============================================================
 
 MULTIDAY_LABELS_DIR = (
@@ -147,35 +131,6 @@ MULTIDAY_LABEL_FILES = {
 }
 
 
-# Backward-compatible Wednesday label reference.
-
-LABELLED_WEDNESDAY_FILE = (
-    MULTIDAY_LABEL_FILES[
-        "Wednesday"
-    ]
-)
-
-
-# ============================================================
-# Official MachineLearningCSV Reference
-#
-# This is a reference/sanity-check source only.
-# It is NOT the primary training dataset.
-# ============================================================
-
-ML_REFERENCE_DIR = (
-    RAW_DIR
-    / "MachineLearningCSV"
-    / "MachineLearningCVE"
-)
-
-
-ML_REFERENCE_WEDNESDAY_FILE = (
-    ML_REFERENCE_DIR
-    / "Wednesday-workingHours.pcap_ISCX.csv"
-)
-
-
 # ============================================================
 # Processed Directories
 # ============================================================
@@ -193,29 +148,120 @@ MULTIDAY_SPLIT_DIR = (
 
 
 # ============================================================
-# Primary Train/Test Dataset
+# Final Machine-Learning Datasets
+#
+# training_dataset.csv
+# --------------------
+# Final enhanced training dataset.
+#
+# Used by:
+#
+#     Random Forest
+#     Decision Tree
+#     Support Vector Machine
+#
+#
+# test_multiday.csv
+# -----------------
+# Final labelled held-out flow-level test dataset.
+#
+#
+# test_multiday_packets.csv
+# -------------------------
+# Packet companion for test_multiday.csv.
+#
+# Join key:
+#
+#     (day, flow_id)
 # ============================================================
 
 TRAIN_DATASET_FILE = (
+    TRAIN_DIR
+    / "training_dataset.csv"
+)
+
+
+TRAIN_MANIFEST_FILE = (
+    TRAIN_DIR
+    / "training_dataset_manifest.csv"
+)
+
+
+TEST_DATASET_FILE = (
+    TEST_DIR
+    / "test_multiday.csv"
+)
+
+
+TEST_PACKET_DATASET_FILE = (
+    TEST_DIR
+    / "test_multiday_packets.csv"
+)
+
+
+# ============================================================
+# Original CIC Multiday Training Split
+#
+# This is NOT the final enhanced training dataset.
+#
+# It is retained because it is one source used to build:
+#
+#     data/train/training_dataset.csv
+# ============================================================
+
+CIC_TRAIN_SPLIT_FILE = (
     MULTIDAY_SPLIT_DIR
     / "train_multiday.csv"
 )
 
 
-TEST_DATASET_FILE = (
-    MULTIDAY_SPLIT_DIR
-    / "test_multiday.csv"
+# ============================================================
+# External / Unseen Test Discovery
+#
+# All flow-level CSV files under data/test matching:
+#
+#     *_flow.csv
+#
+# are treated as external unseen inference datasets.
+#
+# test_multiday.csv is added explicitly because it does not
+# end with "_flow.csv".
+# ============================================================
+
+TEST_FLOW_GLOB = (
+    "*_flow.csv"
 )
 
 
-SPLIT_SUMMARY_FILE = (
-    MULTIDAY_SPLIT_DIR
-    / "split_summary.txt"
-)
+TEST_ADDITIONAL_FLOW_FILES = [
+    TEST_DATASET_FILE,
+]
 
 
 # ============================================================
-# Legacy / Intermediate Processed Files
+# Standalone Preprocessing Defaults
+#
+# These are default working/output paths for standalone
+# preprocessing scripts.
+#
+# They are NOT the final RF / DT / SVM train or test datasets.
+#
+# packet_parser.py:
+#
+#     PCAP
+#       -> packet_features.csv
+#
+# flow_builder.py:
+#
+#     packet_features.csv
+#       -> flow_features.csv
+#
+# label_matcher.py:
+#
+#     flow_features.csv
+#       -> final_ml_dataset.csv
+#
+# These files do not need to exist permanently.
 # ============================================================
 
 PACKET_FEATURES_FILE = (
@@ -237,24 +283,9 @@ FINAL_ML_DATASET_FILE = (
 
 
 # ============================================================
-# Random Forest Outputs
+# Random Forest Artifacts
 #
-# ==================== CHANGED ===============================
-#
-# Random Forest artifacts are now stored together under:
-#
-#     random_forest/
-#
-# Files:
-#
-#   rf_model.joblib
-#       Bare trained sklearn model.
-#
-#   rf_model_meta.json
-#       Reproducibility and model metadata.
-#
-#   rf_model_report.txt
-#       Human-readable evaluation report.
+# Primary classifier used by the final NetworkIDS system.
 # ============================================================
 
 RANDOM_FOREST_MODEL_FILE = (
@@ -276,6 +307,58 @@ RANDOM_FOREST_REPORT_FILE = (
 
 
 # ============================================================
+# Decision Tree Artifacts
+#
+# Comparison model only.
+#
+# It is not used by the final dashboard.
+# ============================================================
+
+DECISION_TREE_MODEL_FILE = (
+    DECISION_TREE_DIR
+    / "dt_model.joblib"
+)
+
+
+DECISION_TREE_META_FILE = (
+    DECISION_TREE_DIR
+    / "dt_model_meta.json"
+)
+
+
+DECISION_TREE_REPORT_FILE = (
+    DECISION_TREE_DIR
+    / "dt_model_report.txt"
+)
+
+
+# ============================================================
+# Support Vector Machine Artifacts
+#
+# Comparison model only.
+#
+# It is not used by the final dashboard.
+# ============================================================
+
+SUPPORT_VECTOR_MACHINE_MODEL_FILE = (
+    SUPPORT_VECTOR_MACHINE_DIR
+    / "svm_model.joblib"
+)
+
+
+SUPPORT_VECTOR_MACHINE_META_FILE = (
+    SUPPORT_VECTOR_MACHINE_DIR
+    / "svm_model_meta.json"
+)
+
+
+SUPPORT_VECTOR_MACHINE_REPORT_FILE = (
+    SUPPORT_VECTOR_MACHINE_DIR
+    / "svm_model_report.txt"
+)
+
+
+# ============================================================
 # Classification Labels
 # ============================================================
 
@@ -291,9 +374,12 @@ LABEL_COLUMN = "label"
 #
 # IMPORTANT:
 #
-# This list is the SINGLE SOURCE OF TRUTH for the model input.
+# This list is the SINGLE SOURCE OF TRUTH for model input.
 #
-# Do NOT hard-code the feature count anywhere else.
+# Random Forest, Decision Tree and SVM must all use the same
+# feature list for fair comparison.
+#
+# Do NOT hard-code the feature count elsewhere.
 # ============================================================
 
 ML_FEATURES = [
@@ -367,6 +453,10 @@ ML_FEATURES = [
 
 # ============================================================
 # Metadata Columns
+#
+# Used for traceability / investigation only.
+#
+# They are NOT ML features.
 # ============================================================
 
 METADATA_COLUMNS = [
@@ -458,6 +548,11 @@ FLOW_IDLE_TIMEOUT = 120.0
 # ============================================================
 
 def ensure_directories():
+    """
+    Create project-owned working/output directories.
+
+    Source datasets themselves are not generated here.
+    """
 
     DATA_DIR.mkdir(
         parents=True,
@@ -474,6 +569,11 @@ def ensure_directories():
         exist_ok=True,
     )
 
+    TRAIN_DIR.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
     TEST_DIR.mkdir(
         parents=True,
         exist_ok=True,
@@ -484,17 +584,25 @@ def ensure_directories():
         exist_ok=True,
     )
 
-
-    # ========================================================
-    # ==================== ADDED ==============================
-    # Dedicated Random Forest directory.
-    # ========================================================
-
     RANDOM_FOREST_DIR.mkdir(
         parents=True,
         exist_ok=True,
     )
 
+    DECISION_TREE_DIR.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    SUPPORT_VECTOR_MACHINE_DIR.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    MULTIDAY_LABELS_DIR.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
 
     MULTIDAY_PACKET_DIR.mkdir(
         parents=True,
@@ -512,22 +620,29 @@ def ensure_directories():
 # ============================================================
 
 def validate_ml_features():
+    """
+    Validate the shared model feature definition.
+    """
 
-    if len(ML_FEATURES) == 0:
+    if len(
+        ML_FEATURES
+    ) == 0:
 
         raise ValueError(
             "ML_FEATURES must contain at least one feature."
         )
 
-
     if len(
-        set(ML_FEATURES)
-    ) != len(ML_FEATURES):
+        set(
+            ML_FEATURES
+        )
+    ) != len(
+        ML_FEATURES
+    ):
 
         raise ValueError(
             "Duplicate feature names detected in ML_FEATURES."
         )
-
 
     forbidden_features = {
 
@@ -543,13 +658,13 @@ def validate_ml_features():
         "day",
     }
 
-
     overlap = (
-        set(ML_FEATURES)
+        set(
+            ML_FEATURES
+        )
         &
         forbidden_features
     )
-
 
     if overlap:
 
@@ -557,10 +672,12 @@ def validate_ml_features():
             "Metadata fields must not appear in ML_FEATURES:\n"
             + "\n".join(
                 f"  - {feature}"
-                for feature in sorted(overlap)
+                for feature
+                in sorted(
+                    overlap
+                )
             )
         )
-
 
     return True
 
@@ -570,39 +687,50 @@ def validate_ml_features():
 # ============================================================
 
 def validate_mac_ip_columns():
+    """
+    Validate packet-level and flow-level MAC-IP integrity
+    column definitions.
+    """
 
     if len(
         MAC_IP_PACKET_COLUMNS
     ) != len(
-        set(MAC_IP_PACKET_COLUMNS)
+        set(
+            MAC_IP_PACKET_COLUMNS
+        )
     ):
 
         raise ValueError(
             "Duplicate packet-level MAC-IP columns detected."
         )
 
-
     if len(
         MAC_IP_FLOW_COLUMNS
     ) != len(
-        set(MAC_IP_FLOW_COLUMNS)
+        set(
+            MAC_IP_FLOW_COLUMNS
+        )
     ):
 
         raise ValueError(
             "Duplicate flow-level MAC-IP columns detected."
         )
 
-
     overlap = (
-        set(ML_FEATURES)
+        set(
+            ML_FEATURES
+        )
         &
         (
-            set(MAC_IP_PACKET_COLUMNS)
+            set(
+                MAC_IP_PACKET_COLUMNS
+            )
             |
-            set(MAC_IP_FLOW_COLUMNS)
+            set(
+                MAC_IP_FLOW_COLUMNS
+            )
         )
     )
-
 
     if overlap:
 
@@ -611,29 +739,33 @@ def validate_mac_ip_columns():
             "inside ML_FEATURES:\n"
             + "\n".join(
                 f"  - {feature}"
-                for feature in sorted(overlap)
+                for feature
+                in sorted(
+                    overlap
+                )
             )
         )
-
 
     return True
 
 
 # ============================================================
-# Primary Training File Validation
+# Primary Dataset Validation
 # ============================================================
 
 def validate_training_files():
+    """
+    Validate final train/test datasets used by the ML models.
+    """
 
     required_files = {
 
-        "Train dataset":
+        "Final training dataset":
             TRAIN_DATASET_FILE,
 
-        "Test dataset":
+        "Held-out test dataset":
             TEST_DATASET_FILE,
     }
-
 
     missing = []
 
@@ -647,11 +779,10 @@ def validate_training_files():
                 f"{name}: {path}"
             )
 
-
     if missing:
 
         print(
-            "Missing primary training files:"
+            "Missing primary ML dataset files:"
         )
 
         for item in missing:
@@ -662,6 +793,55 @@ def validate_training_files():
 
         return False
 
+    return True
+
+
+# ============================================================
+# Training Manifest Validation
+# ============================================================
+
+def validate_training_manifest():
+    """
+    Check whether the final training dataset provenance
+    manifest is available.
+    """
+
+    if not TRAIN_MANIFEST_FILE.exists():
+
+        print(
+            "Missing training dataset manifest:"
+        )
+
+        print(
+            f"  - {TRAIN_MANIFEST_FILE}"
+        )
+
+        return False
+
+    return True
+
+
+# ============================================================
+# Test Packet Companion Validation
+# ============================================================
+
+def validate_test_packet_file():
+    """
+    Check whether the packet companion for test_multiday.csv
+    is available.
+    """
+
+    if not TEST_PACKET_DATASET_FILE.exists():
+
+        print(
+            "Missing test packet companion:"
+        )
+
+        print(
+            f"  - {TEST_PACKET_DATASET_FILE}"
+        )
+
+        return False
 
     return True
 
@@ -686,14 +866,59 @@ if __name__ == "__main__":
 
     ensure_directories()
 
+    # ========================================================
+    # Project paths
+    # ========================================================
+
+    print()
+
     print(
-        f"Project root: "
+        "Project:"
+    )
+
+    print(
+        f"  Root      : "
         f"{PROJECT_ROOT}"
     )
 
     print(
-        f"Default CIC day: "
-        f"{DEFAULT_CIC_DAY}"
+        f"  Data      : "
+        f"{DATA_DIR}"
+    )
+
+    print(
+        f"  Raw       : "
+        f"{RAW_DIR}"
+    )
+
+    print(
+        f"  Processed : "
+        f"{PROCESSED_DIR}"
+    )
+
+    print(
+        f"  Train     : "
+        f"{TRAIN_DIR}"
+    )
+
+    print(
+        f"  Test      : "
+        f"{TEST_DIR}"
+    )
+
+    # ========================================================
+    # CIC preparation
+    # ========================================================
+
+    print()
+
+    print(
+        "CIC multiday preparation:"
+    )
+
+    print(
+        f"  CIC train split: "
+        f"{CIC_TRAIN_SPLIT_FILE}"
     )
 
     print()
@@ -708,6 +933,40 @@ if __name__ == "__main__":
             f"  {day:<10}: "
             f"{MULTIDAY_LABEL_FILES[day]}"
         )
+
+    # ========================================================
+    # Final ML datasets
+    # ========================================================
+
+    print()
+
+    print(
+        "Final ML datasets:"
+    )
+
+    print(
+        f"  Train    : "
+        f"{TRAIN_DATASET_FILE}"
+    )
+
+    print(
+        f"  Manifest : "
+        f"{TRAIN_MANIFEST_FILE}"
+    )
+
+    print(
+        f"  Test     : "
+        f"{TEST_DATASET_FILE}"
+    )
+
+    print(
+        f"  Packets  : "
+        f"{TEST_PACKET_DATASET_FILE}"
+    )
+
+    # ========================================================
+    # Feature validation
+    # ========================================================
 
     print()
 
@@ -724,47 +983,138 @@ if __name__ == "__main__":
         "MAC-IP integrity columns: OK"
     )
 
-    print()
-
-    print(
-        "Primary datasets:"
-    )
-
-    print(
-        f"  Train: {TRAIN_DATASET_FILE}"
-    )
-
-    print(
-        f"  Test : {TEST_DATASET_FILE}"
-    )
+    # ========================================================
+    # Dataset validation
+    # ========================================================
 
     print()
 
+    datasets_ok = (
+        validate_training_files()
+    )
+
+    manifest_ok = (
+        validate_training_manifest()
+    )
+
+    packet_test_ok = (
+        validate_test_packet_file()
+    )
+
+    print()
+
+    print(
+        "Dataset availability:"
+    )
+
+    print(
+        f"  Train/test ready : "
+        f"{'YES' if datasets_ok else 'NO'}"
+    )
+
+    print(
+        f"  Train manifest   : "
+        f"{'YES' if manifest_ok else 'NO'}"
+    )
+
+    print(
+        f"  Packet companion : "
+        f"{'YES' if packet_test_ok else 'NO'}"
+    )
 
     # ========================================================
-    # ==================== CHANGED ============================
-    # Show the dedicated RF directory and its artifacts.
+    # Random Forest
     # ========================================================
+
+    print()
 
     print(
         "Random Forest:"
     )
 
     print(
-        f"  Directory: {RANDOM_FOREST_DIR}"
+        f"  Directory : "
+        f"{RANDOM_FOREST_DIR}"
     )
 
     print(
-        f"  Model    : {RANDOM_FOREST_MODEL_FILE}"
+        f"  Model     : "
+        f"{RANDOM_FOREST_MODEL_FILE}"
     )
 
     print(
-        f"  Meta     : {RANDOM_FOREST_META_FILE}"
+        f"  Meta      : "
+        f"{RANDOM_FOREST_META_FILE}"
     )
 
     print(
-        f"  Report   : {RANDOM_FOREST_REPORT_FILE}"
+        f"  Report    : "
+        f"{RANDOM_FOREST_REPORT_FILE}"
     )
+
+    # ========================================================
+    # Decision Tree
+    # ========================================================
+
+    print()
+
+    print(
+        "Decision Tree:"
+    )
+
+    print(
+        f"  Directory : "
+        f"{DECISION_TREE_DIR}"
+    )
+
+    print(
+        f"  Model     : "
+        f"{DECISION_TREE_MODEL_FILE}"
+    )
+
+    print(
+        f"  Meta      : "
+        f"{DECISION_TREE_META_FILE}"
+    )
+
+    print(
+        f"  Report    : "
+        f"{DECISION_TREE_REPORT_FILE}"
+    )
+
+    # ========================================================
+    # Support Vector Machine
+    # ========================================================
+
+    print()
+
+    print(
+        "Support Vector Machine:"
+    )
+
+    print(
+        f"  Directory : "
+        f"{SUPPORT_VECTOR_MACHINE_DIR}"
+    )
+
+    print(
+        f"  Model     : "
+        f"{SUPPORT_VECTOR_MACHINE_MODEL_FILE}"
+    )
+
+    print(
+        f"  Meta      : "
+        f"{SUPPORT_VECTOR_MACHINE_META_FILE}"
+    )
+
+    print(
+        f"  Report    : "
+        f"{SUPPORT_VECTOR_MACHINE_REPORT_FILE}"
+    )
+
+    # ========================================================
+    # Completed
+    # ========================================================
 
     print()
 

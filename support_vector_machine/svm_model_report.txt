@@ -1,0 +1,103 @@
+NetworkIDS - Calibrated Linear SVM Training Report
+======================================================================
+
+Model Configuration
+----------------------------------------------------------------------
+Model              : CalibratedClassifierCV
+Base estimator     : LinearSVC
+C                  : 1.0
+penalty            : l2
+loss               : squared_hinge
+class_weight       : balanced
+dual               : auto
+tol                : 0.0001
+max_iter           : 20000
+random_state       : 42
+actual_iterations  : 398
+scikit-learn       : 1.9.1
+ML feature count   : 42
+
+Probability Calibration
+----------------------------------------------------------------------
+Method             : sigmoid
+CV folds           : 3
+Ensemble           : False
+Calibration jobs   : -1
+Probability output : Calibrated P(Benign) and P(Attack)
+Calibration design : Cross-validation is used to obtain unbiased classifier scores for sigmoid calibration. With ensemble=False, one final base estimator is trained on the complete training dataset for deployment-oriented inference.
+
+Comparison Purpose
+----------------------------------------------------------------------
+The calibrated Linear SVM is evaluated as a deployment-capable non-tree alternative to the Decision Tree and primary Random Forest. All three models use the same final training dataset, held-out test dataset, 42-feature schema and binary labels. Model-specific preprocessing is applied only where required by the estimator.
+
+SVM-Specific Preprocessing
+----------------------------------------------------------------------
+Imputer            : SimpleImputer
+Imputer strategy   : median
+Keep empty features: True
+Fully-empty fill   : 0 for fully-empty numerical training features
+Scaler             : StandardScaler
+Scaler with_mean   : True
+Scaler with_std    : True
+Feature expansion  : None; no missing indicators or additional model features are added.
+Leakage control    : Imputer and scaler are inside the estimator supplied to CalibratedClassifierCV, so calibration folds fit preprocessing only from their corresponding training partitions.
+
+Label Configuration
+----------------------------------------------------------------------
+Benign            : 0
+Attack            : 1
+
+Dataset
+----------------------------------------------------------------------
+Training file      : C:\FYP\NetworkIDS\data\train\training_dataset.csv
+Test file          : C:\FYP\NetworkIDS\data\test\test_multiday.csv
+Training rows      : 3,484,498
+Test rows          : 745,724
+Evaluation         : Predefined held-out test dataset; test data was not used for model fitting or probability calibration.
+
+Missing-Value Summary
+----------------------------------------------------------------------
+Training NaN cells : 13,089,760
+Test NaN cells     : 2,879,187
+Fully-empty training features:
+  - vlan_id
+  - vlan_priority
+
+Train Label Distribution
+----------------------------------------------------------------------
+0 Benign       2,291,533
+1 Attack       1,192,965
+
+Test Label Distribution
+----------------------------------------------------------------------
+0 Benign         567,230
+1 Attack         178,494
+
+Classification Metrics
+----------------------------------------------------------------------
+Accuracy            : 0.884088
+Precision           : 0.710724
+Recall              : 0.869732
+F1-score            : 0.782229
+AUC-ROC             : 0.946682
+False Positive Rate : 0.111394
+False Negative Rate : 0.130268
+AUC score source    : Calibrated P(Attack)
+
+Confusion Matrix
+----------------------------------------------------------------------
+                 Predicted
+                 Benign     Attack    
+Actual Benign      504,044     63,186
+Actual Attack       23,252    155,242
+
+Classification Report
+----------------------------------------------------------------------
+              precision    recall  f1-score   support
+
+      Benign   0.955903  0.888606  0.921027    567230
+      Attack   0.710724  0.869732  0.782229    178494
+
+    accuracy                       0.884088    745724
+   macro avg   0.833314  0.879169  0.851628    745724
+weighted avg   0.897218  0.884088  0.887805    745724

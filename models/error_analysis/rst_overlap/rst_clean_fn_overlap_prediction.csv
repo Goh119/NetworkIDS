@@ -1,1 +1,0 @@
-flow_id,timestamp,src_ip,dst_ip,src_mac,dst_mac,label,original_label,predicted_label,attack_probability,prediction_type,correct_prediction

@@ -24,7 +24,7 @@ from collections import defaultdict
 import logging
 logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
 
-from scapy.all import (  # type: ignore[reportMissingImports]
+from scapy.all import (
     PcapReader,
     Ether,
     Dot1Q,
@@ -36,7 +36,7 @@ from scapy.all import (  # type: ignore[reportMissingImports]
     raw,
 )
 
-from scapy.layers.inet import in4_chksum  # type: ignore[reportMissingImports]
+from scapy.layers.inet import in4_chksum 
 
 
 sys.path.append(
@@ -1123,9 +1123,7 @@ def main():
 
     parser.add_argument(
         "--pcap",
-        default=str(
-            config.PCAP_FILE
-        ),
+        required=True,
         help="Path to the PCAP file.",
     )
 

@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        NetworkIDS Dashboard
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/dashboard.css') }}"
+    >
+</head>
+
+<body>
+
+    <!-- ===================================================== -->
+    <!-- Header -->
+    <!-- ===================================================== -->
+
+    <header class="topbar">
+
+        <div>
+            <h1>
+                NetworkIDS
+            </h1>
+
+            <p>
+                Explainable Header-Flow Network Traffic Analysis
+            </p>
+        </div>
+
+        <div class="model-badge">
+            Random Forest IDS
+        </div>
+
+    </header>
+
+
+    <main class="page-container">
+
+
+        <!-- ================================================= -->
+        <!-- Input -->
+        <!-- ================================================= -->
+
+        <section class="card input-card">
+
+            <div class="section-heading">
+
+                <div>
+                    <h2>
+                        Analyze Network Traffic
+                    </h2>
+
+                    <p>
+                        Upload a PCAP capture or run the bundled
+                        demonstration traffic.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="input-options">
+
+
+                <!-- Upload -->
+
+                <div class="input-option">
+
+                    <div class="option-icon">
+                        ↑
+                    </div>
+
+                    <h3>
+                        Upload PCAP
+                    </h3>
+
+                    <p>
+                        Analyze your own captured network traffic.
+                    </p>
+
+                    <label
+                        class="button button-secondary"
+                        for="pcapFile"
+                    >
+                        Choose PCAP
+                    </label>
+
+                    <input
+                        id="pcapFile"
+                        type="file"
+                        accept=".pcap,.pcapng"
+                        hidden
+                    >
+
+                    <div
+                        id="selectedFile"
+                        class="selected-file"
+                    >
+                        No file selected
+                    </div>
+
+                    <button
+                        id="analyzeUploadButton"
+                        class="button button-primary"
+                        disabled
+                    >
+                        Analyze Uploaded Traffic
+                    </button>
+
+                </div>
+
+
+                <div class="or-divider">
+                    OR
+                </div>
+
+
+                <!-- Demo -->
+
+                <div class="input-option">
+
+                    <div class="option-icon">
+                        ▶
+                    </div>
+
+                    <h3>
+                        Demo Traffic
+                    </h3>
+
+                    <p>
+                        Run the IDS using the prepared demonstration PCAP.
+                    </p>
+
+                    <button
+                        id="demoButton"
+                        class="button button-primary"
+                    >
+                        Run Demo Traffic
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- Status -->
+
+            <div
+                id="analysisStatus"
+                class="analysis-status hidden"
+            >
+
+                <div class="spinner"></div>
+
+                <div>
+                    <strong id="analysisStatusTitle">
+                        Analyzing network traffic...
+                    </strong>
+
+                    <p id="analysisStatusText">
+                        Packet parsing, flow construction,
+                        classification and integrity analysis are running.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div
+                id="errorBox"
+                class="error-box hidden"
+            ></div>
+
+        </section>
+
+
+
+        <!-- ================================================= -->
+        <!-- Results -->
+        <!-- ================================================= -->
+
+        <section
+            id="resultsSection"
+            class="hidden"
+        >
+
+
+            <!-- Current analysis -->
+
+            <div class="result-title">
+
+                <div>
+                    <h2>
+                        Analysis Results
+                    </h2>
+
+                    <p>
+                        Traffic source:
+                        <strong id="sourceName">-</strong>
+                    </p>
+                </div>
+
+            </div>
+
+
+            <!-- KPI -->
+
+            <div class="kpi-grid">
+
+                <div class="kpi-card">
+                    <span class="kpi-label">
+                        Total Packets
+                    </span>
+
+                    <strong
+                        id="totalPackets"
+                        class="kpi-value"
+                    >
+                        0
+                    </strong>
+                </div>
+
+
+                <div class="kpi-card">
+                    <span class="kpi-label">
+                        Total Flows
+                    </span>
+
+                    <strong
+                        id="totalFlows"
+                        class="kpi-value"
+                    >
+                        0
+                    </strong>
+                </div>
+
+
+                <div class="kpi-card attack-card">
+                    <span class="kpi-label">
+                        Attack Flows
+                    </span>
+
+                    <strong
+                        id="attackFlows"
+                        class="kpi-value"
+                    >
+                        0
+                    </strong>
+                </div>
+
+
+                <div class="kpi-card benign-card">
+                    <span class="kpi-label">
+                        Benign Flows
+                    </span>
+
+                    <strong
+                        id="benignFlows"
+                        class="kpi-value"
+                    >
+                        0
+                    </strong>
+                </div>
+
+
+                <div class="kpi-card suspicious-card">
+                    <span class="kpi-label">
+                        Suspicious Packets
+                    </span>
+
+                    <strong
+                        id="suspiciousPackets"
+                        class="kpi-value"
+                    >
+                        0
+                    </strong>
+                </div>
+
+
+                <div class="kpi-card tampered-card">
+                    <span class="kpi-label">
+                        Tampered Packets
+                    </span>
+
+                    <strong
+                        id="tamperedPackets"
+                        class="kpi-value"
+                    >
+                        0
+                    </strong>
+                </div>
+
+            </div>
+
+
+
+            <!-- Distribution -->
+
+            <section class="card">
+
+                <div class="section-heading">
+
+                    <div>
+                        <h3>
+                            Classification Distribution
+                        </h3>
+
+                        <p>
+                            Random Forest predictions for the current capture.
+                        </p>
+                    </div>
+
+
+                    <strong id="attackRate">
+                        0% Attack
+                    </strong>
+
+                </div>
+
+
+                <div class="distribution-bar">
+
+                    <div
+                        id="benignBar"
+                        class="distribution-benign"
+                    ></div>
+
+                    <div
+                        id="attackBar"
+                        class="distribution-attack"
+                    ></div>
+
+                </div>
+
+
+                <div class="distribution-labels">
+
+                    <span>
+                        <span class="legend-dot benign-dot"></span>
+                        Benign
+                    </span>
+
+                    <span>
+                        <span class="legend-dot attack-dot"></span>
+                        Attack
+                    </span>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- ================================================= -->
+            <!-- Flow table -->
+            <!-- ================================================= -->
+
+            <section class="card">
+
+                <div class="section-heading">
+
+                    <div>
+                        <h3>
+                            Flow Analysis
+                        </h3>
+
+                        <p>
+                            Each row represents one bidirectional TCP/UDP flow.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <!-- Filters -->
+
+                <div class="filter-row">
+
+                    <input
+                        id="searchInput"
+                        class="filter-control search-control"
+                        type="text"
+                        placeholder="Search Flow ID or IP address..."
+                    >
+
+
+                    <select
+                        id="predictionFilter"
+                        class="filter-control"
+                    >
+                        <option value="All">
+                            All Predictions
+                        </option>
+
+                        <option value="Attack">
+                            Attack
+                        </option>
+
+                        <option value="Benign">
+                            Benign
+                        </option>
+                    </select>
+
+
+                    <select
+                        id="protocolFilter"
+                        class="filter-control"
+                    >
+                        <option value="All">
+                            All Protocols
+                        </option>
+
+                        <option value="TCP">
+                            TCP
+                        </option>
+
+                        <option value="UDP">
+                            UDP
+                        </option>
+                    </select>
+
+                </div>
+
+
+                <!-- Table -->
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+
+                                <th>
+                                    Flow
+                                </th>
+
+                                <th>
+                                    Source
+                                </th>
+
+                                <th>
+                                    Destination
+                                </th>
+
+                                <th>
+                                    Protocol
+                                </th>
+
+                                <th>
+                                    Avg TTL
+                                </th>
+
+                                <th>
+                                    Packets
+                                </th>
+
+                                <th>
+                                    Bytes
+                                </th>
+
+                                <th>
+                                    Prediction
+                                </th>
+
+                                <th>
+                                    Attack Probability
+                                </th>
+
+                                <th>
+                                    Action
+                                </th>
+
+                            </tr>
+                        </thead>
+
+
+                        <tbody id="flowTableBody">
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <!-- Pagination -->
+
+                <div class="pagination">
+
+                    <button
+                        id="previousPage"
+                        class="button button-small button-secondary"
+                    >
+                        Previous
+                    </button>
+
+
+                    <span id="pageInformation">
+                        Page 1 of 1
+                    </span>
+
+
+                    <button
+                        id="nextPage"
+                        class="button button-small button-secondary"
+                    >
+                        Next
+                    </button>
+
+                </div>
+
+            </section>
+
+
+        </section>
+
+    </main>
+
+
+
+    <!-- ===================================================== -->
+    <!-- Flow Details Modal -->
+    <!-- ===================================================== -->
+
+    <div
+        id="flowModal"
+        class="modal hidden"
+    >
+
+        <div class="modal-backdrop"></div>
+
+
+        <div class="modal-panel">
+
+            <div class="modal-header">
+
+                <div>
+                    <h2>
+                        Flow Details
+                    </h2>
+
+                    <span
+                        id="modalFlowId"
+                        class="flow-id-label"
+                    >
+                        -
+                    </span>
+                </div>
+
+
+                <button
+                    id="closeModal"
+                    class="modal-close"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div class="modal-body">
+
+
+                <!-- Flow information -->
+
+                <section class="modal-section">
+
+                    <h3>
+                        Flow Information
+                    </h3>
+
+
+                    <div
+                        id="flowInformation"
+                        class="detail-grid"
+                    ></div>
+
+                </section>
+
+
+
+                <!-- Classification -->
+
+                <section class="modal-section">
+
+                    <h3>
+                        Classification
+                    </h3>
+
+
+                    <div class="classification-box">
+
+                        <div>
+                            <span>
+                                Prediction
+                            </span>
+
+                            <strong id="modalPrediction">
+                                -
+                            </strong>
+                        </div>
+
+
+                        <div>
+                            <span>
+                                Attack Probability
+                            </span>
+
+                            <strong id="modalProbability">
+                                -
+                            </strong>
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- Packet integrity summary -->
+
+                <section class="modal-section">
+
+                    <h3>
+                        Related Packet Integrity
+                    </h3>
+
+
+                    <div
+                        id="integrityLoading"
+                        class="loading-text"
+                    >
+                        Checking packets associated with this flow...
+                    </div>
+
+
+                    <div
+                        id="integritySummary"
+                        class="hidden"
+                    >
+
+                        <div
+                            id="integrityBadge"
+                            class="integrity-badge"
+                        >
+                            -
+                        </div>
+
+
+                        <div
+                            id="integrityCounts"
+                            class="mini-kpi-grid"
+                        ></div>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- SHAP accordion -->
+
+                <section class="accordion">
+
+                    <button
+                        id="shapToggle"
+                        class="accordion-header"
+                    >
+                        <span>
+                            Why was this flow classified this way?
+                        </span>
+
+                        <span class="accordion-arrow">
+                            ▼
+                        </span>
+                    </button>
+
+
+                    <div
+                        id="shapContent"
+                        class="accordion-content hidden"
+                    >
+
+                        <div
+                            id="shapLoading"
+                            class="loading-text"
+                        >
+                            SHAP explanation will be generated when opened.
+                        </div>
+
+
+                        <div
+                            id="shapResults"
+                            class="hidden"
+                        ></div>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- Packet accordion -->
+
+                <section class="accordion">
+
+                    <button
+                        id="packetToggle"
+                        class="accordion-header"
+                    >
+                        <span>
+                            Related Packets
+                        </span>
+
+                        <span class="accordion-arrow">
+                            ▼
+                        </span>
+                    </button>
+
+
+                    <div
+                        id="packetContent"
+                        class="accordion-content hidden"
+                    >
+
+                        <div class="table-wrapper">
+
+                            <table>
+
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            Packet
+                                        </th>
+
+                                        <th>
+                                            Source
+                                        </th>
+
+                                        <th>
+                                            Destination
+                                        </th>
+
+                                        <th>
+                                            TTL
+                                        </th>
+
+                                        <th>
+                                            Flags
+                                        </th>
+
+                                        <th>
+                                            IP Checksum
+                                        </th>
+
+                                        <th>
+                                            L4 Checksum
+                                        </th>
+
+                                        <th>
+                                            Integrity
+                                        </th>
+                                    </tr>
+                                </thead>
+
+
+                                <tbody id="packetTableBody">
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <script
+        src="{{ url_for('static', filename='js/dashboard.js') }}"
+    ></script>
+
+</body>
+
+</html>
