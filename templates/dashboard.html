@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -15,9 +16,11 @@
 
     <link
         rel="stylesheet"
-        href="{{ url_for('static', filename='css/dashboard.css') }}"
+        href="{{ url_for('static', filename='dashboard.css') }}"
     >
+
 </head>
+
 
 <body>
 
@@ -27,166 +30,312 @@
 
     <header class="topbar">
 
-        <div>
-            <h1>
-                NetworkIDS
-            </h1>
+        <div class="brand">
 
-            <p>
-                Explainable Header-Flow Network Traffic Analysis
-            </p>
+            <div class="brand-mark">
+                N
+            </div>
+
+
+            <div>
+
+                <h1>
+                    NetworkIDS
+                </h1>
+
+                <p>
+                    Explainable Header-Flow Network Traffic Analysis
+                </p>
+
+            </div>
+
         </div>
 
-        <div class="model-badge">
-            Random Forest IDS
+
+        <div class="topbar-actions">
+
+            <div class="model-badge">
+                Random Forest IDS
+            </div>
+
+
+            <button
+                id="themeToggle"
+                class="theme-toggle"
+                type="button"
+                aria-label="Toggle light and dark theme"
+                title="Toggle theme"
+            >
+                ☾
+            </button>
+
         </div>
 
     </header>
+
 
 
     <main class="page-container">
 
 
         <!-- ================================================= -->
-        <!-- Input -->
+        <!-- Initial upload view -->
         <!-- ================================================= -->
 
-        <section class="card input-card">
+        <section
+            id="landingSection"
+            class="landing-section"
+        >
 
-            <div class="section-heading">
+            <div class="landing-intro">
 
-                <div>
-                    <h2>
-                        Analyze Network Traffic
-                    </h2>
+                <span class="eyebrow">
+                    Offline Network Traffic Analysis
+                </span>
 
-                    <p>
-                        Upload a PCAP capture or run the bundled
-                        demonstration traffic.
-                    </p>
-                </div>
+
+                <h2>
+                    Analyse network traffic with
+                    clear, explainable results.
+                </h2>
+
+
+                <p>
+                    Upload a packet capture to classify network flows,
+                    review packet header integrity, and understand the
+                    features that influenced each prediction.
+                </p>
 
             </div>
 
 
-            <div class="input-options">
+            <section class="upload-card">
+
+                <div class="upload-heading">
+
+                    <div>
+
+                        <h3>
+                            Upload packet capture
+                        </h3>
+
+                        <p>
+                            Select a PCAP file to begin the analysis.
+                        </p>
+
+                    </div>
+
+                </div>
 
 
-                <!-- Upload -->
+                <label
+                    id="uploadDropZone"
+                    class="upload-drop-zone"
+                    for="pcapFile"
+                >
 
-                <div class="input-option">
-
-                    <div class="option-icon">
+                    <div class="upload-icon">
                         ↑
                     </div>
 
-                    <h3>
-                        Upload PCAP
-                    </h3>
 
-                    <p>
-                        Analyze your own captured network traffic.
-                    </p>
-
-                    <label
-                        class="button button-secondary"
-                        for="pcapFile"
-                    >
-                        Choose PCAP
-                    </label>
-
-                    <input
-                        id="pcapFile"
-                        type="file"
-                        accept=".pcap,.pcapng"
-                        hidden
-                    >
-
-                    <div
-                        id="selectedFile"
-                        class="selected-file"
-                    >
-                        No file selected
-                    </div>
-
-                    <button
-                        id="analyzeUploadButton"
-                        class="button button-primary"
-                        disabled
-                    >
-                        Analyze Uploaded Traffic
-                    </button>
-
-                </div>
-
-
-                <div class="or-divider">
-                    OR
-                </div>
-
-
-                <!-- Demo -->
-
-                <div class="input-option">
-
-                    <div class="option-icon">
-                        ▶
-                    </div>
-
-                    <h3>
-                        Demo Traffic
-                    </h3>
-
-                    <p>
-                        Run the IDS using the prepared demonstration PCAP.
-                    </p>
-
-                    <button
-                        id="demoButton"
-                        class="button button-primary"
-                    >
-                        Run Demo Traffic
-                    </button>
-
-                </div>
-
-            </div>
-
-
-            <!-- Status -->
-
-            <div
-                id="analysisStatus"
-                class="analysis-status hidden"
-            >
-
-                <div class="spinner"></div>
-
-                <div>
-                    <strong id="analysisStatusTitle">
-                        Analyzing network traffic...
+                    <strong>
+                        Choose a PCAP file
                     </strong>
 
-                    <p id="analysisStatusText">
-                        Packet parsing, flow construction,
-                        classification and integrity analysis are running.
-                    </p>
+
+                    <span>
+                        or drag and drop it here
+                    </span>
+
+
+                    <small>
+                        Supported: .pcap, .pcapng · Maximum 512 MB
+                    </small>
+
+                </label>
+
+
+                <input
+                    id="pcapFile"
+                    type="file"
+                    accept=".pcap,.pcapng"
+                    hidden
+                >
+
+
+                <div
+                    id="selectedFilePanel"
+                    class="selected-file-panel hidden"
+                >
+
+                    <div>
+
+                        <span class="selected-file-label">
+                            Selected file
+                        </span>
+
+                        <strong id="selectedFile">
+                            -
+                        </strong>
+
+                        <span
+                            id="selectedFileSize"
+                            class="selected-file-size"
+                        >
+                            -
+                        </span>
+
+                    </div>
+
+
+                    <button
+                        id="clearSelectedFile"
+                        class="clear-file-button"
+                        type="button"
+                        aria-label="Clear selected file"
+                    >
+                        ×
+                    </button>
+
                 </div>
 
-            </div>
+
+                <button
+                    id="analyzeUploadButton"
+                    class="button button-primary analyze-button"
+                    type="button"
+                    disabled
+                >
+                    Analyze Network Traffic
+                </button>
 
 
-            <div
-                id="errorBox"
-                class="error-box hidden"
-            ></div>
+                <div
+                    id="errorBox"
+                    class="error-box hidden"
+                ></div>
+
+            </section>
+
+
+            <!-- ================================================= -->
+            <!-- 4-stage progress -->
+            <!-- ================================================= -->
+
+            <section
+                id="analysisProgress"
+                class="analysis-progress hidden"
+            >
+
+                <div class="stage-grid">
+
+                    <div
+                        id="step-extract"
+                        class="stage-step is-pending"
+                    >
+
+                        <div class="stage-line"></div>
+
+                        <div class="stage-title">
+                            1. Extract
+                        </div>
+
+                        <div class="stage-state">
+                            Waiting
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="step-build"
+                        class="stage-step is-pending"
+                    >
+
+                        <div class="stage-line"></div>
+
+                        <div class="stage-title">
+                            2. Build flows
+                        </div>
+
+                        <div class="stage-state">
+                            Waiting
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="step-headers"
+                        class="stage-step is-pending"
+                    >
+
+                        <div class="stage-line"></div>
+
+                        <div class="stage-title">
+                            3. Check headers
+                        </div>
+
+                        <div class="stage-state">
+                            Waiting
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="step-classify"
+                        class="stage-step is-pending"
+                    >
+
+                        <div class="stage-line"></div>
+
+                        <div class="stage-title">
+                            4. Classify
+                        </div>
+
+                        <div class="stage-state">
+                            Waiting
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="analysis-progress-footer">
+
+                    <div>
+
+                        <strong id="analysisStatusTitle">
+                            Analyzing network traffic
+                        </strong>
+
+                        <p id="analysisStatusText">
+                            Preparing analysis...
+                        </p>
+
+                    </div>
+
+
+                    <div
+                        id="analysisElapsed"
+                        class="analysis-elapsed"
+                    >
+                        Elapsed: 00:00
+                    </div>
+
+                </div>
+
+            </section>
 
         </section>
 
 
 
         <!-- ================================================= -->
-        <!-- Results -->
+        <!-- Analysis results -->
         <!-- ================================================= -->
 
         <section
@@ -195,22 +344,40 @@
         >
 
 
-            <!-- Current analysis -->
+            <!-- Result heading -->
 
             <div class="result-title">
 
                 <div>
+
+                    <span class="eyebrow">
+                        Current Analysis
+                    </span>
+
                     <h2>
-                        Analysis Results
+                        Traffic Analysis Results
                     </h2>
 
                     <p>
-                        Traffic source:
-                        <strong id="sourceName">-</strong>
+                        Source:
+                        <strong id="sourceName">
+                            -
+                        </strong>
                     </p>
+
                 </div>
 
+
+                <button
+                    id="newAnalysisButton"
+                    class="button button-secondary"
+                    type="button"
+                >
+                    New Analysis
+                </button>
+
             </div>
+
 
 
             <!-- KPI -->
@@ -218,6 +385,7 @@
             <div class="kpi-grid">
 
                 <div class="kpi-card">
+
                     <span class="kpi-label">
                         Total Packets
                     </span>
@@ -228,10 +396,12 @@
                     >
                         0
                     </strong>
+
                 </div>
 
 
                 <div class="kpi-card">
+
                     <span class="kpi-label">
                         Total Flows
                     </span>
@@ -242,10 +412,12 @@
                     >
                         0
                     </strong>
+
                 </div>
 
 
                 <div class="kpi-card attack-card">
+
                     <span class="kpi-label">
                         Attack Flows
                     </span>
@@ -256,10 +428,12 @@
                     >
                         0
                     </strong>
+
                 </div>
 
 
                 <div class="kpi-card benign-card">
+
                     <span class="kpi-label">
                         Benign Flows
                     </span>
@@ -270,10 +444,12 @@
                     >
                         0
                     </strong>
+
                 </div>
 
 
                 <div class="kpi-card suspicious-card">
+
                     <span class="kpi-label">
                         Suspicious Packets
                     </span>
@@ -284,10 +460,12 @@
                     >
                         0
                     </strong>
+
                 </div>
 
 
                 <div class="kpi-card tampered-card">
+
                     <span class="kpi-label">
                         Tampered Packets
                     </span>
@@ -298,19 +476,23 @@
                     >
                         0
                     </strong>
+
                 </div>
 
             </div>
 
 
 
-            <!-- Distribution -->
+            <!-- ================================================= -->
+            <!-- Classification Distribution -->
+            <!-- ================================================= -->
 
             <section class="card">
 
                 <div class="section-heading">
 
                     <div>
+
                         <h3>
                             Classification Distribution
                         </h3>
@@ -318,10 +500,14 @@
                         <p>
                             Random Forest predictions for the current capture.
                         </p>
+
                     </div>
 
 
-                    <strong id="attackRate">
+                    <strong
+                        id="attackRate"
+                        class="section-stat"
+                    >
                         0% Attack
                     </strong>
 
@@ -346,13 +532,24 @@
                 <div class="distribution-labels">
 
                     <span>
-                        <span class="legend-dot benign-dot"></span>
+
+                        <span
+                            class="legend-dot benign-dot"
+                        ></span>
+
                         Benign
+
                     </span>
 
+
                     <span>
-                        <span class="legend-dot attack-dot"></span>
+
+                        <span
+                            class="legend-dot attack-dot"
+                        ></span>
+
                         Attack
+
                     </span>
 
                 </div>
@@ -362,7 +559,7 @@
 
 
             <!-- ================================================= -->
-            <!-- Flow table -->
+            <!-- Flow analysis -->
             <!-- ================================================= -->
 
             <section class="card">
@@ -370,19 +567,19 @@
                 <div class="section-heading">
 
                     <div>
+
                         <h3>
                             Flow Analysis
                         </h3>
 
                         <p>
-                            Each row represents one bidirectional TCP/UDP flow.
+                            Network flows are ordered from newest to oldest.
                         </p>
+
                     </div>
 
                 </div>
 
-
-                <!-- Filters -->
 
                 <div class="filter-row">
 
@@ -390,7 +587,7 @@
                         id="searchInput"
                         class="filter-control search-control"
                         type="text"
-                        placeholder="Search Flow ID or IP address..."
+                        placeholder="Search IP address, port or protocol..."
                     >
 
 
@@ -398,6 +595,7 @@
                         id="predictionFilter"
                         class="filter-control"
                     >
+
                         <option value="All">
                             All Predictions
                         </option>
@@ -409,6 +607,7 @@
                         <option value="Benign">
                             Benign
                         </option>
+
                     </select>
 
 
@@ -416,6 +615,7 @@
                         id="protocolFilter"
                         class="filter-control"
                     >
+
                         <option value="All">
                             All Protocols
                         </option>
@@ -427,22 +627,22 @@
                         <option value="UDP">
                             UDP
                         </option>
+
                     </select>
 
                 </div>
 
-
-                <!-- Table -->
 
                 <div class="table-wrapper">
 
                     <table>
 
                         <thead>
+
                             <tr>
 
                                 <th>
-                                    Flow
+                                    Timestamp
                                 </th>
 
                                 <th>
@@ -482,6 +682,7 @@
                                 </th>
 
                             </tr>
+
                         </thead>
 
 
@@ -494,34 +695,45 @@
                 </div>
 
 
-                <!-- Pagination -->
-
                 <div class="pagination">
 
-                    <button
-                        id="previousPage"
-                        class="button button-small button-secondary"
+                    <span
+                        id="flowCountInformation"
+                        class="pagination-count"
                     >
-                        Previous
-                    </button>
-
-
-                    <span id="pageInformation">
-                        Page 1 of 1
+                        0 flows
                     </span>
 
 
-                    <button
-                        id="nextPage"
-                        class="button button-small button-secondary"
-                    >
-                        Next
-                    </button>
+                    <div class="pagination-controls">
+
+                        <button
+                            id="previousPage"
+                            class="button button-small button-secondary"
+                            type="button"
+                        >
+                            Previous
+                        </button>
+
+
+                        <span id="pageInformation">
+                            Page 1 of 1
+                        </span>
+
+
+                        <button
+                            id="nextPage"
+                            class="button button-small button-secondary"
+                            type="button"
+                        >
+                            Next
+                        </button>
+
+                    </div>
 
                 </div>
 
             </section>
-
 
         </section>
 
@@ -546,22 +758,26 @@
             <div class="modal-header">
 
                 <div>
+
                     <h2>
                         Flow Details
                     </h2>
 
                     <span
-                        id="modalFlowId"
-                        class="flow-id-label"
+                        id="modalFlowTime"
+                        class="flow-time-label"
                     >
                         -
                     </span>
+
                 </div>
 
 
                 <button
                     id="closeModal"
                     class="modal-close"
+                    type="button"
+                    aria-label="Close flow details"
                 >
                     ×
                 </button>
@@ -571,8 +787,6 @@
 
             <div class="modal-body">
 
-
-                <!-- Flow information -->
 
                 <section class="modal-section">
 
@@ -590,8 +804,6 @@
 
 
 
-                <!-- Classification -->
-
                 <section class="modal-section">
 
                     <h3>
@@ -602,6 +814,7 @@
                     <div class="classification-box">
 
                         <div>
+
                             <span>
                                 Prediction
                             </span>
@@ -609,10 +822,12 @@
                             <strong id="modalPrediction">
                                 -
                             </strong>
+
                         </div>
 
 
                         <div>
+
                             <span>
                                 Attack Probability
                             </span>
@@ -620,6 +835,7 @@
                             <strong id="modalProbability">
                                 -
                             </strong>
+
                         </div>
 
                     </div>
@@ -627,8 +843,6 @@
                 </section>
 
 
-
-                <!-- Packet integrity summary -->
 
                 <section class="modal-section">
 
@@ -669,21 +883,25 @@
 
 
 
-                <!-- SHAP accordion -->
-
                 <section class="accordion">
 
                     <button
                         id="shapToggle"
                         class="accordion-header"
+                        type="button"
                     >
+
                         <span>
                             Why was this flow classified this way?
                         </span>
 
-                        <span class="accordion-arrow">
+                        <span
+                            id="shapArrow"
+                            class="accordion-arrow"
+                        >
                             ▼
                         </span>
+
                     </button>
 
 
@@ -711,21 +929,25 @@
 
 
 
-                <!-- Packet accordion -->
-
                 <section class="accordion">
 
                     <button
                         id="packetToggle"
                         class="accordion-header"
+                        type="button"
                     >
+
                         <span>
                             Related Packets
                         </span>
 
-                        <span class="accordion-arrow">
+                        <span
+                            id="packetArrow"
+                            class="accordion-arrow"
+                        >
                             ▼
                         </span>
+
                     </button>
 
 
@@ -739,7 +961,9 @@
                             <table>
 
                                 <thead>
+
                                     <tr>
+
                                         <th>
                                             Packet
                                         </th>
@@ -771,7 +995,9 @@
                                         <th>
                                             Integrity
                                         </th>
+
                                     </tr>
+
                                 </thead>
 
 
@@ -787,7 +1013,6 @@
 
                 </section>
 
-
             </div>
 
         </div>
@@ -797,7 +1022,7 @@
 
 
     <script
-        src="{{ url_for('static', filename='js/dashboard.js') }}"
+        src="{{ url_for('static', filename='dashboard.js') }}"
     ></script>
 
 </body>

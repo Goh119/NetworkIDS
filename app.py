@@ -3,11 +3,10 @@ app.py
 ------
 NetworkIDS - Flask Dashboard Backend.
 
-Single-page FYP prototype.
+Single-page FYP prototype for offline PCAP analysis.
 
-Supported runtime modes:
-    1. Upload a PCAP file.
-    2. Use the bundled demo PCAP.
+Supported runtime mode:
+    Upload a PCAP / PCAPNG file.
 
 Runtime pipeline:
     PCAP
@@ -15,6 +14,7 @@ Runtime pipeline:
         -> packet_features.csv
         -> flow_builder.py
         -> flow_features.csv
+        -> Packet Integrity Checker
         -> Random Forest classification
 
 Packet-level integrity checking is performed independently
@@ -23,27 +23,31 @@ using src.integrity_checker.apply_rules().
 SHAP explanations are calculated lazily only when the user
 opens the explanation section for a selected flow.
 
+Only the latest analysis is retained inside runtime/current/.
+
 No database is used.
 """
 
 from pathlib import Path
-from datetime import datetime
 import json
 import math
 import shutil
 import subprocess
 import sys
 import threading
+import time
 
 import joblib
 import numpy as np
 import pandas as pd
+
 from flask import (
     Flask,
     jsonify,
     render_template,
     request,
 )
+
 from werkzeug.utils import secure_filename
 
 
@@ -56,6 +60,7 @@ import src.config as config
 from src.integrity_checker import (
     apply_rules,
     NEEDED_COLUMNS as INTEGRITY_NEEDED_COLUMNS,
+    ALL_RULES,
 )
 
 
@@ -63,42 +68,26 @@ from src.integrity_checker import (
 # Project paths
 # ============================================================
 
-PROJECT_ROOT = Path(__file__).resolve().parent
+PROJECT_ROOT = Path(
+    __file__
+).resolve().parent
 
-UPLOAD_DIR = (
-    PROJECT_ROOT
-    / "uploads"
-)
 
 RUNTIME_DIR = (
     PROJECT_ROOT
     / "runtime"
 )
 
+
 CURRENT_RUNTIME_DIR = (
     RUNTIME_DIR
     / "current"
-)
-
-DEMO_DIR = (
-    PROJECT_ROOT
-    / "demo"
-)
-
-DEMO_PCAP = (
-    DEMO_DIR
-    / "demo_traffic.pcap"
 )
 
 
 # ============================================================
 # Runtime files
 # ============================================================
-
-RUNTIME_INPUT_PCAP = (
-    CURRENT_RUNTIME_DIR
-    / "input.pcap"
-)
 
 RUNTIME_PACKET_FEATURES = (
     CURRENT_RUNTIME_DIR
@@ -135,6 +124,12 @@ ALLOWED_EXTENSIONS = {
     ".pcapng",
 }
 
+MAX_UPLOAD_BYTES = (
+    512
+    * 1024
+    * 1024
+)
+
 INTEGRITY_CHUNK_SIZE = 250_000
 
 DEFAULT_PAGE_SIZE = 25
@@ -142,6 +137,110 @@ DEFAULT_PAGE_SIZE = 25
 MAX_PAGE_SIZE = 100
 
 RELATED_PACKET_LIMIT = 100
+
+
+# ============================================================
+# Friendly SHAP feature names
+# ============================================================
+
+FEATURE_LABELS = {
+
+    "frame_length_mean":
+        "average frame length",
+
+    "ip_total_length_mean":
+        "average IP packet length",
+
+    "ttl_mean":
+        "average TTL",
+
+    "src_port":
+        "source port",
+
+    "dst_port":
+        "destination port",
+
+    "tcp_header_length_mean":
+        "average TCP header length",
+
+    "tcp_window_mean":
+        "average TCP window size",
+
+    "flow_packet_count":
+        "flow packet count",
+
+    "flow_byte_count":
+        "flow byte count",
+
+    "forward_packet_count":
+        "forward packet count",
+
+    "reverse_packet_count":
+        "reverse packet count",
+
+    "forward_byte_count":
+        "forward byte count",
+
+    "reverse_byte_count":
+        "reverse byte count",
+
+    "flow_duration":
+        "flow duration",
+
+    "iat_mean":
+        "average packet inter-arrival time",
+
+    "iat_min":
+        "minimum packet inter-arrival time",
+
+    "iat_max":
+        "maximum packet inter-arrival time",
+
+    "byte_rate":
+        "byte rate",
+
+    "packet_rate":
+        "packet rate",
+
+    "syn_count":
+        "SYN flag count",
+
+    "ack_count":
+        "ACK flag count",
+
+    "fin_count":
+        "FIN flag count",
+
+    "rst_count":
+        "RST flag count",
+
+    "psh_count":
+        "PSH flag count",
+
+    "urg_count":
+        "URG flag count",
+
+    "ip_id_mean":
+        "average IPv4 identification value",
+
+    "ip_header_length_mean":
+        "average IP header length",
+
+    "fragment_offset_mean":
+        "average fragmentation offset",
+
+    "ip_dscp":
+        "DSCP value",
+
+    "ip_ecn":
+        "ECN value",
+
+    "ip_version":
+        "IP version",
+
+    "ip_protocol":
+        "IP protocol",
+}
 
 
 # ============================================================
@@ -155,31 +254,16 @@ app = Flask(
 )
 
 
-# Maximum upload:
-# 512 MB for prototype use.
-#
-# You may increase this later if needed.
-
 app.config[
     "MAX_CONTENT_LENGTH"
-] = 512 * 1024 * 1024
+] = MAX_UPLOAD_BYTES
 
 
 # ============================================================
 # Ensure directories
 # ============================================================
 
-UPLOAD_DIR.mkdir(
-    parents=True,
-    exist_ok=True,
-)
-
 RUNTIME_DIR.mkdir(
-    parents=True,
-    exist_ok=True,
-)
-
-DEMO_DIR.mkdir(
     parents=True,
     exist_ok=True,
 )
@@ -192,6 +276,7 @@ DEMO_DIR.mkdir(
 MODEL_FILE = Path(
     config.RANDOM_FOREST_MODEL_FILE
 )
+
 
 if not MODEL_FILE.exists():
 
@@ -216,8 +301,13 @@ if hasattr(
 ):
 
     if (
-        int(MODEL.n_features_in_)
-        != len(config.ML_FEATURES)
+        int(
+            MODEL.n_features_in_
+        )
+        !=
+        len(
+            config.ML_FEATURES
+        )
     ):
 
         raise RuntimeError(
@@ -234,8 +324,12 @@ if hasattr(
         MODEL.feature_names_in_
     )
 
-    if model_features != list(
-        config.ML_FEATURES
+    if (
+        model_features
+        !=
+        list(
+            config.ML_FEATURES
+        )
     ):
 
         raise RuntimeError(
@@ -257,7 +351,11 @@ MODEL_CLASSES = list(
     MODEL.classes_
 )
 
-if config.LABEL_ATTACK not in MODEL_CLASSES:
+
+if (
+    config.LABEL_ATTACK
+    not in MODEL_CLASSES
+):
 
     raise RuntimeError(
         "Configured Attack label was not found "
@@ -274,16 +372,21 @@ ATTACK_CLASS_INDEX = (
 
 # ============================================================
 # Application state
-#
-# This is intentionally simple because this is a single-user
-# local FYP prototype rather than a multi-user production app.
 # ============================================================
 
 STATE_LOCK = threading.Lock()
 
+ANALYSIS_CONTROL_LOCK = (
+    threading.Lock()
+)
+
+
 APP_STATE = {
 
     "ready":
+        False,
+
+    "analyzing":
         False,
 
     "source_name":
@@ -303,13 +406,27 @@ APP_STATE = {
 
     "packet_cache":
         {},
+
+    # Analysis progress
+    "stage":
+        None,
+
+    "stage_message":
+        None,
+
+    "started_at":
+        None,
+
+    "elapsed_seconds":
+        0.0,
+
+    "error":
+        None,
 }
 
 
 # ============================================================
 # SHAP state
-#
-# Created lazily the first time a user requests an explanation.
 # ============================================================
 
 SHAP_EXPLAINER = None
@@ -321,13 +438,14 @@ SHAP_LOCK = threading.Lock()
 # Utility helpers
 # ============================================================
 
-def json_safe(value):
-    """
-    Convert numpy/pandas values into JSON-safe Python values.
-    """
+def json_safe(
+    value,
+):
 
     if value is None:
+
         return None
+
 
     if isinstance(
         value,
@@ -339,7 +457,11 @@ def json_safe(value):
             np.int64,
         ),
     ):
-        return int(value)
+
+        return int(
+            value
+        )
+
 
     if isinstance(
         value,
@@ -351,136 +473,284 @@ def json_safe(value):
         ),
     ):
 
-        if np.isnan(value):
+        if np.isnan(
+            value
+        ):
+
             return None
 
-        if np.isinf(value):
+
+        if np.isinf(
+            value
+        ):
+
             return None
 
-        return float(value)
+
+        return float(
+            value
+        )
+
 
     try:
 
-        if pd.isna(value):
+        if pd.isna(
+            value
+        ):
+
             return None
 
-    except (TypeError, ValueError):
+    except (
+        TypeError,
+        ValueError,
+    ):
+
         pass
+
 
     return value
 
 
-def safe_float(value):
-    """
-    Convert a value into float when possible.
-    """
+def safe_float(
+    value,
+):
 
-    value = json_safe(value)
+    value = json_safe(
+        value
+    )
+
 
     if value is None:
+
         return None
 
+
     try:
-        return float(value)
+
+        return float(
+            value
+        )
 
     except (
         TypeError,
         ValueError,
     ):
+
         return None
 
 
-def safe_int(value):
-    """
-    Convert a value into int when possible.
-    """
+def safe_int(
+    value,
+):
 
-    value = json_safe(value)
+    value = json_safe(
+        value
+    )
+
 
     if value is None:
+
         return None
 
+
     try:
-        return int(float(value))
+
+        return int(
+            float(
+                value
+            )
+        )
 
     except (
         TypeError,
         ValueError,
     ):
+
         return None
 
 
 def format_protocol(
     ip_protocol,
 ):
-    """
-    Convert IP protocol number into readable name.
-    """
 
     protocol = safe_int(
         ip_protocol
     )
 
+
     mapping = {
-        1: "ICMP",
-        6: "TCP",
-        17: "UDP",
-        58: "ICMPv6",
+
+        1:
+            "ICMP",
+
+        6:
+            "TCP",
+
+        17:
+            "UDP",
+
+        58:
+            "ICMPv6",
     }
 
+
     if protocol in mapping:
-        return mapping[protocol]
+
+        return mapping[
+            protocol
+        ]
+
 
     if protocol is None:
+
         return "Unknown"
 
-    return str(protocol)
+
+    return str(
+        protocol
+    )
 
 
-def label_to_text(label):
-    """
-    Convert configured prediction label into text.
-    """
+def label_to_text(
+    label,
+):
 
-    label = int(label)
+    label = int(
+        label
+    )
 
-    if label == config.LABEL_ATTACK:
+
+    if (
+        label
+        ==
+        config.LABEL_ATTACK
+    ):
+
         return "Attack"
 
-    if label == config.LABEL_BENIGN:
+
+    if (
+        label
+        ==
+        config.LABEL_BENIGN
+    ):
+
         return "Benign"
 
-    return str(label)
+
+    return str(
+        label
+    )
 
 
 def allowed_file(
     filename,
 ):
-    """
-    Validate uploaded PCAP extension.
-    """
 
     suffix = (
-        Path(filename)
+        Path(
+            filename
+        )
         .suffix
         .lower()
     )
 
-    return suffix in ALLOWED_EXTENSIONS
 
+    return (
+        suffix
+        in
+        ALLOWED_EXTENSIONS
+    )
+
+
+def get_feature_label(
+    feature,
+):
+
+    if feature in FEATURE_LABELS:
+
+        return FEATURE_LABELS[
+            feature
+        ]
+
+
+    return (
+        feature
+        .replace(
+            "_",
+            " ",
+        )
+        .strip()
+        .lower()
+    )
+
+
+def format_feature_value_for_text(
+    value,
+):
+
+    value = safe_float(
+        value
+    )
+
+
+    if value is None:
+
+        return "an unavailable value"
+
+
+    if float(
+        value
+    ).is_integer():
+
+        return f"{int(value):,}"
+
+
+    absolute = abs(
+        value
+    )
+
+
+    if (
+        absolute > 0
+        and
+        absolute < 0.0001
+    ):
+
+        return (
+            f"{value:.8f}"
+            .rstrip(
+                "0"
+            )
+            .rstrip(
+                "."
+            )
+        )
+
+
+    return (
+        f"{value:.2f}"
+        .rstrip(
+            "0"
+        )
+        .rstrip(
+            "."
+        )
+    )
+
+
+# ============================================================
+# Runtime state helpers
+# ============================================================
 
 def reset_runtime_directory():
-    """
-    Remove previous runtime analysis.
-
-    Only the latest dashboard analysis is retained.
-    """
 
     if CURRENT_RUNTIME_DIR.exists():
 
         shutil.rmtree(
             CURRENT_RUNTIME_DIR
         )
+
 
     CURRENT_RUNTIME_DIR.mkdir(
         parents=True,
@@ -489,9 +759,103 @@ def reset_runtime_directory():
 
 
 def reset_application_state():
-    """
-    Clear previous in-memory dashboard state.
-    """
+
+    with STATE_LOCK:
+
+        APP_STATE.update({
+
+            "ready":
+                False,
+
+            "analyzing":
+                False,
+
+            "source_name":
+                None,
+
+            "flow_df":
+                None,
+
+            "packet_integrity_path":
+                None,
+
+            "summary":
+                None,
+
+            "shap_cache":
+                {},
+
+            "packet_cache":
+                {},
+
+            "stage":
+                None,
+
+            "stage_message":
+                None,
+
+            "started_at":
+                None,
+
+            "elapsed_seconds":
+                0.0,
+
+            "error":
+                None,
+        })
+
+
+def get_elapsed_seconds_locked():
+
+    started_at = APP_STATE[
+        "started_at"
+    ]
+
+
+    if (
+        APP_STATE[
+            "analyzing"
+        ]
+        and
+        started_at is not None
+    ):
+
+        return max(
+            0.0,
+            time.monotonic()
+            -
+            started_at,
+        )
+
+
+    return float(
+        APP_STATE[
+            "elapsed_seconds"
+        ]
+        or
+        0.0
+    )
+
+
+def update_analysis_stage(
+    stage,
+    message,
+):
+
+    with STATE_LOCK:
+
+        APP_STATE[
+            "stage"
+        ] = stage
+
+        APP_STATE[
+            "stage_message"
+        ] = message
+
+
+def mark_analysis_started(
+    source_name,
+):
 
     with STATE_LOCK:
 
@@ -500,28 +864,69 @@ def reset_application_state():
         ] = False
 
         APP_STATE[
+            "analyzing"
+        ] = True
+
+        APP_STATE[
             "source_name"
+        ] = source_name
+
+        APP_STATE[
+            "stage"
+        ] = "extract"
+
+        APP_STATE[
+            "stage_message"
+        ] = (
+            "Extracting packet and header features..."
+        )
+
+        APP_STATE[
+            "started_at"
+        ] = time.monotonic()
+
+        APP_STATE[
+            "elapsed_seconds"
+        ] = 0.0
+
+        APP_STATE[
+            "error"
         ] = None
 
-        APP_STATE[
-            "flow_df"
-        ] = None
+
+def mark_analysis_failed(
+    error_message,
+):
+
+    with STATE_LOCK:
+
+        elapsed = (
+            get_elapsed_seconds_locked()
+        )
 
         APP_STATE[
-            "packet_integrity_path"
-        ] = None
+            "elapsed_seconds"
+        ] = elapsed
 
         APP_STATE[
-            "summary"
-        ] = None
+            "analyzing"
+        ] = False
 
         APP_STATE[
-            "shap_cache"
-        ] = {}
+            "ready"
+        ] = False
 
         APP_STATE[
-            "packet_cache"
-        ] = {}
+            "error"
+        ] = str(
+            error_message
+        )
+
+        APP_STATE[
+            "stage_message"
+        ] = (
+            "Analysis stopped because an error occurred."
+        )
 
 
 # ============================================================
@@ -532,11 +937,6 @@ def run_command(
     command,
     stage_name,
 ):
-    """
-    Run one existing project script.
-
-    The scripts remain independent from Flask.
-    """
 
     completed = subprocess.run(
         command,
@@ -547,25 +947,37 @@ def run_command(
         text=True,
     )
 
-    if completed.returncode != 0:
+
+    if (
+        completed.returncode
+        !=
+        0
+    ):
 
         stdout_tail = (
-            completed.stdout[-4000:]
+            completed.stdout[
+                -4000:
+            ]
             if completed.stdout
             else ""
         )
 
+
         stderr_tail = (
-            completed.stderr[-4000:]
+            completed.stderr[
+                -4000:
+            ]
             if completed.stderr
             else ""
         )
+
 
         raise RuntimeError(
             f"{stage_name} failed.\n\n"
             f"STDOUT:\n{stdout_tail}\n\n"
             f"STDERR:\n{stderr_tail}"
         )
+
 
     return completed
 
@@ -578,17 +990,6 @@ def run_packet_parser(
     pcap_path,
     output_csv,
 ):
-    """
-    Run the existing packet_parser.py.
-
-    Current packet_parser CLI:
-        --pcap
-        --limit
-        --preview
-        --out
-
-    limit=0 means process the whole capture.
-    """
 
     command = [
 
@@ -601,7 +1002,9 @@ def run_packet_parser(
         ),
 
         "--pcap",
-        str(pcap_path),
+        str(
+            pcap_path
+        ),
 
         "--limit",
         "0",
@@ -610,13 +1013,17 @@ def run_packet_parser(
         "0",
 
         "--out",
-        str(output_csv),
+        str(
+            output_csv
+        ),
     ]
+
 
     run_command(
         command,
         "Packet parser",
     )
+
 
     if not output_csv.exists():
 
@@ -634,9 +1041,6 @@ def run_flow_builder(
     packet_csv,
     flow_csv,
 ):
-    """
-    Run the existing streaming flow_builder.py.
-    """
 
     command = [
 
@@ -649,16 +1053,22 @@ def run_flow_builder(
         ),
 
         "--in",
-        str(packet_csv),
+        str(
+            packet_csv
+        ),
 
         "--out",
-        str(flow_csv),
+        str(
+            flow_csv
+        ),
     ]
+
 
     run_command(
         command,
         "Flow builder",
     )
+
 
     if not flow_csv.exists():
 
@@ -676,17 +1086,12 @@ def run_runtime_integrity(
     packet_csv,
     output_csv,
 ):
-    """
-    Apply the current packet integrity rules to the uploaded/demo
-    capture without using the permanent five-day research output.
-
-    Returns aggregate packet integrity statistics.
-    """
 
     header = pd.read_csv(
         packet_csv,
         nrows=0,
     )
+
 
     missing = [
 
@@ -695,8 +1100,11 @@ def run_runtime_integrity(
         for column
         in INTEGRITY_NEEDED_COLUMNS
 
-        if column not in header.columns
+        if column
+        not in
+        header.columns
     ]
+
 
     if missing:
 
@@ -706,7 +1114,8 @@ def run_runtime_integrity(
             +
             "\n".join(
                 f"  - {column}"
-                for column in missing
+                for column
+                in missing
             )
         )
 
@@ -718,16 +1127,28 @@ def run_runtime_integrity(
 
     state_counts = {
 
-        "Intact": 0,
+        "Intact":
+            0,
 
-        "Suspicious": 0,
+        "Suspicious":
+            0,
 
-        "Tampered": 0,
+        "Tampered":
+            0,
     }
 
-    total_packets = 0
 
-    indicator_count = 0
+    rule_counts = {
+
+        rule:
+            0
+
+        for rule
+        in ALL_RULES
+    }
+
+
+    total_packets = 0
 
     first_write = True
 
@@ -746,14 +1167,29 @@ def run_runtime_integrity(
             chunk
         )
 
+
         total_packets += len(
             chunk
         )
 
 
+        for rule in ALL_RULES:
+
+            rule_counts[
+                rule
+            ] += int(
+                chunk[
+                    rule
+                ]
+                .sum()
+            )
+
+
         for state in state_counts:
 
-            state_counts[state] += int(
+            state_counts[
+                state
+            ] += int(
                 (
                     chunk[
                         "integrity_state"
@@ -763,14 +1199,6 @@ def run_runtime_integrity(
                 )
                 .sum()
             )
-
-
-        indicator_count += int(
-            chunk[
-                "S7_invalid_l4_checksum"
-            ]
-            .sum()
-        )
 
 
         chunk.to_csv(
@@ -783,6 +1211,7 @@ def run_runtime_integrity(
             header=first_write,
             index=False,
         )
+
 
         first_write = False
 
@@ -817,8 +1246,23 @@ def run_runtime_integrity(
 
         "l4_checksum_indicators":
             int(
-                indicator_count
+                rule_counts[
+                    "S7_invalid_l4_checksum"
+                ]
             ),
+
+        "rule_counts": {
+
+            rule:
+                int(
+                    rule_counts[
+                        rule
+                    ]
+                )
+
+            for rule
+            in ALL_RULES
+        },
     }
 
 
@@ -830,9 +1274,6 @@ def run_random_forest(
     flow_csv,
     output_csv,
 ):
-    """
-    Classify all generated flows using the final Random Forest.
-    """
 
     flow_df = pd.read_csv(
         flow_csv,
@@ -855,7 +1296,9 @@ def run_random_forest(
         for feature
         in config.ML_FEATURES
 
-        if feature not in flow_df.columns
+        if feature
+        not in
+        flow_df.columns
     ]
 
 
@@ -866,7 +1309,8 @@ def run_random_forest(
             +
             "\n".join(
                 f"  - {feature}"
-                for feature in missing_features
+                for feature
+                in missing_features
             )
         )
 
@@ -884,14 +1328,18 @@ def run_random_forest(
 
     infinite_count = 0
 
+
     for feature in config.ML_FEATURES:
 
         values = (
-            X[feature]
+            X[
+                feature
+            ]
             .to_numpy(
                 copy=False
             )
         )
+
 
         infinite_count += int(
             np.isinf(
@@ -947,9 +1395,7 @@ def run_random_forest(
 
     flow_df[
         "attack_probability"
-    ] = (
-        attack_probabilities
-    )
+    ] = attack_probabilities
 
 
     flow_df.to_csv(
@@ -970,9 +1416,6 @@ def build_summary(
     integrity_summary,
     source_name,
 ):
-    """
-    Build runtime dashboard KPI values.
-    """
 
     total_flows = int(
         len(
@@ -1059,49 +1502,48 @@ def build_summary(
             integrity_summary[
                 "l4_checksum_indicators"
             ],
+
+        "integrity_rule_counts":
+            integrity_summary[
+                "rule_counts"
+            ],
     }
 
 
 # ============================================================
-# Main PCAP analysis
+# Main runtime analysis
 # ============================================================
 
-def analyze_pcap(
+def analyze_runtime_capture(
     pcap_path,
     source_name,
 ):
-    """
-    Run the complete runtime dashboard pipeline.
-    """
-
-    reset_application_state()
-
-    reset_runtime_directory()
-
 
     # --------------------------------------------------------
-    # Copy selected capture into runtime/current/
+    # 1. Extract
     # --------------------------------------------------------
 
-    shutil.copy2(
-        pcap_path,
-        RUNTIME_INPUT_PCAP,
+    update_analysis_stage(
+        "extract",
+        "Extracting packet and header features...",
     )
 
 
-    # --------------------------------------------------------
-    # 1. Packet parser
-    # --------------------------------------------------------
-
     run_packet_parser(
-        RUNTIME_INPUT_PCAP,
+        pcap_path,
         RUNTIME_PACKET_FEATURES,
     )
 
 
     # --------------------------------------------------------
-    # 2. Flow builder
+    # 2. Build flows
     # --------------------------------------------------------
+
+    update_analysis_stage(
+        "build",
+        "Building bidirectional network flows...",
+    )
+
 
     run_flow_builder(
         RUNTIME_PACKET_FEATURES,
@@ -1110,8 +1552,14 @@ def analyze_pcap(
 
 
     # --------------------------------------------------------
-    # 3. Integrity checker
+    # 3. Check headers
     # --------------------------------------------------------
+
+    update_analysis_stage(
+        "headers",
+        "Checking packet header integrity...",
+    )
+
 
     integrity_summary = (
         run_runtime_integrity(
@@ -1122,8 +1570,14 @@ def analyze_pcap(
 
 
     # --------------------------------------------------------
-    # 4. Random Forest
+    # 4. Classify
     # --------------------------------------------------------
+
+    update_analysis_stage(
+        "classify",
+        "Classifying network flows with Random Forest...",
+    )
+
 
     flow_df = (
         run_random_forest(
@@ -1134,7 +1588,7 @@ def analyze_pcap(
 
 
     # --------------------------------------------------------
-    # 5. Summary
+    # Summary
     # --------------------------------------------------------
 
     summary = build_summary(
@@ -1160,14 +1614,23 @@ def analyze_pcap(
 
 
     # --------------------------------------------------------
-    # Store current state
+    # Store completed state
     # --------------------------------------------------------
 
     with STATE_LOCK:
 
+        elapsed = (
+            get_elapsed_seconds_locked()
+        )
+
+
         APP_STATE[
             "ready"
         ] = True
+
+        APP_STATE[
+            "analyzing"
+        ] = False
 
         APP_STATE[
             "source_name"
@@ -1195,8 +1658,45 @@ def analyze_pcap(
             "packet_cache"
         ] = {}
 
+        APP_STATE[
+            "stage"
+        ] = "classify"
+
+        APP_STATE[
+            "stage_message"
+        ] = (
+            "Analysis completed successfully."
+        )
+
+        APP_STATE[
+            "elapsed_seconds"
+        ] = elapsed
+
+        APP_STATE[
+            "error"
+        ] = None
+
 
     return summary
+
+
+def analysis_worker(
+    pcap_path,
+    source_name,
+):
+
+    try:
+
+        analyze_runtime_capture(
+            pcap_path,
+            source_name,
+        )
+
+    except Exception as exc:
+
+        mark_analysis_failed(
+            exc
+        )
 
 
 # ============================================================
@@ -1206,9 +1706,6 @@ def analyze_pcap(
 def serialize_flow(
     row,
 ):
-    """
-    Convert one flow row into dashboard-friendly JSON.
-    """
 
     src_ip = json_safe(
         row.get(
@@ -1216,17 +1713,20 @@ def serialize_flow(
         )
     )
 
+
     dst_ip = json_safe(
         row.get(
             "dst_ip"
         )
     )
 
+
     src_port = safe_int(
         row.get(
             "src_port"
         )
     )
+
 
     dst_port = safe_int(
         row.get(
@@ -1238,14 +1738,18 @@ def serialize_flow(
     source = (
         f"{src_ip}:{src_port}"
         if src_port is not None
-        else str(src_ip)
+        else str(
+            src_ip
+        )
     )
 
 
     destination = (
         f"{dst_ip}:{dst_port}"
         if dst_port is not None
-        else str(dst_ip)
+        else str(
+            dst_ip
+        )
     )
 
 
@@ -1337,9 +1841,6 @@ def serialize_flow(
 def serialize_flow_details(
     row,
 ):
-    """
-    More detailed information for the modal popup.
-    """
 
     base = serialize_flow(
         row
@@ -1472,13 +1973,11 @@ def serialize_flow_details(
 def get_flow_row(
     flow_id,
 ):
-    """
-    Find one currently analysed flow.
-    """
 
     flow_df = APP_STATE[
         "flow_df"
     ]
+
 
     if flow_df is None:
 
@@ -1488,9 +1987,14 @@ def get_flow_row(
     matches = flow_df[
         flow_df[
             "flow_id"
-        ].astype(str)
+        ]
+        .astype(
+            str
+        )
         ==
-        str(flow_id)
+        str(
+            flow_id
+        )
     ]
 
 
@@ -1499,7 +2003,9 @@ def get_flow_row(
         return None
 
 
-    return matches.iloc[0]
+    return matches.iloc[
+        0
+    ]
 
 
 # ============================================================
@@ -1509,23 +2015,16 @@ def get_flow_row(
 def get_related_packets(
     flow_id,
 ):
-    """
-    Find packet-level rows associated with one bidirectional flow.
 
-    Matching uses:
-        - source/destination IP
-        - source/destination ports
-        - protocol
-        - flow start/end timestamps
-
-    Both forward and reverse directions are accepted.
-    """
-
-    cached = APP_STATE[
-        "packet_cache"
-    ].get(
-        flow_id
+    cached = (
+        APP_STATE[
+            "packet_cache"
+        ]
+        .get(
+            flow_id
+        )
     )
+
 
     if cached is not None:
 
@@ -1535,6 +2034,7 @@ def get_related_packets(
     flow = get_flow_row(
         flow_id
     )
+
 
     if flow is None:
 
@@ -1547,9 +2047,11 @@ def get_related_packets(
         "packet_integrity_path"
     ]
 
+
     if (
         packet_path is None
-        or not Path(
+        or
+        not Path(
             packet_path
         ).exists()
     ):
@@ -1565,11 +2067,13 @@ def get_related_packets(
         ]
     )
 
+
     dst_ip = str(
         flow[
             "dst_ip"
         ]
     )
+
 
     src_port = safe_int(
         flow[
@@ -1577,11 +2081,13 @@ def get_related_packets(
         ]
     )
 
+
     dst_port = safe_int(
         flow[
             "dst_port"
         ]
     )
+
 
     protocol = safe_int(
         flow[
@@ -1589,17 +2095,31 @@ def get_related_packets(
         ]
     )
 
-    start_time = float(
+
+    start_time = safe_float(
         flow[
             "timestamp"
         ]
     )
 
-    duration = float(
-        flow[
-            "flow_duration"
-        ]
+
+    duration = (
+        safe_float(
+            flow[
+                "flow_duration"
+            ]
+        )
+        or
+        0.0
     )
+
+
+    if start_time is None:
+
+        raise ValueError(
+            "The selected flow does not contain a valid timestamp."
+        )
+
 
     end_time = (
         start_time
@@ -1661,7 +2181,7 @@ def get_related_packets(
     reader = pd.read_csv(
         packet_path,
         usecols=required_columns,
-        chunksize=250_000,
+        chunksize=INTEGRITY_CHUNK_SIZE,
         low_memory=False,
     )
 
@@ -1677,13 +2197,10 @@ def get_related_packets(
 
 
         time_mask = (
-
             timestamps.ge(
                 start_time
             )
-
             &
-
             timestamps.le(
                 end_time
             )
@@ -1691,6 +2208,7 @@ def get_related_packets(
 
 
         if not time_mask.any():
+
             continue
 
 
@@ -1709,11 +2227,31 @@ def get_related_packets(
         )
 
 
+        src_port_values = pd.to_numeric(
+            chunk[
+                "src_port"
+            ],
+            errors="coerce",
+        )
+
+
+        dst_port_values = pd.to_numeric(
+            chunk[
+                "dst_port"
+            ],
+            errors="coerce",
+        )
+
+
         forward_mask = (
 
             chunk[
                 "src_ip"
-            ].astype(str).eq(
+            ]
+            .astype(
+                str
+            )
+            .eq(
                 src_ip
             )
 
@@ -1721,29 +2259,23 @@ def get_related_packets(
 
             chunk[
                 "dst_ip"
-            ].astype(str).eq(
+            ]
+            .astype(
+                str
+            )
+            .eq(
                 dst_ip
             )
 
             &
 
-            pd.to_numeric(
-                chunk[
-                    "src_port"
-                ],
-                errors="coerce",
-            ).eq(
+            src_port_values.eq(
                 src_port
             )
 
             &
 
-            pd.to_numeric(
-                chunk[
-                    "dst_port"
-                ],
-                errors="coerce",
-            ).eq(
+            dst_port_values.eq(
                 dst_port
             )
         )
@@ -1753,7 +2285,11 @@ def get_related_packets(
 
             chunk[
                 "src_ip"
-            ].astype(str).eq(
+            ]
+            .astype(
+                str
+            )
+            .eq(
                 dst_ip
             )
 
@@ -1761,44 +2297,33 @@ def get_related_packets(
 
             chunk[
                 "dst_ip"
-            ].astype(str).eq(
+            ]
+            .astype(
+                str
+            )
+            .eq(
                 src_ip
             )
 
             &
 
-            pd.to_numeric(
-                chunk[
-                    "src_port"
-                ],
-                errors="coerce",
-            ).eq(
+            src_port_values.eq(
                 dst_port
             )
 
             &
 
-            pd.to_numeric(
-                chunk[
-                    "dst_port"
-                ],
-                errors="coerce",
-            ).eq(
+            dst_port_values.eq(
                 src_port
             )
         )
 
 
         mask = (
-
             time_mask
-
             &
-
             protocol_mask
-
             &
-
             (
                 forward_mask
                 |
@@ -1813,6 +2338,7 @@ def get_related_packets(
 
 
         if selected.empty:
+
             continue
 
 
@@ -1862,7 +2388,9 @@ def get_related_packets(
                 selected[
                     "integrity_indicators"
                 ]
-                .fillna("None")
+                .fillna(
+                    "None"
+                )
                 !=
                 "None"
             )
@@ -1879,135 +2407,143 @@ def get_related_packets(
         )
 
 
-        if remaining > 0:
+        if remaining <= 0:
 
-            for _, packet in (
-                selected
-                .head(
-                    remaining
-                )
-                .iterrows()
-            ):
-
-                flags = []
-
-                flag_map = {
-
-                    "SYN":
-                        "tcp_syn",
-
-                    "ACK":
-                        "tcp_ack",
-
-                    "FIN":
-                        "tcp_fin",
-
-                    "RST":
-                        "tcp_rst",
-
-                    "PSH":
-                        "tcp_psh",
-
-                    "URG":
-                        "tcp_urg",
-                }
+            continue
 
 
-                for (
-                    flag_name,
-                    column,
-                ) in flag_map.items():
+        for _, packet in (
+            selected
+            .head(
+                remaining
+            )
+            .iterrows()
+        ):
 
-                    if safe_int(
+            flags = []
+
+
+            flag_map = {
+
+                "SYN":
+                    "tcp_syn",
+
+                "ACK":
+                    "tcp_ack",
+
+                "FIN":
+                    "tcp_fin",
+
+                "RST":
+                    "tcp_rst",
+
+                "PSH":
+                    "tcp_psh",
+
+                "URG":
+                    "tcp_urg",
+            }
+
+
+            for (
+                flag_name,
+                column,
+            ) in flag_map.items():
+
+                if (
+                    safe_int(
                         packet.get(
                             column
                         )
-                    ) == 1:
+                    )
+                    ==
+                    1
+                ):
 
-                        flags.append(
-                            flag_name
+                    flags.append(
+                        flag_name
+                    )
+
+
+            packet_rows.append({
+
+                "packet_id":
+                    safe_int(
+                        packet.get(
+                            "packet_id"
                         )
+                    ),
 
+                "timestamp":
+                    safe_float(
+                        packet.get(
+                            "timestamp"
+                        )
+                    ),
 
-                packet_rows.append({
+                "source":
+                    (
+                        f"{packet.get('src_ip')}:"
+                        f"{safe_int(packet.get('src_port'))}"
+                    ),
 
-                    "packet_id":
-                        safe_int(
-                            packet.get(
-                                "packet_id"
-                            )
-                        ),
+                "destination":
+                    (
+                        f"{packet.get('dst_ip')}:"
+                        f"{safe_int(packet.get('dst_port'))}"
+                    ),
 
-                    "timestamp":
-                        safe_float(
-                            packet.get(
-                                "timestamp"
-                            )
-                        ),
+                "ttl":
+                    safe_float(
+                        packet.get(
+                            "ttl"
+                        )
+                    ),
 
-                    "source":
-                        (
-                            f"{packet.get('src_ip')}:"
-                            f"{safe_int(packet.get('src_port'))}"
-                        ),
+                "flags":
+                    (
+                        ", ".join(
+                            flags
+                        )
+                        if flags
+                        else "None"
+                    ),
 
-                    "destination":
-                        (
-                            f"{packet.get('dst_ip')}:"
-                            f"{safe_int(packet.get('dst_port'))}"
-                        ),
+                "ip_checksum":
+                    safe_int(
+                        packet.get(
+                            "ip_checksum_valid"
+                        )
+                    ),
 
-                    "ttl":
-                        safe_float(
-                            packet.get(
-                                "ttl"
-                            )
-                        ),
+                "l4_checksum":
+                    safe_int(
+                        packet.get(
+                            "l4_checksum_valid"
+                        )
+                    ),
 
-                    "flags":
-                        (
-                            ", ".join(
-                                flags
-                            )
-                            if flags
-                            else "None"
-                        ),
+                "integrity_state":
+                    json_safe(
+                        packet.get(
+                            "integrity_state"
+                        )
+                    ),
 
-                    "ip_checksum":
-                        safe_int(
-                            packet.get(
-                                "ip_checksum_valid"
-                            )
-                        ),
+                "reasons":
+                    json_safe(
+                        packet.get(
+                            "integrity_reasons"
+                        )
+                    ),
 
-                    "l4_checksum":
-                        safe_int(
-                            packet.get(
-                                "l4_checksum_valid"
-                            )
-                        ),
-
-                    "integrity_state":
-                        json_safe(
-                            packet.get(
-                                "integrity_state"
-                            )
-                        ),
-
-                    "reasons":
-                        json_safe(
-                            packet.get(
-                                "integrity_reasons"
-                            )
-                        ),
-
-                    "indicators":
-                        json_safe(
-                            packet.get(
-                                "integrity_indicators"
-                            )
-                        ),
-                })
+                "indicators":
+                    json_safe(
+                        packet.get(
+                            "integrity_indicators"
+                        )
+                    ),
+            })
 
 
     if tampered > 0:
@@ -2064,7 +2600,9 @@ def get_related_packets(
 
     APP_STATE[
         "packet_cache"
-    ][flow_id] = result
+    ][
+        flow_id
+    ] = result
 
 
     return result
@@ -2075,9 +2613,6 @@ def get_related_packets(
 # ============================================================
 
 def get_shap_explainer():
-    """
-    Create TreeExplainer only when first requested.
-    """
 
     global SHAP_EXPLAINER
 
@@ -2093,6 +2628,7 @@ def get_shap_explainer():
 
             import shap
 
+
             SHAP_EXPLAINER = (
                 shap.TreeExplainer(
                     MODEL,
@@ -2106,18 +2642,225 @@ def get_shap_explainer():
     return SHAP_EXPLAINER
 
 
+def build_plain_shap_explanation(
+    prediction,
+    attack_probability,
+    contributions,
+):
+
+    if prediction == "Attack":
+
+        target_word = (
+            "Attack"
+        )
+
+        support_direction = (
+            "pushed the model toward Attack"
+        )
+
+        oppose_direction = (
+            "pushed the model toward Benign"
+        )
+
+        supporting = [
+            item
+            for item
+            in contributions
+            if item[
+                "shap_value"
+            ] > 0
+        ][
+            :3
+        ]
+
+        opposing = [
+            item
+            for item
+            in contributions
+            if item[
+                "shap_value"
+            ] < 0
+        ][
+            :2
+        ]
+
+    else:
+
+        target_word = (
+            "Benign"
+        )
+
+        support_direction = (
+            "pushed the model toward Benign"
+        )
+
+        oppose_direction = (
+            "pushed the model toward Attack"
+        )
+
+        supporting = [
+            item
+            for item
+            in contributions
+            if item[
+                "shap_value"
+            ] < 0
+        ][
+            :3
+        ]
+
+        opposing = [
+            item
+            for item
+            in contributions
+            if item[
+                "shap_value"
+            ] > 0
+        ][
+            :2
+        ]
+
+
+    sentences = [
+
+        f"This flow was classified as {target_word}."
+    ]
+
+
+    if supporting:
+
+        strongest = supporting[
+            0
+        ]
+
+
+        strongest_label = (
+            strongest[
+                "feature_label"
+            ]
+        )
+
+
+        strongest_value = (
+            format_feature_value_for_text(
+                strongest[
+                    "feature_value"
+                ]
+            )
+        )
+
+
+        sentence = (
+            f"The strongest factor was {strongest_label} "
+            f"({strongest_value}), which {support_direction}."
+        )
+
+
+        other_names = [
+
+            item[
+                "feature_label"
+            ]
+
+            for item
+            in supporting[
+                1:
+            ]
+        ]
+
+
+        if len(
+            other_names
+        ) == 1:
+
+            sentence += (
+                f" {other_names[0].capitalize()} "
+                "also supported this result."
+            )
+
+        elif len(
+            other_names
+        ) >= 2:
+
+            sentence += (
+                f" {other_names[0].capitalize()} and "
+                f"{other_names[1]} also supported this result."
+            )
+
+
+        sentences.append(
+            sentence
+        )
+
+
+    if opposing:
+
+        opposing_names = [
+
+            item[
+                "feature_label"
+            ]
+
+            for item
+            in opposing
+        ]
+
+
+        if len(
+            opposing_names
+        ) == 1:
+
+            sentences.append(
+                (
+                    f"{opposing_names[0].capitalize()} "
+                    f"{oppose_direction}, but it was not strong "
+                    "enough to change the final classification."
+                )
+            )
+
+        else:
+
+            sentences.append(
+                (
+                    f"{opposing_names[0].capitalize()} and "
+                    f"{opposing_names[1]} {oppose_direction}, "
+                    "but their influence was not strong enough "
+                    "to change the final classification."
+                )
+            )
+
+
+    if len(
+        sentences
+    ) == 1:
+
+        sentences.append(
+            (
+                "No single displayed feature had a strong enough "
+                "individual contribution to provide a more detailed "
+                "plain-language explanation."
+            )
+        )
+
+
+    return " ".join(
+        sentences
+    )
+
+
 def calculate_shap(
     flow_id,
 ):
-    """
-    Calculate local SHAP explanation for one selected flow.
-    """
 
-    cached = APP_STATE[
-        "shap_cache"
-    ].get(
-        flow_id
+    cached = (
+        APP_STATE[
+            "shap_cache"
+        ]
+        .get(
+            flow_id
+        )
     )
+
 
     if cached is not None:
 
@@ -2127,6 +2870,7 @@ def calculate_shap(
     flow = get_flow_row(
         flow_id
     )
+
 
     if flow is None:
 
@@ -2166,10 +2910,6 @@ def calculate_shap(
     )
 
 
-    # --------------------------------------------------------
-    # Handle SHAP output formats across versions
-    # --------------------------------------------------------
-
     if isinstance(
         raw_shap,
         list,
@@ -2179,7 +2919,9 @@ def calculate_shap(
             raw_shap[
                 ATTACK_CLASS_INDEX
             ]
-        )[0]
+        )[
+            0
+        ]
 
     else:
 
@@ -2188,7 +2930,11 @@ def calculate_shap(
         )
 
 
-        if shap_array.ndim == 3:
+        if (
+            shap_array.ndim
+            ==
+            3
+        ):
 
             shap_vector = (
                 shap_array[
@@ -2198,7 +2944,11 @@ def calculate_shap(
                 ]
             )
 
-        elif shap_array.ndim == 2:
+        elif (
+            shap_array.ndim
+            ==
+            2
+        ):
 
             shap_vector = (
                 shap_array[
@@ -2231,21 +2981,43 @@ def calculate_shap(
         )
 
 
-        feature_value = (
-            json_safe(
-                X.iloc[
-                    0
-                ][
-                    feature
-                ]
-            )
+        feature_value = json_safe(
+            X.iloc[
+                0
+            ][
+                feature
+            ]
         )
+
+
+        if shap_value > 0:
+
+            direction = (
+                "Attack"
+            )
+
+        elif shap_value < 0:
+
+            direction = (
+                "Benign"
+            )
+
+        else:
+
+            direction = (
+                "Neutral"
+            )
 
 
         contributions.append({
 
             "feature":
                 feature,
+
+            "feature_label":
+                get_feature_label(
+                    feature
+                ),
 
             "feature_value":
                 feature_value,
@@ -2259,11 +3031,7 @@ def calculate_shap(
                 ),
 
             "direction":
-                (
-                    "Attack"
-                    if shap_value > 0
-                    else "Benign"
-                ),
+                direction,
         })
 
 
@@ -2276,33 +3044,57 @@ def calculate_shap(
     )
 
 
+    prediction = json_safe(
+        flow.get(
+            "prediction"
+        )
+    )
+
+
+    attack_probability = safe_float(
+        flow.get(
+            "attack_probability"
+        )
+    )
+
+
+    plain_explanation = (
+        build_plain_shap_explanation(
+            prediction=prediction,
+            attack_probability=(
+                attack_probability
+            ),
+            contributions=contributions,
+        )
+    )
+
+
     result = {
 
         "flow_id":
             flow_id,
 
         "prediction":
-            json_safe(
-                flow.get(
-                    "prediction"
-                )
-            ),
+            prediction,
 
         "attack_probability":
-            safe_float(
-                flow.get(
-                    "attack_probability"
-                )
-            ),
+            attack_probability,
+
+        "plain_explanation":
+            plain_explanation,
 
         "top_contributions":
-            contributions[:10],
+            contributions[
+                :10
+            ],
     }
 
 
     APP_STATE[
         "shap_cache"
-    ][flow_id] = result
+    ][
+        flow_id
+    ] = result
 
 
     return result
@@ -2312,11 +3104,13 @@ def calculate_shap(
 # Routes
 # ============================================================
 
-@app.route("/")
+@app.route(
+    "/"
+)
 def index():
 
     return render_template(
-        "index.html"
+        "dashboard.html"
     )
 
 
@@ -2326,130 +3120,277 @@ def index():
 
 @app.route(
     "/api/analyze/upload",
-    methods=["POST"],
+    methods=[
+        "POST"
+    ],
 )
 def analyze_upload():
 
-    try:
+    with ANALYSIS_CONTROL_LOCK:
 
-        if "file" not in request.files:
+        try:
 
-            return jsonify({
-                "success": False,
-                "error": "No PCAP file was provided.",
-            }), 400
+            # ------------------------------------------------
+            # Do not start another analysis while one is active.
+            # ------------------------------------------------
 
+            with STATE_LOCK:
 
-        file = request.files[
-            "file"
-        ]
+                if APP_STATE[
+                    "analyzing"
+                ]:
 
+                    return jsonify({
 
-        if (
-            file.filename is None
-            or file.filename.strip() == ""
-        ):
+                        "success":
+                            False,
 
-            return jsonify({
-                "success": False,
-                "error": "No file was selected.",
-            }), 400
+                        "error":
+                            (
+                                "An analysis is already running. "
+                                "Please wait for it to finish."
+                            ),
 
-
-        filename = secure_filename(
-            file.filename
-        )
+                    }), 409
 
 
-        if not allowed_file(
-            filename
-        ):
+            # ------------------------------------------------
+            # Validate upload
+            # ------------------------------------------------
 
-            return jsonify({
-                "success": False,
-                "error": (
-                    "Unsupported file type. "
-                    "Please upload a .pcap or .pcapng file."
+            if (
+                "file"
+                not in
+                request.files
+            ):
+
+                return jsonify({
+
+                    "success":
+                        False,
+
+                    "error":
+                        "No PCAP file was provided.",
+
+                }), 400
+
+
+            file = request.files[
+                "file"
+            ]
+
+
+            if (
+                file.filename is None
+                or
+                file.filename.strip()
+                ==
+                ""
+            ):
+
+                return jsonify({
+
+                    "success":
+                        False,
+
+                    "error":
+                        "No file was selected.",
+
+                }), 400
+
+
+            original_filename = (
+                secure_filename(
+                    file.filename
+                )
+            )
+
+
+            if not original_filename:
+
+                return jsonify({
+
+                    "success":
+                        False,
+
+                    "error":
+                        "The selected filename is not valid.",
+
+                }), 400
+
+
+            if not allowed_file(
+                original_filename
+            ):
+
+                return jsonify({
+
+                    "success":
+                        False,
+
+                    "error":
+                        (
+                            "Unsupported file type. "
+                            "Please upload a .pcap or .pcapng file."
+                        ),
+
+                }), 400
+
+
+            # ------------------------------------------------
+            # Only retain newest analysis
+            # ------------------------------------------------
+
+            reset_application_state()
+
+            reset_runtime_directory()
+
+
+            suffix = (
+                Path(
+                    original_filename
+                )
+                .suffix
+                .lower()
+            )
+
+
+            runtime_input = (
+                CURRENT_RUNTIME_DIR
+                /
+                f"input{suffix}"
+            )
+
+
+            # Save directly to runtime/current/.
+            # No uploads/ directory is retained.
+
+            file.save(
+                runtime_input
+            )
+
+
+            # ------------------------------------------------
+            # Start analysis state
+            # ------------------------------------------------
+
+            mark_analysis_started(
+                original_filename
+            )
+
+
+            # ------------------------------------------------
+            # Run pipeline in a background thread.
+            # ------------------------------------------------
+
+            worker = threading.Thread(
+                target=analysis_worker,
+                args=(
+                    runtime_input,
+                    original_filename,
                 ),
-            }), 400
+                daemon=True,
+                name="networkids-analysis",
+            )
 
 
-        upload_path = (
-            UPLOAD_DIR
-            /
-            filename
-        )
+            worker.start()
 
 
-        file.save(
-            upload_path
-        )
+            return jsonify({
+
+                "success":
+                    True,
+
+                "message":
+                    "Analysis started.",
+
+            }), 202
 
 
-        summary = analyze_pcap(
-            upload_path,
-            source_name=filename,
-        )
+        except Exception as exc:
+
+            mark_analysis_failed(
+                exc
+            )
 
 
-        return jsonify({
-            "success": True,
-            "summary": summary,
-        })
+            return jsonify({
 
+                "success":
+                    False,
 
-    except Exception as exc:
+                "error":
+                    str(
+                        exc
+                    ),
 
-        return jsonify({
-            "success": False,
-            "error": str(exc),
-        }), 500
+            }), 500
 
 
 # ============================================================
-# Analyze demo PCAP
+# Analysis status
 # ============================================================
 
 @app.route(
-    "/api/analyze/demo",
-    methods=["POST"],
+    "/api/status",
+    methods=[
+        "GET"
+    ],
 )
-def analyze_demo():
+def analysis_status():
 
-    try:
+    with STATE_LOCK:
 
-        if not DEMO_PCAP.exists():
-
-            return jsonify({
-                "success": False,
-                "error": (
-                    "Demo traffic file was not found. "
-                    "Place demo_traffic.pcap inside "
-                    f"{DEMO_DIR}"
-                ),
-            }), 404
-
-
-        summary = analyze_pcap(
-            DEMO_PCAP,
-            source_name=(
-                DEMO_PCAP.name
-            ),
+        elapsed = (
+            get_elapsed_seconds_locked()
         )
 
 
         return jsonify({
-            "success": True,
-            "summary": summary,
+
+            "success":
+                True,
+
+            "analyzing":
+                bool(
+                    APP_STATE[
+                        "analyzing"
+                    ]
+                ),
+
+            "ready":
+                bool(
+                    APP_STATE[
+                        "ready"
+                    ]
+                ),
+
+            "source_name":
+                APP_STATE[
+                    "source_name"
+                ],
+
+            "stage":
+                APP_STATE[
+                    "stage"
+                ],
+
+            "stage_message":
+                APP_STATE[
+                    "stage_message"
+                ],
+
+            "elapsed_seconds":
+                float(
+                    elapsed
+                ),
+
+            "error":
+                APP_STATE[
+                    "error"
+                ],
         })
-
-
-    except Exception as exc:
-
-        return jsonify({
-            "success": False,
-            "error": str(exc),
-        }), 500
 
 
 # ============================================================
@@ -2458,7 +3399,9 @@ def analyze_demo():
 
 @app.route(
     "/api/summary",
-    methods=["GET"],
+    methods=[
+        "GET"
+    ],
 )
 def get_summary():
 
@@ -2467,16 +3410,25 @@ def get_summary():
     ]:
 
         return jsonify({
-            "success": False,
-            "error": "No analysis is currently available.",
+
+            "success":
+                False,
+
+            "error":
+                "No analysis is currently available.",
+
         }), 404
 
 
     return jsonify({
-        "success": True,
-        "summary": APP_STATE[
-            "summary"
-        ],
+
+        "success":
+            True,
+
+        "summary":
+            APP_STATE[
+                "summary"
+            ],
     })
 
 
@@ -2486,7 +3438,9 @@ def get_summary():
 
 @app.route(
     "/api/flows",
-    methods=["GET"],
+    methods=[
+        "GET"
+    ],
 )
 def get_flows():
 
@@ -2495,8 +3449,13 @@ def get_flows():
     ]:
 
         return jsonify({
-            "success": False,
-            "error": "No analysis is currently available.",
+
+            "success":
+                False,
+
+            "error":
+                "No analysis is currently available.",
+
         }), 404
 
 
@@ -2562,9 +3521,7 @@ def get_flows():
     filtered = flow_df
 
 
-    # --------------------------------------------------------
     # Prediction filter
-    # --------------------------------------------------------
 
     if prediction_filter in {
         "Attack",
@@ -2580,23 +3537,13 @@ def get_flows():
         ]
 
 
-    # --------------------------------------------------------
     # Protocol filter
-    # --------------------------------------------------------
 
-    if protocol_filter == "TCP":
-
-        filtered = filtered[
-            pd.to_numeric(
-                filtered[
-                    "ip_protocol"
-                ],
-                errors="coerce",
-            )
-            .eq(6)
-        ]
-
-    elif protocol_filter == "UDP":
+    if (
+        protocol_filter
+        ==
+        "TCP"
+    ):
 
         filtered = filtered[
             pd.to_numeric(
@@ -2605,50 +3552,135 @@ def get_flows():
                 ],
                 errors="coerce",
             )
-            .eq(17)
+            .eq(
+                6
+            )
+        ]
+
+    elif (
+        protocol_filter
+        ==
+        "UDP"
+    ):
+
+        filtered = filtered[
+            pd.to_numeric(
+                filtered[
+                    "ip_protocol"
+                ],
+                errors="coerce",
+            )
+            .eq(
+                17
+            )
         ]
 
 
-    # --------------------------------------------------------
-    # Search
-    # --------------------------------------------------------
+    # Search IP, port and protocol.
 
     if search_query:
 
-        search_mask = (
-
-            filtered[
-                "flow_id"
-            ]
-            .astype(str)
-            .str.lower()
-            .str.contains(
-                search_query,
-                na=False,
-            )
-
-            |
-
+        src_ip_text = (
             filtered[
                 "src_ip"
             ]
-            .astype(str)
-            .str.lower()
-            .str.contains(
+            .astype(
+                str
+            )
+            .str
+            .lower()
+        )
+
+
+        dst_ip_text = (
+            filtered[
+                "dst_ip"
+            ]
+            .astype(
+                str
+            )
+            .str
+            .lower()
+        )
+
+
+        src_port_text = (
+            filtered[
+                "src_port"
+            ]
+            .astype(
+                str
+            )
+            .str
+            .lower()
+        )
+
+
+        dst_port_text = (
+            filtered[
+                "dst_port"
+            ]
+            .astype(
+                str
+            )
+            .str
+            .lower()
+        )
+
+
+        protocol_text = (
+            filtered[
+                "ip_protocol"
+            ]
+            .apply(
+                format_protocol
+            )
+            .astype(
+                str
+            )
+            .str
+            .lower()
+        )
+
+
+        search_mask = (
+
+            src_ip_text.str.contains(
                 search_query,
                 na=False,
+                regex=False,
             )
 
             |
 
-            filtered[
-                "dst_ip"
-            ]
-            .astype(str)
-            .str.lower()
-            .str.contains(
+            dst_ip_text.str.contains(
                 search_query,
                 na=False,
+                regex=False,
+            )
+
+            |
+
+            src_port_text.str.contains(
+                search_query,
+                na=False,
+                regex=False,
+            )
+
+            |
+
+            dst_port_text.str.contains(
+                search_query,
+                na=False,
+                regex=False,
+            )
+
+            |
+
+            protocol_text.str.contains(
+                search_query,
+                na=False,
+                regex=False,
             )
         )
 
@@ -2656,6 +3688,33 @@ def get_flows():
         filtered = filtered[
             search_mask
         ]
+
+
+    # Newest flow first.
+
+    filtered = (
+        filtered
+        .assign(
+            _sort_timestamp=(
+                pd.to_numeric(
+                    filtered[
+                        "timestamp"
+                    ],
+                    errors="coerce",
+                )
+            )
+        )
+        .sort_values(
+            by="_sort_timestamp",
+            ascending=False,
+            na_position="last",
+        )
+        .drop(
+            columns=[
+                "_sort_timestamp"
+            ]
+        )
+    )
 
 
     total_rows = int(
@@ -2676,11 +3735,14 @@ def get_flows():
 
 
     if page > total_pages:
+
         page = total_pages
 
 
     start = (
-        page - 1
+        page
+        -
+        1
     ) * page_size
 
 
@@ -2739,7 +3801,9 @@ def get_flows():
 
 @app.route(
     "/api/flow/<flow_id>",
-    methods=["GET"],
+    methods=[
+        "GET"
+    ],
 )
 def flow_details(
     flow_id,
@@ -2750,8 +3814,13 @@ def flow_details(
     ]:
 
         return jsonify({
-            "success": False,
-            "error": "No analysis is currently available.",
+
+            "success":
+                False,
+
+            "error":
+                "No analysis is currently available.",
+
         }), 404
 
 
@@ -2763,16 +3832,25 @@ def flow_details(
     if row is None:
 
         return jsonify({
-            "success": False,
-            "error": "Flow not found.",
+
+            "success":
+                False,
+
+            "error":
+                "Flow not found.",
+
         }), 404
 
 
     return jsonify({
-        "success": True,
-        "flow": serialize_flow_details(
-            row
-        ),
+
+        "success":
+            True,
+
+        "flow":
+            serialize_flow_details(
+                row
+            ),
     })
 
 
@@ -2782,7 +3860,9 @@ def flow_details(
 
 @app.route(
     "/api/flow/<flow_id>/packets",
-    methods=["GET"],
+    methods=[
+        "GET"
+    ],
 )
 def flow_packets(
     flow_id,
@@ -2796,16 +3876,27 @@ def flow_packets(
 
 
         return jsonify({
-            "success": True,
-            "result": result,
+
+            "success":
+                True,
+
+            "result":
+                result,
         })
 
 
     except Exception as exc:
 
         return jsonify({
-            "success": False,
-            "error": str(exc),
+
+            "success":
+                False,
+
+            "error":
+                str(
+                    exc
+                ),
+
         }), 500
 
 
@@ -2815,7 +3906,9 @@ def flow_packets(
 
 @app.route(
     "/api/flow/<flow_id>/explain",
-    methods=["GET"],
+    methods=[
+        "GET"
+    ],
 )
 def flow_explain(
     flow_id,
@@ -2831,16 +3924,27 @@ def flow_explain(
 
 
         return jsonify({
-            "success": True,
-            "explanation": explanation,
+
+            "success":
+                True,
+
+            "explanation":
+                explanation,
         })
 
 
     except Exception as exc:
 
         return jsonify({
-            "success": False,
-            "error": str(exc),
+
+            "success":
+                False,
+
+            "error":
+                str(
+                    exc
+                ),
+
         }), 500
 
 
@@ -2848,17 +3952,24 @@ def flow_explain(
 # Flask error: oversized upload
 # ============================================================
 
-@app.errorhandler(413)
+@app.errorhandler(
+    413
+)
 def too_large(
     _error,
 ):
 
     return jsonify({
-        "success": False,
-        "error": (
-            "The uploaded PCAP exceeds the "
-            "configured 512 MB limit."
-        ),
+
+        "success":
+            False,
+
+        "error":
+            (
+                "The uploaded PCAP exceeds the "
+                "configured 512 MB limit."
+            ),
+
     }), 413
 
 
@@ -2881,15 +3992,23 @@ if __name__ == "__main__":
     )
 
     print(
-        f"Random Forest: {MODEL_FILE}"
+        f"Random Forest : "
+        f"{MODEL_FILE}"
     )
 
     print(
-        f"Demo PCAP    : {DEMO_PCAP}"
+        "Upload limit  : "
+        "512 MB"
     )
 
     print(
-        "Dashboard    : http://127.0.0.1:5000"
+        "Runtime       : "
+        f"{CURRENT_RUNTIME_DIR}"
+    )
+
+    print(
+        "Dashboard     : "
+        "http://127.0.0.1:5000"
     )
 
     print(
@@ -2900,5 +4019,11 @@ if __name__ == "__main__":
     app.run(
         host="127.0.0.1",
         port=5000,
+
         debug=True,
+
+        # Prevent Flask debug mode from loading the model twice.
+        use_reloader=False,
+
+        threaded=True,
     )
