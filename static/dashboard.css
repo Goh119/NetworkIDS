@@ -2165,3 +2165,7 @@ tbody tr:hover {
 @media(max-width:760px) { .overview-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); } .chart-grid { grid-template-columns:1fr; } .chart-card-wide { grid-column:auto; } .stage-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:22px 18px; } .analysis-progress-footer { align-items:flex-start; flex-direction:column; } .donut-layout { gap:20px; } .results-actions { width:100%; } }
 
 .results-nav-link.is-disabled { opacity:.5; cursor:not-allowed; }
+
+/* PDF Export action: added without changing existing dashboard layout. */
+.export-pdf-button { display:inline-flex; align-items:center; justify-content:center; gap:8px; white-space:nowrap; font-size:13px; font-weight:650; }
+.export-pdf-button span { font-size:18px; line-height:1; }

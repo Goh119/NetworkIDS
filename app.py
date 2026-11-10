@@ -45,6 +45,8 @@ from flask import (
     jsonify,
     render_template,
     request,
+    redirect,
+    url_for,
 )
 
 from werkzeug.utils import secure_filename
@@ -3323,9 +3325,19 @@ def calculate_shap(
 )
 def index():
 
-    return render_template(
-        "dashboard.html"
-    )
+    # The landing/upload page stays separate from the results.
+    return render_template("upload.html")
+
+
+@app.route("/dashboard", methods=["GET"])
+def dashboard_page():
+
+    # Dashboard data still comes from the existing summary and overview APIs.
+    # Without an analysis, return the user to the upload page.
+    if not APP_STATE["ready"]:
+        return redirect(url_for("index"))
+
+    return render_template("dashboard.html")
 
 
 # ============================================================
@@ -3571,6 +3583,55 @@ def get_overview():
     if overview is None:
         return jsonify({"success": False, "error": "Overview data is not prepared."}), 503
     return jsonify({"success": True, "overview": overview})
+
+
+# ============================================================
+# Export PDF report (read-only: reuse the current analysis)
+# ============================================================
+
+@app.route("/api/report/pdf", methods=["GET"])
+def export_pdf_report():
+    from io import BytesIO
+    from flask import send_file
+    from werkzeug.utils import secure_filename
+    from src.report_generator import build_security_report
+
+    # Take a stable reference to the current prepared analysis.
+    with STATE_LOCK:
+        if not APP_STATE["ready"] or ANALYSIS_STATUS["analyzing"]:
+            return jsonify({"success": False, "error": "No completed analysis is available for PDF export."}), 409
+        summary = dict(APP_STATE["summary"] or {})
+        overview = dict(OVERVIEW_CACHE or {})
+        flow_df = APP_STATE["flow_df"]
+
+    if not summary or not overview or flow_df is None:
+        return jsonify({"success": False, "error": "The current analysis report data is incomplete."}), 503
+
+    # Only a small subset is needed, so no PCAP reprocessing or SHAP recomputation.
+    try:
+        attack_rows = flow_df.loc[
+            flow_df["prediction_label"] == config.LABEL_ATTACK,
+            ["flow_id", "src_ip", "dst_ip", "src_port", "dst_port",
+             "ip_protocol", "attack_probability", "integrity_state"]
+        ]
+        top_attacks = (
+            attack_rows.sort_values("attack_probability", ascending=False)
+            .head(10).to_dict(orient="records")
+        )
+        report_bytes = BytesIO()
+        build_security_report(report_bytes, summary, overview, top_attacks)
+        report_bytes.seek(0)
+        filename = secure_filename(str(summary.get("source_name") or "capture"))
+        stem = Path(filename).stem[:55] or "capture"
+        return send_file(
+            report_bytes,
+            mimetype="application/pdf",
+            as_attachment=True,
+            download_name=f"NetworkIDS_{stem}_Security_Report.pdf",
+        )
+    except Exception:
+        app.logger.exception("PDF export failed")
+        return jsonify({"success": False, "error": "Unable to generate the PDF report. Check the Flask console for details."}), 500
 
 
 # ============================================================

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        NetworkIDS Upload
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='dashboard.css') }}"
+    >
+
+</head>
+
+
+<body>
+
+    <!-- ===================================================== -->
+    <!-- Header -->
+    <!-- ===================================================== -->
+
+    <header class="topbar">
+
+        <div class="brand">
+
+            <div class="brand-mark">
+                N
+            </div>
+
+
+            <div>
+
+                <h1>
+                    NetworkIDS
+                </h1>
+
+                <p>
+                    Explainable Header-Flow Network Traffic Analysis
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="topbar-actions">
+
+            <div class="model-badge">
+                Random Forest IDS
+            </div>
+
+
+            <button
+                id="themeToggle"
+                class="theme-toggle"
+                type="button"
+                aria-label="Toggle light and dark theme"
+                title="Toggle theme"
+            >
+                ☾
+            </button>
+
+        </div>
+
+    </header>
+
+
+
+    <main class="page-container">
+
+
+        <!-- ================================================= -->
+        <!-- Initial upload view -->
+        <!-- ================================================= -->
+
+        <section
+            id="landingSection"
+            class="landing-section"
+        >
+
+            <div class="landing-intro">
+
+                <span class="eyebrow">
+                    Offline Network Traffic Analysis
+                </span>
+
+
+                <h2>
+                    Analyse network traffic with
+                    clear, explainable results.
+                </h2>
+
+
+                <p>
+                    Upload a packet capture to classify network flows,
+                    review packet header integrity, and understand the
+                    features that influenced each prediction.
+                </p>
+
+            </div>
+
+
+            <section class="upload-card">
+
+                <div class="upload-heading">
+
+                    <div>
+
+                        <h3>
+                            Upload packet capture
+                        </h3>
+
+                        <p>
+                            Select a PCAP file to begin the analysis.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <label
+                    id="uploadDropZone"
+                    class="upload-drop-zone"
+                    for="pcapFile"
+                >
+
+                    <div class="upload-icon">
+                        ↑
+                    </div>
+
+
+                    <strong>
+                        Choose a PCAP file
+                    </strong>
+
+
+                    <span>
+                        or drag and drop it here
+                    </span>
+
+
+                    <small>
+                        Supported: .pcap, .pcapng · Maximum 512 MB
+                    </small>
+
+                </label>
+
+
+                <input
+                    id="pcapFile"
+                    type="file"
+                    accept=".pcap,.pcapng"
+                    hidden
+                >
+
+
+                <div
+                    id="selectedFilePanel"
+                    class="selected-file-panel hidden"
+                >
+
+                    <div>
+
+                        <span class="selected-file-label">
+                            Selected file
+                        </span>
+
+                        <strong id="selectedFile">
+                            -
+                        </strong>
+
+                        <span
+                            id="selectedFileSize"
+                            class="selected-file-size"
+                        >
+                            -
+                        </span>
+
+                    </div>
+
+
+                    <button
+                        id="clearSelectedFile"
+                        class="clear-file-button"
+                        type="button"
+                        aria-label="Clear selected file"
+                    >
+                        ×
+                    </button>
+
+                </div>
+
+
+                <button
+                    id="analyzeUploadButton"
+                    class="button button-primary analyze-button"
+                    type="button"
+                    disabled
+                >
+                    Analyze Network Traffic
+                </button>
+
+
+                <div
+                    id="errorBox"
+                    class="error-box hidden"
+                ></div>
+
+            </section>
+
+
+            <!-- Analysis progress: shown only while processing -->
+            <section id="analysisProgress" class="analysis-progress hidden" aria-live="polite">
+                <div class="stage-grid">
+                    <div id="step-extract" class="stage-step is-pending"><div class="stage-line"></div><div class="stage-title">1. Extract</div><div class="stage-state">Waiting</div></div>
+                    <div id="step-build" class="stage-step is-pending"><div class="stage-line"></div><div class="stage-title">2. Build flows</div><div class="stage-state">Waiting</div></div>
+                    <div id="step-headers" class="stage-step is-pending"><div class="stage-line"></div><div class="stage-title">3. Check headers</div><div class="stage-state">Waiting</div></div>
+                    <div id="step-classify" class="stage-step is-pending"><div class="stage-line"></div><div class="stage-title">4. Classify</div><div class="stage-state">Waiting</div></div>
+                </div>
+                <div class="analysis-progress-footer">
+                    <div><strong id="analysisStatusTitle">Analyzing network traffic</strong><p id="analysisStatusText">Preparing analysis...</p></div>
+                    <div id="analysisElapsed" class="analysis-elapsed">Elapsed: 00:00</div>
+                </div>
+            </section>
+        </section>
+
+
+
+
+    </main>
+    <script src="{{ url_for('static', filename='upload.js') }}"></script>
+</body>
+</html>

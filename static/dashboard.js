@@ -1,4 +1,4 @@
-// NetworkIDS Overview — upload, progress, KPI and chart rendering.
+// NetworkIDS Overview — KPI and chart rendering.
 // Chart data comes from the backend, never from placeholder values.
 const MAX_FILE_SIZE_BYTES = 512 * 1024 * 1024;
 const $ = id => document.getElementById(id);
@@ -22,8 +22,8 @@ function time(v) {
     const pad = n => String(n).padStart(2,"0");
     return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 }
-function showError(message) { $("errorBox").textContent = message; $("errorBox").classList.remove("hidden"); }
-function hideError() { $("errorBox").textContent = ""; $("errorBox").classList.add("hidden"); }
+function showError(message) { const el=$("errorBox"); if(el){el.textContent=message;el.classList.remove("hidden");} }
+function hideError() { const el=$("errorBox"); if(el){el.textContent="";el.classList.add("hidden");} }
 function formatSize(n) { return n >= 1048576 ? `${(n/1048576).toFixed(1)} MB` : `${(n/1024).toFixed(1)} KB`; }
 function applyTheme(theme) {
     document.documentElement.setAttribute("data-theme", theme);
@@ -33,92 +33,15 @@ function applyTheme(theme) {
 applyTheme(["light","dark"].includes(localStorage.getItem("networkids-theme")) ? localStorage.getItem("networkids-theme") : "dark");
 $("themeToggle").addEventListener("click", () => applyTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark"));
 
-function resetFile() {
-    $("pcapFile").value = "";
-    $("selectedFilePanel").classList.add("hidden");
-    $("analyzeUploadButton").disabled = true;
-    hideError();
-}
-function setFile(file) {
-    hideError();
-    if (!file) { resetFile(); return; }
-    if (!/\.(pcap|pcapng)$/i.test(file.name)) { resetFile(); showError("Unsupported file type. Please select a .pcap or .pcapng file."); return; }
-    if (file.size > MAX_FILE_SIZE_BYTES) { resetFile(); showError("The selected PCAP exceeds the 512 MB upload limit."); return; }
-    $("selectedFile").textContent = file.name;
-    $("selectedFileSize").textContent = formatSize(file.size);
-    $("selectedFilePanel").classList.remove("hidden");
-    $("analyzeUploadButton").disabled = false;
-}
-$("pcapFile").addEventListener("change", e => setFile(e.target.files[0]));
-$("clearSelectedFile").addEventListener("click", resetFile);
-for (const eventName of ["dragenter", "dragover", "dragleave", "drop"]) {
-    $("uploadDropZone").addEventListener(eventName, e => {
-        e.preventDefault(); e.stopPropagation();
-        $("uploadDropZone").classList.toggle("drag-over", eventName === "dragenter" || eventName === "dragover");
-        if (eventName === "drop" && e.dataTransfer.files.length) {
-            const dt = new DataTransfer(); dt.items.add(e.dataTransfer.files[0]);
-            $("pcapFile").files = dt.files; setFile(dt.files[0]);
-        }
-    });
-}
-function setBusy(busy) {
-    isAnalyzing = busy;
-    $("pcapFile").disabled = busy;
-    $("clearSelectedFile").disabled = busy;
-    $("analyzeUploadButton").disabled = busy || !$("pcapFile").files.length;
-    $("analyzeUploadButton").textContent = busy ? "Analyzing..." : "Analyze Network Traffic";
-}
-function progress(data) {
-    $("analysisProgress").classList.remove("hidden");
-    const stageIndex = stages.indexOf(data.stage);
-    stages.forEach((name, i) => {
-        const el = $(`step-${name}`);
-        el.classList.remove("is-pending","is-active","is-complete","is-error");
-        let state = "Waiting", cls = "is-pending";
-        if (data.ready || (data.stage === "prepare") || (stageIndex >= 0 && i < stageIndex)) { state = "✓ Complete"; cls = "is-complete"; }
-        else if (i === stageIndex && data.error) { state = "✕ Failed"; cls = "is-error"; }
-        else if (i === stageIndex && data.analyzing) { state = "● Running"; cls = "is-active"; }
-        el.classList.add(cls); el.querySelector(".stage-state").textContent = state;
-    });
-    $("analysisStatusTitle").textContent = data.error ? "Analysis failed" : data.ready ? "Analysis completed" : "Analyzing network traffic";
-    $("analysisStatusText").textContent = data.error || (data.ready ? "The traffic analysis is complete." : data.stage_message || "Preparing analysis...");
-    $("analysisElapsed").textContent = `Elapsed: ${seconds(data.elapsed_seconds ?? (Date.now()-uploadStart)/1000)}`;
-}
-async function getJSON(path, options) {
-    const res = await fetch(path, {cache:"no-store", ...options});
-    const json = await res.json();
-    if (!res.ok || !json.success) throw new Error(json.error || `Request failed: ${res.status}`);
-    return json;
-}
-function stopPolling() { if (statusTimer !== null) clearTimeout(statusTimer); statusTimer = null; }
-async function pollStatus() {
-    try {
-        const state = await getJSON("/api/status");
-        progress(state);
-        if (state.error) { stopPolling(); setBusy(false); showError(state.error); return; }
-        if (state.ready) { stopPolling(); setBusy(false); await showOverview(); return; }
-        if (state.analyzing) statusTimer = setTimeout(pollStatus, 900);
-    } catch (err) { stopPolling(); setBusy(false); showError(err.message); }
-}
-$("analyzeUploadButton").addEventListener("click", async () => {
-    const file = $("pcapFile").files[0];
-    if (!file || isAnalyzing) return;
-    hideError(); setBusy(true); uploadStart = Date.now();
-    progress({analyzing:true,stage:"extract",stage_message:"Uploading capture and preparing analysis...",elapsed_seconds:0});
-    const form = new FormData(); form.append("file",file);
-    try {
-        const res = await getJSON("/api/analyze/upload", {method:"POST",body:form});
-        // Supports either an asynchronous worker or legacy synchronous response.
-        if (res.summary) { progress({ready:true}); setBusy(false); await showOverview(); }
-        else pollStatus();
-    } catch (err) {
-        setBusy(false); progress({stage:"extract",error:err.message,elapsed_seconds:(Date.now()-uploadStart)/1000}); showError(err.message);
+// Fetch and validate JSON from the NetworkIDS backend.
+async function getJSON(path, options = {}) {
+    const response = await fetch(path, { cache: "no-store", ...options });
+    const data = await response.json();
+    if (!response.ok || !data.success) {
+        throw new Error(data.error || `Request failed: ${response.status}`);
     }
-});
-$("newAnalysisButton").addEventListener("click", () => {
-    stopPolling(); $("resultsSection").classList.add("hidden"); $("landingSection").classList.remove("hidden");
-    $("analysisProgress").classList.add("hidden"); resetFile(); window.scrollTo(0,0);
-});
+    return data;
+}
 
 const palette = {attack:"var(--attack)", benign:"var(--benign)", warning:"var(--warning)", tampered:"var(--tampered)", primary:"var(--primary)"};
 function empty(container, msg="No available data for this chart.") { container.replaceChildren(); const n=document.createElement("div"); n.className="chart-empty"; n.textContent=msg; container.appendChild(n); }
@@ -195,7 +118,6 @@ function renderOverview(data) {
     if (data.shap_error) empty($("shapChart"),`SHAP importance unavailable: ${data.shap_error}`);
 }
 async function showOverview() {
-    $("landingSection").classList.add("hidden");$("resultsSection").classList.remove("hidden");
     window.scrollTo(0,0);
     const area=$("overviewError");area.classList.add("hidden");
     try {
@@ -204,7 +126,50 @@ async function showOverview() {
         catch(err) {area.textContent=`Some charts could not be loaded: ${err.message}`;area.classList.remove("hidden");}
     } catch(err) {area.textContent=err.message;area.classList.remove("hidden");}
 }
-// Do not reset an existing analysis on browser refresh.
-if (!new URLSearchParams(location.search).has("new")) {
-    getJSON("/api/summary").then(showOverview).catch(()=>{});
+// Only the dashboard page calls the overview APIs.
+showOverview();
+
+
+// ============================================================
+// Export current analysis PDF - generated by Flask, not a screenshot.
+// ============================================================
+const exportPdfButton = $("exportPdfButton");
+if (exportPdfButton) {
+    exportPdfButton.addEventListener("click", async () => {
+        const errorBox = $("exportPdfError");
+        errorBox.classList.add("hidden");
+        errorBox.textContent = "";
+        exportPdfButton.disabled = true;
+        exportPdfButton.textContent = "Generating PDF...";
+        try {
+            const response = await fetch("/api/report/pdf", { cache: "no-store" });
+            if (!response.ok) {
+                let message = `PDF export failed (${response.status}).`;
+                try {
+                    const result = await response.json();
+                    message = result.error || message;
+                } catch (_) { /* Non-JSON server response. */ }
+                throw new Error(message);
+            }
+            const blob = await response.blob();
+            const disposition = response.headers.get("Content-Disposition") || "";
+            const nameMatch = disposition.match(/filename="?([^";]+)"?/i);
+            const filename = nameMatch ? nameMatch[1] : "NetworkIDS_Security_Analysis_Report.pdf";
+            const downloadUrl = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = downloadUrl;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            setTimeout(() => URL.revokeObjectURL(downloadUrl), 60000);
+        } catch (error) {
+            errorBox.textContent = error.message;
+            errorBox.classList.remove("hidden");
+            errorBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        } finally {
+            exportPdfButton.disabled = false;
+            exportPdfButton.innerHTML = '<span aria-hidden="true">&#8595;</span> Export PDF';
+        }
+    });
 }
