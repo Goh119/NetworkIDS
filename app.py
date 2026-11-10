@@ -14,7 +14,6 @@ Runtime pipeline:
         -> packet_features.csv
         -> flow_builder.py
         -> flow_features.csv
-        -> Packet Integrity Checker
         -> Random Forest classification
 
 Packet-level integrity checking is performed independently
@@ -254,6 +253,9 @@ app = Flask(
 )
 
 
+# Maximum upload:
+# 512 MB for prototype use.
+
 app.config[
     "MAX_CONTENT_LENGTH"
 ] = MAX_UPLOAD_BYTES
@@ -324,6 +326,7 @@ if hasattr(
         MODEL.feature_names_in_
     )
 
+
     if (
         model_features
         !=
@@ -376,17 +379,10 @@ ATTACK_CLASS_INDEX = (
 
 STATE_LOCK = threading.Lock()
 
-ANALYSIS_CONTROL_LOCK = (
-    threading.Lock()
-)
-
 
 APP_STATE = {
 
     "ready":
-        False,
-
-    "analyzing":
         False,
 
     "source_name":
@@ -406,24 +402,29 @@ APP_STATE = {
 
     "packet_cache":
         {},
-
-    # Analysis progress
-    "stage":
-        None,
-
-    "stage_message":
-        None,
-
-    "started_at":
-        None,
-
-    "elapsed_seconds":
-        0.0,
-
-    "error":
-        None,
 }
 
+
+# Current analysis stage for the upload page.
+ANALYSIS_STATUS = {
+    "analyzing": False,
+    "ready": False,
+    "error": None,
+    "stage": None,
+    "stage_message": "No analysis in progress.",
+    "started_at": None,
+    "elapsed_final": 0.0,
+}
+OVERVIEW_CACHE = None
+TIMELINE_CACHE = None
+RUNTIME_OVERVIEW = CURRENT_RUNTIME_DIR / "overview_stats.json"
+RUNTIME_TIMELINE = CURRENT_RUNTIME_DIR / "events_timeline.json"
+RUNTIME_FLOW_INTEGRITY = CURRENT_RUNTIME_DIR / "flow_integrity.csv"
+
+def mark_stage(stage, message):
+    with STATE_LOCK:
+        ANALYSIS_STATUS["stage"] = stage
+        ANALYSIS_STATUS["stage_message"] = message
 
 # ============================================================
 # SHAP state
@@ -441,6 +442,9 @@ SHAP_LOCK = threading.Lock()
 def json_safe(
     value,
 ):
+    """
+    Convert numpy/pandas values into JSON-safe Python values.
+    """
 
     if value is None:
 
@@ -514,6 +518,9 @@ def json_safe(
 def safe_float(
     value,
 ):
+    """
+    Convert a value into float when possible.
+    """
 
     value = json_safe(
         value
@@ -526,22 +533,18 @@ def safe_float(
 
 
     try:
-
-        return float(
-            value
-        )
-
-    except (
-        TypeError,
-        ValueError,
-    ):
-
+        result = float(value)
+        return result if math.isfinite(result) else None
+    except (TypeError, ValueError, OverflowError):
         return None
 
 
 def safe_int(
     value,
 ):
+    """
+    Convert a value into int when possible.
+    """
 
     value = json_safe(
         value
@@ -572,6 +575,9 @@ def safe_int(
 def format_protocol(
     ip_protocol,
 ):
+    """
+    Convert IP protocol number into readable name.
+    """
 
     protocol = safe_int(
         ip_protocol
@@ -614,6 +620,9 @@ def format_protocol(
 def label_to_text(
     label,
 ):
+    """
+    Convert configured prediction label into text.
+    """
 
     label = int(
         label
@@ -646,6 +655,9 @@ def label_to_text(
 def allowed_file(
     filename,
 ):
+    """
+    Validate uploaded PCAP extension.
+    """
 
     suffix = (
         Path(
@@ -666,6 +678,9 @@ def allowed_file(
 def get_feature_label(
     feature,
 ):
+    """
+    Convert an ML feature name into a simpler readable label.
+    """
 
     if feature in FEATURE_LABELS:
 
@@ -688,6 +703,9 @@ def get_feature_label(
 def format_feature_value_for_text(
     value,
 ):
+    """
+    Format a feature value for plain-language SHAP explanation.
+    """
 
     value = safe_float(
         value
@@ -713,37 +731,29 @@ def format_feature_value_for_text(
 
     if (
         absolute > 0
-        and
-        absolute < 0.0001
+        and absolute < 0.0001
     ):
 
         return (
             f"{value:.8f}"
-            .rstrip(
-                "0"
-            )
-            .rstrip(
-                "."
-            )
+            .rstrip("0")
+            .rstrip(".")
         )
 
 
     return (
         f"{value:.2f}"
-        .rstrip(
-            "0"
-        )
-        .rstrip(
-            "."
-        )
+        .rstrip("0")
+        .rstrip(".")
     )
 
 
-# ============================================================
-# Runtime state helpers
-# ============================================================
-
 def reset_runtime_directory():
+    """
+    Remove previous runtime analysis.
+
+    Only the latest analysis is retained.
+    """
 
     if CURRENT_RUNTIME_DIR.exists():
 
@@ -759,174 +769,41 @@ def reset_runtime_directory():
 
 
 def reset_application_state():
+    """
+    Clear previous in-memory dashboard state.
+    """
 
+    global OVERVIEW_CACHE, TIMELINE_CACHE
     with STATE_LOCK:
-
-        APP_STATE.update({
-
-            "ready":
-                False,
-
-            "analyzing":
-                False,
-
-            "source_name":
-                None,
-
-            "flow_df":
-                None,
-
-            "packet_integrity_path":
-                None,
-
-            "summary":
-                None,
-
-            "shap_cache":
-                {},
-
-            "packet_cache":
-                {},
-
-            "stage":
-                None,
-
-            "stage_message":
-                None,
-
-            "started_at":
-                None,
-
-            "elapsed_seconds":
-                0.0,
-
-            "error":
-                None,
-        })
-
-
-def get_elapsed_seconds_locked():
-
-    started_at = APP_STATE[
-        "started_at"
-    ]
-
-
-    if (
-        APP_STATE[
-            "analyzing"
-        ]
-        and
-        started_at is not None
-    ):
-
-        return max(
-            0.0,
-            time.monotonic()
-            -
-            started_at,
-        )
-
-
-    return float(
-        APP_STATE[
-            "elapsed_seconds"
-        ]
-        or
-        0.0
-    )
-
-
-def update_analysis_stage(
-    stage,
-    message,
-):
-
-    with STATE_LOCK:
-
-        APP_STATE[
-            "stage"
-        ] = stage
-
-        APP_STATE[
-            "stage_message"
-        ] = message
-
-
-def mark_analysis_started(
-    source_name,
-):
-
-    with STATE_LOCK:
-
+        OVERVIEW_CACHE = None
+        TIMELINE_CACHE = None
         APP_STATE[
             "ready"
         ] = False
-
-        APP_STATE[
-            "analyzing"
-        ] = True
 
         APP_STATE[
             "source_name"
-        ] = source_name
-
-        APP_STATE[
-            "stage"
-        ] = "extract"
-
-        APP_STATE[
-            "stage_message"
-        ] = (
-            "Extracting packet and header features..."
-        )
-
-        APP_STATE[
-            "started_at"
-        ] = time.monotonic()
-
-        APP_STATE[
-            "elapsed_seconds"
-        ] = 0.0
-
-        APP_STATE[
-            "error"
         ] = None
 
-
-def mark_analysis_failed(
-    error_message,
-):
-
-    with STATE_LOCK:
-
-        elapsed = (
-            get_elapsed_seconds_locked()
-        )
+        APP_STATE[
+            "flow_df"
+        ] = None
 
         APP_STATE[
-            "elapsed_seconds"
-        ] = elapsed
+            "packet_integrity_path"
+        ] = None
 
         APP_STATE[
-            "analyzing"
-        ] = False
+            "summary"
+        ] = None
 
         APP_STATE[
-            "ready"
-        ] = False
+            "shap_cache"
+        ] = {}
 
         APP_STATE[
-            "error"
-        ] = str(
-            error_message
-        )
-
-        APP_STATE[
-            "stage_message"
-        ] = (
-            "Analysis stopped because an error occurred."
-        )
+            "packet_cache"
+        ] = {}
 
 
 # ============================================================
@@ -937,6 +814,9 @@ def run_command(
     command,
     stage_name,
 ):
+    """
+    Run one existing project script.
+    """
 
     completed = subprocess.run(
         command,
@@ -955,27 +835,38 @@ def run_command(
     ):
 
         stdout_tail = (
+
             completed.stdout[
                 -4000:
             ]
+
             if completed.stdout
+
             else ""
         )
 
 
         stderr_tail = (
+
             completed.stderr[
                 -4000:
             ]
+
             if completed.stderr
+
             else ""
         )
 
 
         raise RuntimeError(
+
             f"{stage_name} failed.\n\n"
-            f"STDOUT:\n{stdout_tail}\n\n"
-            f"STDERR:\n{stderr_tail}"
+
+            f"STDOUT:\n"
+            f"{stdout_tail}\n\n"
+
+            f"STDERR:\n"
+            f"{stderr_tail}"
         )
 
 
@@ -990,6 +881,11 @@ def run_packet_parser(
     pcap_path,
     output_csv,
 ):
+    """
+    Run packet_parser.py.
+
+    limit=0 means process the complete capture.
+    """
 
     command = [
 
@@ -1041,6 +937,9 @@ def run_flow_builder(
     packet_csv,
     flow_csv,
 ):
+    """
+    Run the existing streaming flow_builder.py.
+    """
 
     command = [
 
@@ -1086,6 +985,15 @@ def run_runtime_integrity(
     packet_csv,
     output_csv,
 ):
+    """
+    Apply packet integrity rules to the current capture.
+
+    Returns:
+        - packet integrity state counts
+        - T1-T3 rule counts
+        - S1-S6 rule counts
+        - S7 indicator count
+    """
 
     header = pd.read_csv(
         packet_csv,
@@ -1274,6 +1182,9 @@ def run_random_forest(
     flow_csv,
     output_csv,
 ):
+    """
+    Classify generated flows using the final Random Forest.
+    """
 
     flow_df = pd.read_csv(
         flow_csv,
@@ -1416,6 +1327,9 @@ def build_summary(
     integrity_summary,
     source_name,
 ):
+    """
+    Build runtime dashboard KPI values.
+    """
 
     total_flows = int(
         len(
@@ -1449,6 +1363,7 @@ def build_summary(
 
 
     attack_rate = (
+
         attack_flows
         /
         total_flows
@@ -1503,6 +1418,7 @@ def build_summary(
                 "l4_checksum_indicators"
             ],
 
+        # Retained for future integrity-rule UI.
         "integrity_rule_counts":
             integrity_summary[
                 "rule_counts"
@@ -1518,16 +1434,16 @@ def analyze_runtime_capture(
     pcap_path,
     source_name,
 ):
+    """
+    Run the complete pipeline on a PCAP already stored inside
+    runtime/current/.
+    """
 
     # --------------------------------------------------------
-    # 1. Extract
+    # 1. Packet parser
     # --------------------------------------------------------
 
-    update_analysis_stage(
-        "extract",
-        "Extracting packet and header features...",
-    )
-
+    mark_stage("extract", "Extracting L2-L4 packet features...")
 
     run_packet_parser(
         pcap_path,
@@ -1536,14 +1452,10 @@ def analyze_runtime_capture(
 
 
     # --------------------------------------------------------
-    # 2. Build flows
+    # 2. Flow builder
     # --------------------------------------------------------
 
-    update_analysis_stage(
-        "build",
-        "Building bidirectional network flows...",
-    )
-
+    mark_stage("build", "Aggregating packets into network flows...")
 
     run_flow_builder(
         RUNTIME_PACKET_FEATURES,
@@ -1552,14 +1464,10 @@ def analyze_runtime_capture(
 
 
     # --------------------------------------------------------
-    # 3. Check headers
+    # 3. Integrity checker
     # --------------------------------------------------------
 
-    update_analysis_stage(
-        "headers",
-        "Checking packet header integrity...",
-    )
-
+    mark_stage("headers", "Applying packet header integrity rules...")
 
     integrity_summary = (
         run_runtime_integrity(
@@ -1570,14 +1478,10 @@ def analyze_runtime_capture(
 
 
     # --------------------------------------------------------
-    # 4. Classify
+    # 4. Random Forest
     # --------------------------------------------------------
 
-    update_analysis_stage(
-        "classify",
-        "Classifying network flows with Random Forest...",
-    )
-
+    mark_stage("classify", "Classifying network flows with Random Forest...")
 
     flow_df = (
         run_random_forest(
@@ -1588,7 +1492,21 @@ def analyze_runtime_capture(
 
 
     # --------------------------------------------------------
-    # Summary
+    # 5. Prepare packet-to-flow integrity and dashboard data
+    # --------------------------------------------------------
+
+    mark_stage("prepare", "Preparing flow integrity, dashboard charts, timeline and SHAP importance...")
+    flow_df = add_flow_integrity_states(flow_df, RUNTIME_PACKET_INTEGRITY)
+    flow_df.to_csv(RUNTIME_PREDICTIONS, index=False)
+    overview = build_overview_payload(flow_df)
+    timeline = build_timeline_payload(flow_df)
+    with open(RUNTIME_OVERVIEW, "w", encoding="utf-8") as file:
+        json.dump(overview, file, indent=2)
+    with open(RUNTIME_TIMELINE, "w", encoding="utf-8") as file:
+        json.dump(timeline, file, indent=2)
+
+    # --------------------------------------------------------
+    # 5. Summary
     # --------------------------------------------------------
 
     summary = build_summary(
@@ -1613,24 +1531,21 @@ def analyze_runtime_capture(
         )
 
 
+    # Prepared caches are published before ready=True.
+    global OVERVIEW_CACHE, TIMELINE_CACHE
+    with STATE_LOCK:
+        OVERVIEW_CACHE = overview
+        TIMELINE_CACHE = timeline
+
     # --------------------------------------------------------
-    # Store completed state
+    # Store current state
     # --------------------------------------------------------
 
     with STATE_LOCK:
 
-        elapsed = (
-            get_elapsed_seconds_locked()
-        )
-
-
         APP_STATE[
             "ready"
         ] = True
-
-        APP_STATE[
-            "analyzing"
-        ] = False
 
         APP_STATE[
             "source_name"
@@ -1658,46 +1573,182 @@ def analyze_runtime_capture(
             "packet_cache"
         ] = {}
 
-        APP_STATE[
-            "stage"
-        ] = "classify"
-
-        APP_STATE[
-            "stage_message"
-        ] = (
-            "Analysis completed successfully."
-        )
-
-        APP_STATE[
-            "elapsed_seconds"
-        ] = elapsed
-
-        APP_STATE[
-            "error"
-        ] = None
-
 
     return summary
 
 
-def analysis_worker(
-    pcap_path,
-    source_name,
-):
 
+
+# ============================================================
+# Precompute all dashboard results BEFORE making results ready
+# ============================================================
+
+def normalized_endpoint_key(ip, port):
+    """Normalize endpoints for bidirectional 5-tuple matching."""
+    if pd.isna(ip) or pd.isna(port):
+        return None
     try:
+        return f"{str(ip)}:{int(float(port))}"
+    except (TypeError, ValueError, OverflowError):
+        return None
 
-        analyze_runtime_capture(
-            pcap_path,
-            source_name,
+
+def add_flow_integrity_states(flow_df, packet_csv):
+    """Assign existing packet integrity results to flow time windows.
+
+    Matches protocol + bidirectional endpoints + capture timestamp.
+    In case of re-used 5-tuples, a packet is assigned to the latest
+    eligible flow start and only if inside that flow's time window.
+    No new integrity rules or ML predictions are introduced here.
+    """
+    source = flow_df.reset_index(drop=True).copy()
+    source["integrity_state"] = None
+    if source.empty:
+        return source
+
+    starts = pd.to_numeric(source["timestamp"], errors="coerce")
+    durations = pd.to_numeric(source["flow_duration"], errors="coerce").fillna(0).clip(lower=0)
+    protocols = pd.to_numeric(source["ip_protocol"], errors="coerce")
+
+    flow_keys = []
+    for row in source.itertuples(index=False):
+        a = normalized_endpoint_key(row.src_ip, row.src_port)
+        b = normalized_endpoint_key(row.dst_ip, row.dst_port)
+        protocol = safe_int(row.ip_protocol)
+        flow_keys.append("|".join([str(protocol), *sorted([a, b])]) if a and b and protocol is not None else None)
+
+    reference = pd.DataFrame({
+        "_flow_index": np.arange(len(source)),
+        "_key": flow_keys,
+        "_start": starts,
+        "_end": starts + durations + 0.001,
+        "_protocol": protocols,
+    }).dropna(subset=["_key", "_start"])
+
+    if reference.empty:
+        source.to_csv(RUNTIME_FLOW_INTEGRITY, index=False, columns=["flow_id", "integrity_state"])
+        return source
+
+    # Store valid windows by normalized five-tuple.
+    groups = {}
+    for key, group in reference.groupby("_key", sort=False):
+        ordered = group.sort_values("_start")
+        groups[key] = (
+            ordered["_start"].to_numpy(dtype=float),
+            ordered["_end"].to_numpy(dtype=float),
+            ordered["_flow_index"].to_numpy(dtype=int),
         )
 
+    # 0 = no matching packet, 1 = Intact, 2 = Suspicious, 3 = Tampered.
+    severity = np.zeros(len(source), dtype=np.int8)
+    packet_counts = np.zeros(len(source), dtype=np.int64)
+    rule_counts_by_flow = {
+        rule: np.zeros(len(source), dtype=np.int64)
+        for rule in ALL_RULES
+    }
+    usecols = ["timestamp", "src_ip", "dst_ip", "src_port", "dst_port", "ip_protocol", "integrity_state", *ALL_RULES]
+    for chunk in pd.read_csv(packet_csv, usecols=usecols, chunksize=INTEGRITY_CHUNK_SIZE, low_memory=False):
+        chunk["_time"] = pd.to_numeric(chunk["timestamp"], errors="coerce")
+        chunk = chunk.loc[np.isfinite(chunk["_time"])].copy()
+        if chunk.empty:
+            continue
+        chunk["_key"] = [
+            "|".join([str(safe_int(proto)), *sorted([a, b])]) if a and b and safe_int(proto) is not None else None
+            for a, b, proto in zip(
+                (normalized_endpoint_key(ip, port) for ip, port in zip(chunk["src_ip"], chunk["src_port"])),
+                (normalized_endpoint_key(ip, port) for ip, port in zip(chunk["dst_ip"], chunk["dst_port"])),
+                chunk["ip_protocol"]
+            )
+        ]
+        chunk = chunk.dropna(subset=["_key"])
+        for key, packet_group in chunk.groupby("_key", sort=False):
+            if key not in groups:
+                continue
+            flow_starts, flow_ends, flow_indices = groups[key]
+            packet_times = packet_group["_time"].to_numpy(dtype=float)
+            indices = np.searchsorted(flow_starts, packet_times, side="right") - 1
+            valid = indices >= 0
+            valid_positions = np.flatnonzero(valid)
+            if not len(valid_positions):
+                continue
+            candidates = indices[valid_positions]
+            valid_positions = valid_positions[packet_times[valid_positions] <= flow_ends[candidates]]
+            if not len(valid_positions):
+                continue
+            mapped = flow_indices[indices[valid_positions]]
+            states = packet_group["integrity_state"].to_numpy()[valid_positions]
+            levels = np.array([{"Intact": 1, "Suspicious": 2, "Tampered": 3}.get(str(v), 0) for v in states], dtype=np.int8)
+            np.maximum.at(severity, mapped, levels)
+            np.add.at(packet_counts, mapped, 1)
+            for rule in ALL_RULES:
+                flags = pd.to_numeric(packet_group[rule], errors="coerce").fillna(0).to_numpy()[valid_positions]
+                np.add.at(rule_counts_by_flow[rule], mapped, (flags == 1).astype(np.int64))
+
+    for rule, counts in rule_counts_by_flow.items():
+        source[f"integrity_rule_count_{rule}"] = counts
+    source["integrity_packet_count"] = packet_counts
+
+    states = np.array([None, "Intact", "Suspicious", "Tampered"], dtype=object)
+    source["integrity_state"] = states[severity]
+    source[["flow_id", "integrity_state"]].to_csv(RUNTIME_FLOW_INTEGRITY, index=False)
+    return source
+
+
+def build_timeline_payload(df):
+    times = pd.to_numeric(df["timestamp"], errors="coerce")
+    valid = np.isfinite(times)
+    if not bool(valid.any()):
+        return {"success": True, "buckets": [], "interval_seconds": 0}
+    first, last = float(times[valid].min()), float(times[valid].max())
+    span = last - first
+    if span <= 60:
+        interval = 5
+    elif span <= 600:
+        interval = 30
+    elif span <= 3600:
+        interval = 60
+    elif span <= 21600:
+        interval = 300
+    else:
+        interval = max(300, int(math.ceil(span / 70 / 300)) * 300)
+    start = int(math.floor(first / interval) * interval)
+    series = pd.DataFrame({
+        "bucket": (np.floor(times[valid].to_numpy(dtype=float) / interval).astype(np.int64) * interval),
+        "prediction": df.loc[valid, "prediction"].astype(str).to_numpy(),
+    })
+    counts = series.groupby(["bucket", "prediction"]).size().unstack(fill_value=0)
+    # Preserve empty time periods, up to 300 bars (normal range <= ~72).
+    final = int(math.floor(last / interval) * interval)
+    buckets = []
+    for t in range(start, final + interval, interval):
+        values = counts.loc[t] if t in counts.index else None
+        buckets.append({
+            "start": t, "end": t + interval,
+            "attack": int(values.get("Attack", 0)) if values is not None else 0,
+            "benign": int(values.get("Benign", 0)) if values is not None else 0,
+        })
+    return {"success": True, "buckets": buckets, "interval_seconds": interval}
+
+
+def build_overview_payload(df):
+    times = pd.to_numeric(df["timestamp"], errors="coerce")
+    times = times[np.isfinite(times)]
+    attacks = df.loc[df["prediction_label"] == config.LABEL_ATTACK]
+    protocols = df["ip_protocol"].map(format_protocol).value_counts()
+    overview = {
+        "capture_start": float(times.min()) if not times.empty else None,
+        "capture_end": float(times.max()) if not times.empty else None,
+        "protocol_distribution": [{"name": str(k), "value": int(v)} for k, v in protocols.items()],
+        "top_attack_sources": top_counts(attacks, "src_ip", 5),
+        "top_attack_destinations": top_counts(attacks, "dst_ip", 5),
+        "top_attack_ports": top_counts(attacks, "dst_port", 5),
+        "shap_importance": [], "shap_error": None,
+    }
+    try:
+        overview["shap_importance"] = global_shap_importance(df)
     except Exception as exc:
-
-        mark_analysis_failed(
-            exc
-        )
-
+        overview["shap_error"] = str(exc)
+    return overview
 
 # ============================================================
 # Flow serialization
@@ -1706,6 +1757,9 @@ def analysis_worker(
 def serialize_flow(
     row,
 ):
+    """
+    Convert one flow row into dashboard-friendly JSON.
+    """
 
     src_ip = json_safe(
         row.get(
@@ -1736,8 +1790,11 @@ def serialize_flow(
 
 
     source = (
+
         f"{src_ip}:{src_port}"
+
         if src_port is not None
+
         else str(
             src_ip
         )
@@ -1745,8 +1802,11 @@ def serialize_flow(
 
 
     destination = (
+
         f"{dst_ip}:{dst_port}"
+
         if dst_port is not None
+
         else str(
             dst_ip
         )
@@ -1835,12 +1895,18 @@ def serialize_flow(
                     "attack_probability"
                 )
             ),
+
+        "integrity_state":
+            json_safe(row.get("integrity_state")),
     }
 
 
 def serialize_flow_details(
     row,
 ):
+    """
+    More detailed information for the modal popup.
+    """
 
     base = serialize_flow(
         row
@@ -1963,6 +2029,27 @@ def serialize_flow_details(
     })
 
 
+    # These integrity counts were prepared during PCAP analysis.
+    # The popup therefore does not need to re-scan packet_integrity.csv
+    # to show the status and triggered-rule labels.
+    precomputed_rules = []
+    precomputed_indicators = []
+    for rule in ALL_RULES:
+        count = safe_int(row.get(f"integrity_rule_count_{rule}")) or 0
+        if count <= 0:
+            continue
+        info = rule_information(rule, count)
+        if info["category"] == "Indicator":
+            precomputed_indicators.append(info)
+        else:
+            precomputed_rules.append(info)
+
+    base["integrity_explanation"] = {
+        "integrity_state": json_safe(row.get("integrity_state")),
+        "total_packets": safe_int(row.get("integrity_packet_count")) or 0,
+        "triggered_rules": precomputed_rules,
+        "additional_indicators": precomputed_indicators,
+    }
     return base
 
 
@@ -1973,6 +2060,9 @@ def serialize_flow_details(
 def get_flow_row(
     flow_id,
 ):
+    """
+    Find one currently analysed flow.
+    """
 
     flow_df = APP_STATE[
         "flow_df"
@@ -2009,12 +2099,54 @@ def get_flow_row(
 
 
 # ============================================================
+# Integrity rule descriptions for the Events popup
+# ============================================================
+
+INTEGRITY_RULE_DESCRIPTIONS = {
+    "T1": "Invalid IPv4 header checksum",
+    "T2": "Contradictory IPv4 fragmentation fields",
+    "T3": "Invalid IPv4 header length",
+    "S1": "Unusually low TTL",
+    "S2": "Capture-local MAC-IP inconsistency",
+    "S3": "TCP SYN and FIN flags set together",
+    "S4": "TCP SYN and RST flags set together",
+    "S5": "TCP FIN and RST flags set together",
+    "S6": "TCP NULL flags",
+    "S7": "Invalid Layer 4 checksum (indicator only)",
+}
+
+
+def integrity_rule_id(column):
+    return str(column).split("_", 1)[0]
+
+
+def rule_information(column, packet_count):
+    rule_id = integrity_rule_id(column)
+    return {
+        "rule_id": rule_id,
+        "rule_name": str(column),
+        "description": INTEGRITY_RULE_DESCRIPTIONS.get(
+            rule_id, str(column).replace("_", " ")
+        ),
+        "category": (
+            "Indicator" if rule_id == "S7"
+            else "Tampered" if rule_id.startswith("T")
+            else "Suspicious"
+        ),
+        "packet_count": int(packet_count),
+    }
+
+
+# ============================================================
 # Related packet matching
 # ============================================================
 
 def get_related_packets(
     flow_id,
 ):
+    """
+    Find packet-level rows associated with one bidirectional flow.
+    """
 
     cached = (
         APP_STATE[
@@ -2096,39 +2228,33 @@ def get_related_packets(
     )
 
 
-    start_time = safe_float(
+    start_time = float(
         flow[
             "timestamp"
         ]
     )
 
 
-    duration = (
-        safe_float(
-            flow[
-                "flow_duration"
-            ]
-        )
-        or
-        0.0
+    duration = float(
+        flow[
+            "flow_duration"
+        ]
     )
 
 
-    if start_time is None:
-
-        raise ValueError(
-            "The selected flow does not contain a valid timestamp."
-        )
-
-
     end_time = (
+
         start_time
+
         +
+
         max(
             duration,
             0.0,
         )
+
         +
+
         0.000001
     )
 
@@ -2162,8 +2288,13 @@ def get_related_packets(
         "integrity_state",
         "integrity_reasons",
         "integrity_indicators",
+        *ALL_RULES,
     ]
 
+
+    # Count rule triggers across ALL matching packets, not only
+    # the first 100 packet details shown in the popup.
+    triggered_rule_counts = {rule: 0 for rule in ALL_RULES}
 
     total_packets = 0
 
@@ -2197,10 +2328,13 @@ def get_related_packets(
 
 
         time_mask = (
+
             timestamps.ge(
                 start_time
             )
+
             &
+
             timestamps.le(
                 end_time
             )
@@ -2224,22 +2358,6 @@ def get_related_packets(
             protocol_values.eq(
                 protocol
             )
-        )
-
-
-        src_port_values = pd.to_numeric(
-            chunk[
-                "src_port"
-            ],
-            errors="coerce",
-        )
-
-
-        dst_port_values = pd.to_numeric(
-            chunk[
-                "dst_port"
-            ],
-            errors="coerce",
         )
 
 
@@ -2269,13 +2387,25 @@ def get_related_packets(
 
             &
 
-            src_port_values.eq(
+            pd.to_numeric(
+                chunk[
+                    "src_port"
+                ],
+                errors="coerce",
+            )
+            .eq(
                 src_port
             )
 
             &
 
-            dst_port_values.eq(
+            pd.to_numeric(
+                chunk[
+                    "dst_port"
+                ],
+                errors="coerce",
+            )
+            .eq(
                 dst_port
             )
         )
@@ -2307,23 +2437,40 @@ def get_related_packets(
 
             &
 
-            src_port_values.eq(
+            pd.to_numeric(
+                chunk[
+                    "src_port"
+                ],
+                errors="coerce",
+            )
+            .eq(
                 dst_port
             )
 
             &
 
-            dst_port_values.eq(
+            pd.to_numeric(
+                chunk[
+                    "dst_port"
+                ],
+                errors="coerce",
+            )
+            .eq(
                 src_port
             )
         )
 
 
         mask = (
+
             time_mask
+
             &
+
             protocol_mask
+
             &
+
             (
                 forward_mask
                 |
@@ -2383,186 +2530,201 @@ def get_related_packets(
         )
 
 
-        indicator_count += int(
-            (
-                selected[
-                    "integrity_indicators"
-                ]
-                .fillna(
-                    "None"
-                )
-                !=
-                "None"
-            )
-            .sum()
-        )
+        # Rule S7 is an additional indicator. Count packets
+        # with that indicator independently of their status.
+        indicator_columns = [
+            rule for rule in ALL_RULES
+            if integrity_rule_id(rule) == "S7"
+        ]
+        if indicator_columns:
+            indicator_mask = pd.Series(False, index=selected.index)
+            for rule in indicator_columns:
+                indicator_mask |= pd.to_numeric(
+                    selected[rule], errors="coerce"
+                ).fillna(0).ne(0)
+            indicator_count += int(indicator_mask.sum())
 
+        for rule in ALL_RULES:
+            triggered_rule_counts[rule] += int(
+                pd.to_numeric(selected[rule], errors="coerce")
+                .fillna(0).ne(0).sum()
+            )
 
         remaining = (
+
             RELATED_PACKET_LIMIT
+
             -
+
             len(
                 packet_rows
             )
         )
 
 
-        if remaining <= 0:
+        if remaining > 0:
 
-            continue
+            for _, packet in (
+                selected
+                .head(
+                    remaining
+                )
+                .iterrows()
+            ):
 
-
-        for _, packet in (
-            selected
-            .head(
-                remaining
-            )
-            .iterrows()
-        ):
-
-            flags = []
+                flags = []
 
 
-            flag_map = {
+                flag_map = {
 
-                "SYN":
-                    "tcp_syn",
+                    "SYN":
+                        "tcp_syn",
 
-                "ACK":
-                    "tcp_ack",
+                    "ACK":
+                        "tcp_ack",
 
-                "FIN":
-                    "tcp_fin",
+                    "FIN":
+                        "tcp_fin",
 
-                "RST":
-                    "tcp_rst",
+                    "RST":
+                        "tcp_rst",
 
-                "PSH":
-                    "tcp_psh",
+                    "PSH":
+                        "tcp_psh",
 
-                "URG":
-                    "tcp_urg",
-            }
+                    "URG":
+                        "tcp_urg",
+                }
 
 
-            for (
-                flag_name,
-                column,
-            ) in flag_map.items():
+                for (
+                    flag_name,
+                    column,
+                ) in flag_map.items():
 
-                if (
-                    safe_int(
-                        packet.get(
-                            column
+                    if (
+                        safe_int(
+                            packet.get(
+                                column
+                            )
                         )
-                    )
-                    ==
-                    1
-                ):
+                        ==
+                        1
+                    ):
 
-                    flags.append(
-                        flag_name
-                    )
-
-
-            packet_rows.append({
-
-                "packet_id":
-                    safe_int(
-                        packet.get(
-                            "packet_id"
+                        flags.append(
+                            flag_name
                         )
-                    ),
-
-                "timestamp":
-                    safe_float(
-                        packet.get(
-                            "timestamp"
-                        )
-                    ),
-
-                "source":
-                    (
-                        f"{packet.get('src_ip')}:"
-                        f"{safe_int(packet.get('src_port'))}"
-                    ),
-
-                "destination":
-                    (
-                        f"{packet.get('dst_ip')}:"
-                        f"{safe_int(packet.get('dst_port'))}"
-                    ),
-
-                "ttl":
-                    safe_float(
-                        packet.get(
-                            "ttl"
-                        )
-                    ),
-
-                "flags":
-                    (
-                        ", ".join(
-                            flags
-                        )
-                        if flags
-                        else "None"
-                    ),
-
-                "ip_checksum":
-                    safe_int(
-                        packet.get(
-                            "ip_checksum_valid"
-                        )
-                    ),
-
-                "l4_checksum":
-                    safe_int(
-                        packet.get(
-                            "l4_checksum_valid"
-                        )
-                    ),
-
-                "integrity_state":
-                    json_safe(
-                        packet.get(
-                            "integrity_state"
-                        )
-                    ),
-
-                "reasons":
-                    json_safe(
-                        packet.get(
-                            "integrity_reasons"
-                        )
-                    ),
-
-                "indicators":
-                    json_safe(
-                        packet.get(
-                            "integrity_indicators"
-                        )
-                    ),
-            })
 
 
-    if tampered > 0:
+                packet_rows.append({
 
-        overall_state = (
-            "Tampered"
-        )
+                    "packet_id":
+                        safe_int(
+                            packet.get(
+                                "packet_id"
+                            )
+                        ),
 
+                    "timestamp":
+                        safe_float(
+                            packet.get(
+                                "timestamp"
+                            )
+                        ),
+
+                    "source":
+                        (
+                            f"{packet.get('src_ip')}:"
+                            f"{safe_int(packet.get('src_port'))}"
+                        ),
+
+                    "destination":
+                        (
+                            f"{packet.get('dst_ip')}:"
+                            f"{safe_int(packet.get('dst_port'))}"
+                        ),
+
+                    "ttl":
+                        safe_float(
+                            packet.get(
+                                "ttl"
+                            )
+                        ),
+
+                    "flags":
+                        (
+                            ", ".join(
+                                flags
+                            )
+
+                            if flags
+
+                            else "None"
+                        ),
+
+                    "ip_checksum":
+                        safe_int(
+                            packet.get(
+                                "ip_checksum_valid"
+                            )
+                        ),
+
+                    "l4_checksum":
+                        safe_int(
+                            packet.get(
+                                "l4_checksum_valid"
+                            )
+                        ),
+
+                    "integrity_state":
+                        json_safe(
+                            packet.get(
+                                "integrity_state"
+                            )
+                        ),
+
+                    "reasons":
+                        json_safe(
+                            packet.get(
+                                "integrity_reasons"
+                            )
+                        ),
+
+                    "indicators":
+                        json_safe(
+                            packet.get(
+                                "integrity_indicators"
+                            )
+                        ),
+
+                    # Rule flags are authoritative: no guessing
+                    # based on the packet's integrity_state.
+                    "triggered_rules": [
+                        integrity_rule_id(rule)
+                        for rule in ALL_RULES
+                        if safe_int(packet.get(rule)) == 1
+                        and integrity_rule_id(rule) != "S7"
+                    ],
+                    "indicator_rules": [
+                        integrity_rule_id(rule)
+                        for rule in ALL_RULES
+                        if safe_int(packet.get(rule)) == 1
+                        and integrity_rule_id(rule) == "S7"
+                    ],
+                })
+
+
+    if total_packets == 0:
+        overall_state = None
+    elif tampered > 0:
+        overall_state = "Tampered"
     elif suspicious > 0:
-
-        overall_state = (
-            "Suspicious"
-        )
-
+        overall_state = "Suspicious"
+    elif intact > 0:
+        overall_state = "Intact"
     else:
-
-        overall_state = (
-            "Intact"
-        )
+        overall_state = None
 
 
     result = {
@@ -2584,6 +2746,18 @@ def get_related_packets(
 
         "indicator_packets":
             indicator_count,
+
+        "triggered_rules": [
+            rule_information(rule, count)
+            for rule, count in triggered_rule_counts.items()
+            if count > 0 and integrity_rule_id(rule) != "S7"
+        ],
+
+        "additional_indicators": [
+            rule_information(rule, count)
+            for rule, count in triggered_rule_counts.items()
+            if count > 0 and integrity_rule_id(rule) == "S7"
+        ],
 
         "packets":
             packet_rows,
@@ -2613,6 +2787,9 @@ def get_related_packets(
 # ============================================================
 
 def get_shap_explainer():
+    """
+    Create TreeExplainer only when first requested.
+    """
 
     global SHAP_EXPLAINER
 
@@ -2647,84 +2824,108 @@ def build_plain_shap_explanation(
     attack_probability,
     contributions,
 ):
+    """
+    Build a simple flow-specific explanation using the actual
+    local SHAP values.
+
+    This is deterministic and does not use an LLM.
+    """
+
+    positive = [
+        item
+        for item in contributions
+        if item[
+            "shap_value"
+        ] > 0
+    ]
+
+
+    negative = [
+        item
+        for item in contributions
+        if item[
+            "shap_value"
+        ] < 0
+    ]
+
 
     if prediction == "Attack":
 
-        target_word = (
-            "Attack"
+        supporting = positive[
+            :3
+        ]
+
+        opposing = negative[
+            :2
+        ]
+
+        confidence = (
+            attack_probability
+            if attack_probability is not None
+            else None
         )
 
+        target_word = "Attack"
+
         support_direction = (
-            "pushed the model toward Attack"
+            "increased the model's attack score"
         )
 
         oppose_direction = (
             "pushed the model toward Benign"
         )
-
-        supporting = [
-            item
-            for item
-            in contributions
-            if item[
-                "shap_value"
-            ] > 0
-        ][
-            :3
-        ]
-
-        opposing = [
-            item
-            for item
-            in contributions
-            if item[
-                "shap_value"
-            ] < 0
-        ][
-            :2
-        ]
 
     else:
 
-        target_word = (
-            "Benign"
+        supporting = negative[
+            :3
+        ]
+
+        opposing = positive[
+            :2
+        ]
+
+        confidence = (
+
+            1.0
+            -
+            attack_probability
+
+            if attack_probability is not None
+
+            else None
         )
 
+        target_word = "Benign"
+
         support_direction = (
-            "pushed the model toward Benign"
+            "reduced the model's attack score"
         )
 
         oppose_direction = (
             "pushed the model toward Attack"
         )
 
-        supporting = [
-            item
-            for item
-            in contributions
-            if item[
-                "shap_value"
-            ] < 0
-        ][
-            :3
-        ]
 
-        opposing = [
-            item
-            for item
-            in contributions
-            if item[
-                "shap_value"
-            ] > 0
-        ][
-            :2
-        ]
+    sentences = []
 
 
-    sentences = [
+    if confidence is not None:
 
-        f"This flow was classified as {target_word}."
-    ]
+        sentences.append(
+            (
+                f"This flow was classified as {target_word} "
+                f"with {confidence * 100:.2f}% model confidence."
+            )
+        )
+
+    else:
+
+        sentences.append(
+            (
+                f"This flow was classified as {target_word}."
+            )
+        )
 
 
     if supporting:
@@ -2733,13 +2934,9 @@ def build_plain_shap_explanation(
             0
         ]
 
-
-        strongest_label = (
-            strongest[
-                "feature_label"
-            ]
-        )
-
+        strongest_label = strongest[
+            "feature_label"
+        ]
 
         strongest_value = (
             format_feature_value_for_text(
@@ -2756,36 +2953,38 @@ def build_plain_shap_explanation(
         )
 
 
-        other_names = [
-
-            item[
-                "feature_label"
-            ]
-
-            for item
-            in supporting[
-                1:
-            ]
-        ]
-
-
         if len(
-            other_names
-        ) == 1:
+            supporting
+        ) > 1:
 
-            sentence += (
-                f" {other_names[0].capitalize()} "
-                "also supported this result."
-            )
+            other_names = [
 
-        elif len(
-            other_names
-        ) >= 2:
+                item[
+                    "feature_label"
+                ]
 
-            sentence += (
-                f" {other_names[0].capitalize()} and "
-                f"{other_names[1]} also supported this result."
-            )
+                for item
+                in supporting[
+                    1:
+                ]
+            ]
+
+
+            if len(
+                other_names
+            ) == 1:
+
+                sentence += (
+                    f" {other_names[0].capitalize()} "
+                    "also supported this result."
+                )
+
+            else:
+
+                sentence += (
+                    f" {other_names[0].capitalize()} and "
+                    f"{other_names[1]} also supported this result."
+                )
 
 
         sentences.append(
@@ -2813,8 +3012,8 @@ def build_plain_shap_explanation(
             sentences.append(
                 (
                     f"{opposing_names[0].capitalize()} "
-                    f"{oppose_direction}, but it was not strong "
-                    "enough to change the final classification."
+                    f"{oppose_direction}, but it was not "
+                    "strong enough to change the final classification."
                 )
             )
 
@@ -2824,8 +3023,8 @@ def build_plain_shap_explanation(
                 (
                     f"{opposing_names[0].capitalize()} and "
                     f"{opposing_names[1]} {oppose_direction}, "
-                    "but their influence was not strong enough "
-                    "to change the final classification."
+                    "but their combined influence was not strong "
+                    "enough to change the final classification."
                 )
             )
 
@@ -2851,6 +3050,14 @@ def build_plain_shap_explanation(
 def calculate_shap(
     flow_id,
 ):
+    """
+    Calculate local SHAP explanation for one selected flow.
+
+    Direction:
+        positive -> Attack
+        negative -> Benign
+        zero     -> Neutral
+    """
 
     cached = (
         APP_STATE[
@@ -2923,6 +3130,7 @@ def calculate_shap(
             0
         ]
 
+
     else:
 
         shap_array = np.asarray(
@@ -2944,6 +3152,7 @@ def calculate_shap(
                 ]
             )
 
+
         elif (
             shap_array.ndim
             ==
@@ -2955,6 +3164,7 @@ def calculate_shap(
                     0
                 ]
             )
+
 
         else:
 
@@ -2981,12 +3191,14 @@ def calculate_shap(
         )
 
 
-        feature_value = json_safe(
-            X.iloc[
-                0
-            ][
-                feature
-            ]
+        feature_value = (
+            json_safe(
+                X.iloc[
+                    0
+                ][
+                    feature
+                ]
+            )
         )
 
 
@@ -2996,11 +3208,13 @@ def calculate_shap(
                 "Attack"
             )
 
+
         elif shap_value < 0:
 
             direction = (
                 "Benign"
             )
+
 
         else:
 
@@ -3126,194 +3340,13 @@ def index():
 )
 def analyze_upload():
 
-    with ANALYSIS_CONTROL_LOCK:
-
-        try:
-
-            # ------------------------------------------------
-            # Do not start another analysis while one is active.
-            # ------------------------------------------------
-
-            with STATE_LOCK:
-
-                if APP_STATE[
-                    "analyzing"
-                ]:
-
-                    return jsonify({
-
-                        "success":
-                            False,
-
-                        "error":
-                            (
-                                "An analysis is already running. "
-                                "Please wait for it to finish."
-                            ),
-
-                    }), 409
-
-
-            # ------------------------------------------------
-            # Validate upload
-            # ------------------------------------------------
-
-            if (
-                "file"
-                not in
-                request.files
-            ):
-
-                return jsonify({
-
-                    "success":
-                        False,
-
-                    "error":
-                        "No PCAP file was provided.",
-
-                }), 400
-
-
-            file = request.files[
-                "file"
-            ]
-
-
-            if (
-                file.filename is None
-                or
-                file.filename.strip()
-                ==
-                ""
-            ):
-
-                return jsonify({
-
-                    "success":
-                        False,
-
-                    "error":
-                        "No file was selected.",
-
-                }), 400
-
-
-            original_filename = (
-                secure_filename(
-                    file.filename
-                )
-            )
-
-
-            if not original_filename:
-
-                return jsonify({
-
-                    "success":
-                        False,
-
-                    "error":
-                        "The selected filename is not valid.",
-
-                }), 400
-
-
-            if not allowed_file(
-                original_filename
-            ):
-
-                return jsonify({
-
-                    "success":
-                        False,
-
-                    "error":
-                        (
-                            "Unsupported file type. "
-                            "Please upload a .pcap or .pcapng file."
-                        ),
-
-                }), 400
-
-
-            # ------------------------------------------------
-            # Only retain newest analysis
-            # ------------------------------------------------
-
-            reset_application_state()
-
-            reset_runtime_directory()
-
-
-            suffix = (
-                Path(
-                    original_filename
-                )
-                .suffix
-                .lower()
-            )
-
-
-            runtime_input = (
-                CURRENT_RUNTIME_DIR
-                /
-                f"input{suffix}"
-            )
-
-
-            # Save directly to runtime/current/.
-            # No uploads/ directory is retained.
-
-            file.save(
-                runtime_input
-            )
-
-
-            # ------------------------------------------------
-            # Start analysis state
-            # ------------------------------------------------
-
-            mark_analysis_started(
-                original_filename
-            )
-
-
-            # ------------------------------------------------
-            # Run pipeline in a background thread.
-            # ------------------------------------------------
-
-            worker = threading.Thread(
-                target=analysis_worker,
-                args=(
-                    runtime_input,
-                    original_filename,
-                ),
-                daemon=True,
-                name="networkids-analysis",
-            )
-
-
-            worker.start()
-
-
-            return jsonify({
-
-                "success":
-                    True,
-
-                "message":
-                    "Analysis started.",
-
-            }), 202
-
-
-        except Exception as exc:
-
-            mark_analysis_failed(
-                exc
-            )
-
+    try:
+
+        if (
+            "file"
+            not in
+            request.files
+        ):
 
             return jsonify({
 
@@ -3321,76 +3354,128 @@ def analyze_upload():
                     False,
 
                 "error":
-                    str(
-                        exc
-                    ),
+                    "No PCAP file was provided.",
 
-            }), 500
+            }), 400
 
 
-# ============================================================
-# Analysis status
-# ============================================================
+        file = request.files[
+            "file"
+        ]
 
-@app.route(
-    "/api/status",
-    methods=[
-        "GET"
-    ],
-)
-def analysis_status():
 
-    with STATE_LOCK:
+        if (
+            file.filename is None
+            or
+            file.filename.strip()
+            ==
+            ""
+        ):
 
-        elapsed = (
-            get_elapsed_seconds_locked()
+            return jsonify({
+
+                "success":
+                    False,
+
+                "error":
+                    "No file was selected.",
+
+            }), 400
+
+
+        original_filename = (
+            secure_filename(
+                file.filename
+            )
         )
 
+
+        if not original_filename:
+
+            return jsonify({
+
+                "success":
+                    False,
+
+                "error":
+                    "The selected filename is not valid.",
+
+            }), 400
+
+
+        if not allowed_file(
+            original_filename
+        ):
+
+            return jsonify({
+
+                "success":
+                    False,
+
+                "error":
+                    (
+                        "Unsupported file type. "
+                        "Please upload a .pcap or .pcapng file."
+                    ),
+
+            }), 400
+
+
+        # Prevent simultaneous uploads from deleting an active analysis.
+        with STATE_LOCK:
+            if ANALYSIS_STATUS["analyzing"]:
+                return jsonify({"success": False, "error": "An analysis is already running."}), 409
+            ANALYSIS_STATUS.update({
+                "analyzing": True, "ready": False, "error": None,
+                "stage": "extract", "stage_message": "Preparing uploaded capture...",
+                "started_at": time.monotonic(), "elapsed_final": 0.0,
+            })
+
+        try:
+            reset_application_state()
+            reset_runtime_directory()
+            suffix = Path(original_filename).suffix.lower()
+            runtime_input = CURRENT_RUNTIME_DIR / f"input{suffix}"
+            file.save(runtime_input)
+        except Exception:
+            with STATE_LOCK:
+                ANALYSIS_STATUS["analyzing"] = False
+                ANALYSIS_STATUS["error"] = "Unable to save uploaded capture."
+            raise
+
+        def worker():
+            global OVERVIEW_CACHE
+            try:
+                analyze_runtime_capture(runtime_input, source_name=original_filename)
+                with STATE_LOCK:
+                    ANALYSIS_STATUS["analyzing"] = False
+                    ANALYSIS_STATUS["ready"] = True
+                    ANALYSIS_STATUS["elapsed_final"] = time.monotonic() - ANALYSIS_STATUS["started_at"]
+                    ANALYSIS_STATUS["stage_message"] = "Analysis completed."
+            except Exception as exc:
+                with STATE_LOCK:
+                    ANALYSIS_STATUS["analyzing"] = False
+                    ANALYSIS_STATUS["ready"] = False
+                    ANALYSIS_STATUS["error"] = str(exc)
+                    ANALYSIS_STATUS["elapsed_final"] = time.monotonic() - ANALYSIS_STATUS["started_at"]
+
+        threading.Thread(target=worker, daemon=True).start()
+        return jsonify({"success": True, "analyzing": True}), 202
+
+
+    except Exception as exc:
 
         return jsonify({
 
             "success":
-                True,
-
-            "analyzing":
-                bool(
-                    APP_STATE[
-                        "analyzing"
-                    ]
-                ),
-
-            "ready":
-                bool(
-                    APP_STATE[
-                        "ready"
-                    ]
-                ),
-
-            "source_name":
-                APP_STATE[
-                    "source_name"
-                ],
-
-            "stage":
-                APP_STATE[
-                    "stage"
-                ],
-
-            "stage_message":
-                APP_STATE[
-                    "stage_message"
-                ],
-
-            "elapsed_seconds":
-                float(
-                    elapsed
-                ),
+                False,
 
             "error":
-                APP_STATE[
-                    "error"
-                ],
-        })
+                str(
+                    exc
+                ),
+
+        }), 500
 
 
 # ============================================================
@@ -3430,6 +3515,82 @@ def get_summary():
                 "summary"
             ],
     })
+
+
+# ============================================================
+# Upload progress & Overview statistics
+# ============================================================
+@app.route("/api/status", methods=["GET"])
+def get_analysis_status():
+    with STATE_LOCK:
+        result = dict(ANALYSIS_STATUS)
+        started_at = result.pop("started_at")
+        result["elapsed_seconds"] = (
+            time.monotonic() - started_at if result["analyzing"] and started_at
+            else result["elapsed_final"]
+        )
+        result["ready"] = bool(APP_STATE["ready"]) and not result["analyzing"]
+    result["success"] = True
+    return jsonify(result)
+
+
+def top_counts(frame, field, limit=5):
+    if field not in frame.columns: return []
+    values = frame[field].dropna()
+    values = values[~values.astype(str).str.strip().str.lower().isin(["", "nan", "none", "null", "inf", "-inf"])]
+    counts = values.astype(str).value_counts().head(limit)
+    return [{"name": str(k), "value": int(v)} for k, v in counts.items()]
+
+
+def global_shap_importance(frame, sample_size=40):
+    if frame.empty: return []
+    sample = frame.sample(n=min(len(frame), sample_size), random_state=42)
+    X = sample[config.ML_FEATURES].astype(np.float32)
+    explainer = get_shap_explainer()
+    with SHAP_LOCK:
+        raw = explainer.shap_values(X, check_additivity=False)
+    if isinstance(raw, list):
+        values = np.asarray(raw[ATTACK_CLASS_INDEX])
+    else:
+        values = np.asarray(raw)
+        if values.ndim == 3:
+            values = values[:, :, ATTACK_CLASS_INDEX]
+    if values.shape != X.shape:
+        raise ValueError(f"SHAP output shape {values.shape} does not match ML inputs {X.shape}.")
+    importance = np.mean(np.abs(values), axis=0)
+    order = np.argsort(importance)[::-1][:6]
+    return [{"name": get_feature_label(str(config.ML_FEATURES[i])), "value": float(importance[i])} for i in order]
+
+
+@app.route("/api/overview", methods=["GET"])
+def get_overview():
+    if not APP_STATE["ready"]:
+        return jsonify({"success": False, "error": "No analysis is currently available."}), 404
+    with STATE_LOCK:
+        overview = OVERVIEW_CACHE
+    if overview is None:
+        return jsonify({"success": False, "error": "Overview data is not prepared."}), 503
+    return jsonify({"success": True, "overview": overview})
+
+
+# ============================================================
+# Events page and timeline
+# ============================================================
+
+@app.route("/events", methods=["GET"])
+def events_page():
+    return render_template("events.html")
+
+
+@app.route("/api/events/timeline", methods=["GET"])
+def events_timeline():
+    if not APP_STATE["ready"]:
+        return jsonify({"success": False, "error": "No analysis is currently available."}), 404
+    with STATE_LOCK:
+        timeline = TIMELINE_CACHE
+    if timeline is None:
+        return jsonify({"success": False, "error": "Timeline data is not prepared."}), 503
+    return jsonify(timeline)
 
 
 # ============================================================
@@ -3520,8 +3681,18 @@ def get_flows():
 
     filtered = flow_df
 
+    from_ts = request.args.get("from_ts", type=float)
+    to_ts = request.args.get("to_ts", type=float)
+    if from_ts is not None and math.isfinite(from_ts):
+        filtered = filtered[pd.to_numeric(filtered["timestamp"], errors="coerce") >= from_ts]
+    if to_ts is not None and math.isfinite(to_ts):
+        filtered = filtered[pd.to_numeric(filtered["timestamp"], errors="coerce") < to_ts]
 
+
+
+    # --------------------------------------------------------
     # Prediction filter
+    # --------------------------------------------------------
 
     if prediction_filter in {
         "Attack",
@@ -3537,7 +3708,9 @@ def get_flows():
         ]
 
 
+    # --------------------------------------------------------
     # Protocol filter
+    # --------------------------------------------------------
 
     if (
         protocol_filter
@@ -3556,6 +3729,7 @@ def get_flows():
                 6
             )
         ]
+
 
     elif (
         protocol_filter
@@ -3576,7 +3750,22 @@ def get_flows():
         ]
 
 
-    # Search IP, port and protocol.
+    elif protocol_filter == "ICMP":
+        filtered = filtered[
+            pd.to_numeric(filtered["ip_protocol"], errors="coerce").isin([1, 58])
+        ]
+
+
+    # --------------------------------------------------------
+    # Search
+    #
+    # Search:
+    #   - source IP
+    #   - destination IP
+    #   - source port
+    #   - destination port
+    #   - protocol name
+    # --------------------------------------------------------
 
     if search_query:
 
@@ -3643,7 +3832,23 @@ def get_flows():
         )
 
 
+        timestamp_text = (
+            pd.to_datetime(
+                pd.to_numeric(filtered["timestamp"], errors="coerce"),
+                unit="s", errors="coerce", utc=True
+            )
+            .dt.tz_convert("Asia/Kuala_Lumpur")
+            .dt.strftime("%Y-%m-%d %H:%M:%S")
+            .fillna("")
+            .str.lower()
+        )
+
         search_mask = (
+
+            timestamp_text.str.contains(
+                search_query, na=False, regex=False
+            )
+            |
 
             src_ip_text.str.contains(
                 search_query,
@@ -3690,7 +3895,12 @@ def get_flows():
         ]
 
 
-    # Newest flow first.
+    # --------------------------------------------------------
+    # Sort by newest timestamp first.
+    #
+    # Flow ID remains an internal identifier, but timestamp is
+    # the primary visible ordering for the event-style table.
+    # --------------------------------------------------------
 
     filtered = (
         filtered
@@ -3983,33 +4193,40 @@ if __name__ == "__main__":
         "=" * 70
     )
 
+
     print(
         "NetworkIDS Dashboard"
     )
 
+
     print(
         "=" * 70
     )
+
 
     print(
         f"Random Forest : "
         f"{MODEL_FILE}"
     )
 
+
     print(
         "Upload limit  : "
         "512 MB"
     )
+
 
     print(
         "Runtime       : "
         f"{CURRENT_RUNTIME_DIR}"
     )
 
+
     print(
         "Dashboard     : "
         "http://127.0.0.1:5000"
     )
+
 
     print(
         "=" * 70
@@ -4021,9 +4238,5 @@ if __name__ == "__main__":
         port=5000,
 
         debug=True,
-
-        # Prevent Flask debug mode from loading the model twice.
         use_reloader=False,
-
-        threaded=True,
     )

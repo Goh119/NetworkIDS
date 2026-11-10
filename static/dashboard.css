@@ -395,8 +395,7 @@ button {
             0.8fr
         );
 
-    column-gap: 70px;
-    row-gap: 28px;
+    gap: 70px;
 
     align-items: center;
 
@@ -763,167 +762,40 @@ button {
 
 
 /* ==========================================================
-   4-stage analysis progress
+   Analysis state
    ========================================================== */
 
-.analysis-progress {
-    grid-column:
-        1
-        /
-        -1;
+.analysis-status {
+    margin-top: 16px;
 
-    width: 100%;
+    padding: 15px;
 
-    padding:
-        8px
-        0
-        0;
-
-    align-self: start;
-}
-
-
-.stage-grid {
-    display: grid;
-
-    grid-template-columns:
-        repeat(
-            4,
-            minmax(
-                0,
-                1fr
-            )
-        );
-
-    gap: 26px;
-}
-
-
-.stage-step {
-    min-width: 0;
-}
-
-
-.stage-line {
-    width: 100%;
-
-    height: 2px;
-
-    margin-bottom: 13px;
-
-    border-radius: 999px;
-
-    background: var(--border-strong);
-
-    transition:
-        background 0.2s,
-        box-shadow 0.2s;
-}
-
-
-.stage-title {
-    color: var(--text);
-
-    font-size: 12px;
-
-    font-weight: 700;
-}
-
-
-.stage-state {
-    margin-top: 7px;
-
-    color: var(--muted);
-
-    font-size: 11px;
-
-    font-weight: 600;
-}
-
-
-.stage-step.is-complete .stage-line {
-    background: var(--benign);
-}
-
-
-.stage-step.is-complete .stage-state {
-    color:
+    border:
+        1px solid
         color-mix(
             in srgb,
-            var(--benign) 85%,
-            var(--text)
+            var(--primary) 50%,
+            var(--border)
         );
-}
 
+    border-radius: 10px;
 
-.stage-step.is-active .stage-line {
-    background: var(--primary);
+    display: flex;
 
-    box-shadow:
-        0
-        0
-        0
-        1px
+    align-items: center;
+
+    gap: 13px;
+
+    background:
         color-mix(
             in srgb,
-            var(--primary) 16%,
+            var(--primary) 7%,
             transparent
         );
 }
 
 
-.stage-step.is-active .stage-state {
-    color: var(--primary);
-}
-
-
-.stage-step.is-error .stage-line {
-    background: var(--attack);
-}
-
-
-.stage-step.is-error .stage-state {
-    color: var(--attack);
-}
-
-
-.analysis-progress-footer {
-    margin-top: 24px;
-
-    padding:
-        14px
-        16px;
-
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: center;
-
-    gap: 20px;
-
-    border:
-        1px solid var(--border);
-
-    border-radius: 11px;
-
-    background:
-        color-mix(
-            in srgb,
-            var(--panel) 85%,
-            var(--primary) 4%
-        );
-}
-
-
-.analysis-progress-footer strong {
-    display: block;
-
-    font-size: 13px;
-}
-
-
-.analysis-progress-footer p {
+.analysis-status p {
     margin:
         4px
         0
@@ -931,25 +803,40 @@ button {
 
     color: var(--muted);
 
-    font-size: 11px;
+    font-size: 12px;
 }
 
 
-.analysis-elapsed {
+.spinner {
     flex: 0 0 auto;
 
-    color: var(--muted-strong);
+    width: 23px;
+    height: 23px;
 
-    font-size: 12px;
+    border:
+        3px solid var(--border-strong);
 
-    font-variant-numeric:
-        tabular-nums;
+    border-top-color: var(--primary);
+
+    border-radius: 50%;
+
+    animation:
+        spin
+        0.8s
+        linear
+        infinite;
 }
 
 
-/* ==========================================================
-   Analysis error
-   ========================================================== */
+@keyframes spin {
+    to {
+        transform:
+            rotate(
+                360deg
+            );
+    }
+}
+
 
 .error-box {
     margin-top: 16px;
@@ -2098,11 +1985,6 @@ tbody tr:hover {
     }
 
 
-    .analysis-progress {
-        grid-column: 1;
-    }
-
-
     .kpi-grid {
         grid-template-columns:
             repeat(
@@ -2168,26 +2050,6 @@ tbody tr:hover {
     }
 
 
-    .stage-grid {
-        grid-template-columns:
-            repeat(
-                2,
-                1fr
-            );
-
-        gap:
-            22px
-            18px;
-    }
-
-
-    .analysis-progress-footer {
-        align-items: flex-start;
-
-        flex-direction: column;
-    }
-
-
     .result-title {
         align-items: flex-start;
 
@@ -2250,3 +2112,56 @@ tbody tr:hover {
     }
 
 }
+/* ============================================================
+   Overview additions: preserve original NetworkIDS styling
+   ============================================================ */
+.analysis-progress { grid-column: 1 / -1; width: 100%; padding-top: 8px; align-self: start; }
+.stage-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 26px; }
+.stage-line { height: 3px; background: var(--border-strong); border-radius: 99px; margin-bottom: 13px; }
+.stage-title { font-size: 12px; font-weight: 700; }
+.stage-state { margin-top: 7px; font-size: 11px; color: var(--muted); }
+.stage-step.is-complete .stage-line { background: var(--benign); }
+.stage-step.is-complete .stage-state { color: var(--benign); }
+.stage-step.is-active .stage-line { background: var(--primary); }
+.stage-step.is-active .stage-state { color: var(--primary); }
+.stage-step.is-error .stage-line { background: var(--attack); }
+.stage-step.is-error .stage-state { color: var(--attack); }
+.analysis-progress-footer { margin-top:24px; padding:14px 16px; display:flex; justify-content:space-between; gap:20px; align-items:center; border:1px solid var(--border); border-radius:11px; background:var(--panel); }
+.analysis-progress-footer strong { font-size:13px; }
+.analysis-progress-footer p { margin:4px 0 0; color:var(--muted); font-size:11px; }
+.analysis-elapsed { font-size:12px; color:var(--muted-strong); white-space:nowrap; font-variant-numeric:tabular-nums; }
+#resultsSection { padding-top:44px; }
+.capture-period { margin-top:7px !important; font-size:12px; }
+.results-actions { display:flex; flex-wrap:wrap; align-items:center; gap:13px; }
+.results-nav { display:inline-flex; padding:4px; border:1px solid var(--border); border-radius:10px; background:var(--panel); gap:3px; }
+.results-nav-link { text-decoration:none; color:var(--muted); font-size:12px; font-weight:650; padding:9px 15px; border-radius:7px; }
+.results-nav-link:hover { color:var(--text); }
+.results-nav-link.is-current { color:white; background:var(--primary); }
+.overview-kpis { grid-template-columns:repeat(5,minmax(0,1fr)); }
+.chart-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; align-items:stretch; }
+.chart-card { min-width:0; margin-bottom:0; min-height:285px; }
+.chart-card-wide { grid-column:1 / -1; }
+.chart-content { min-height:205px; display:flex; flex-direction:column; justify-content:center; }
+.chart-empty { color:var(--muted); font-size:13px; text-align:center; padding:40px 10px; }
+.donut-layout { display:flex; align-items:center; justify-content:center; gap:35px; flex-wrap:wrap; }
+.donut-chart { width:180px; height:180px; flex:none; border-radius:50%; display:grid; place-items:center; }
+.donut-inner { width:122px; height:122px; border-radius:50%; background:var(--panel); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; text-align:center; }
+.donut-inner strong { font-size:23px; line-height:1.1; font-variant-numeric:tabular-nums; }
+.donut-inner span { font-size:11px; color:var(--muted); }
+.chart-legend { min-width:130px; display:flex; flex-direction:column; gap:11px; }
+.legend-item { display:flex; justify-content:space-between; align-items:center; gap:16px; font-size:12px; }
+.legend-name { display:flex; align-items:center; gap:8px; color:var(--muted-strong); }
+.legend-swatch { flex:none; height:9px; width:9px; border-radius:50%; }
+.legend-count { font-variant-numeric:tabular-nums; font-weight:650; }
+.hbar-list { display:flex; flex-direction:column; gap:15px; width:100%; }
+.hbar-labels { display:flex; justify-content:space-between; gap:12px; margin-bottom:6px; font-size:12px; }
+.hbar-name { overflow-wrap:anywhere; color:var(--muted-strong); }
+.hbar-count { font-weight:700; font-variant-numeric:tabular-nums; }
+.hbar-track { height:9px; background:var(--track); border-radius:99px; overflow:hidden; }
+.hbar-fill { height:100%; border-radius:99px; min-width:2px; }
+.chart-note { font-size:11px; color:var(--muted); margin-top:12px; }
+.chart-content .chart-empty { margin:auto; }
+@media(max-width:1100px) { .overview-kpis { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+@media(max-width:760px) { .overview-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); } .chart-grid { grid-template-columns:1fr; } .chart-card-wide { grid-column:auto; } .stage-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:22px 18px; } .analysis-progress-footer { align-items:flex-start; flex-direction:column; } .donut-layout { gap:20px; } .results-actions { width:100%; } }
+
+.results-nav-link.is-disabled { opacity:.5; cursor:not-allowed; }

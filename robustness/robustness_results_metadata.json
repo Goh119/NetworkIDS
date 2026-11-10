@@ -1,6 +1,6 @@
 {
   "model": "RandomForestClassifier",
-  "model_path": "C:\\FYP\\NetworkIDS\\random_forest\\rf_model.joblib",
+  "model_path": "C:\\FYP\\NetworkIDS\\support_vector_machine\\svm_model.joblib",
   "test_dataset": "C:\\FYP\\NetworkIDS\\data\\test\\test_multiday.csv",
   "feature_count": 42,
   "features": [
@@ -54,12 +54,12 @@
   "sample_size_per_class": 2000,
   "random_state": 42,
   "scenarios": 8,
-  "baseline_clean_accuracy": 0.9839350751752659,
+  "baseline_clean_accuracy": 0.8840884831385338,
   "sampling_policy": "Correctly classified Attack and Benign test samples; same rows reused across scenarios.",
   "ground_truth_policy": "Ground-truth labels are retained unchanged during perturbation.",
   "nan_policy": "NaN retained; no imputation",
   "evaluation_type": "Controlled feature-level perturbation robustness evaluation",
   "packet_level_modification": false,
-  "results_file": "C:\\FYP\\NetworkIDS\\robustness\\robustness_results.csv",
+  "results_file": "C:\\FYP\\NetworkIDS\\robustness\\svm_robustness_results.csv",
   "report_file": "C:\\FYP\\NetworkIDS\\robustness\\robustness_report.txt"
 }
