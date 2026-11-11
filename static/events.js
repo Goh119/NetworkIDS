@@ -349,3 +349,129 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape" && !$("flowModal").c
         await loadFlows();
     }catch(err){showError(err.message);$("timelineChart").textContent="Timeline unavailable.";}
 })();
+
+// Events filters: HTML-rendered dropdowns remain visible in screen recordings.
+// Keep the original selects and their existing change handlers as the data source.
+(function setupRecordedDropdowns() {
+    const css = document.createElement("link");
+    css.rel = "stylesheet";
+    css.href = "/static/events-dropdown.css";
+    document.head.appendChild(css);
+
+    const all = [];
+    for (const id of ["predictionFilter", "protocolFilter"]) {
+        const select = $(id);
+        if (!select) continue;
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "recordable-select";
+        select.parentNode.insertBefore(wrapper, select);
+        wrapper.appendChild(select);
+        select.classList.add("recordable-native-select");
+        select.tabIndex = -1;
+        select.setAttribute("aria-hidden", "true");
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "recordable-select-trigger";
+        button.setAttribute("aria-haspopup", "listbox");
+        button.setAttribute("aria-expanded", "false");
+        button.setAttribute("aria-label", id === "predictionFilter" ? "Filter by prediction" : "Filter by protocol");
+        const selected = document.createElement("span");
+        selected.className = "recordable-select-label";
+        const chevron = document.createElement("span");
+        chevron.className = "recordable-select-chevron";
+        chevron.setAttribute("aria-hidden", "true");
+        // Draw a native-style chevron in the page so screen recordings capture it.
+        const arrowSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        arrowSvg.setAttribute("viewBox", "0 0 16 16");
+        arrowSvg.setAttribute("width", "14");
+        arrowSvg.setAttribute("height", "14");
+        arrowSvg.setAttribute("fill", "none");
+        arrowSvg.setAttribute("stroke", "currentColor");
+        arrowSvg.setAttribute("stroke-width", "1.8");
+        arrowSvg.setAttribute("stroke-linecap", "round");
+        arrowSvg.setAttribute("stroke-linejoin", "round");
+        const arrowPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        arrowPath.setAttribute("d", "M3.5 6l4.5 4 4.5-4");
+        arrowSvg.appendChild(arrowPath);
+        chevron.appendChild(arrowSvg);
+        button.append(selected, chevron);
+
+        const menu = document.createElement("div");
+        menu.className = "recordable-select-menu hidden";
+        menu.setAttribute("role", "listbox");
+        menu.setAttribute("aria-label", id === "predictionFilter" ? "Prediction options" : "Protocol options");
+        const options = [];
+        for (const option of select.options) {
+            const item = document.createElement("button");
+            item.type = "button";
+            item.className = "recordable-select-option";
+            item.setAttribute("role", "option");
+            item.dataset.value = option.value;
+            item.textContent = option.textContent;
+            item.addEventListener("click", () => {
+                select.value = option.value;
+                select.dispatchEvent(new Event("change", { bubbles: true }));
+                update();
+                close();
+                button.focus();
+            });
+            menu.appendChild(item);
+            options.push(item);
+        }
+        wrapper.append(button, menu);
+
+        function update() {
+            selected.textContent = select.selectedOptions[0]?.textContent || "Select";
+            for (const item of options) {
+                const isSelected = item.dataset.value === select.value;
+                item.classList.toggle("is-selected", isSelected);
+                item.setAttribute("aria-selected", String(isSelected));
+            }
+        }
+        function close() {
+            menu.classList.add("hidden");
+            button.setAttribute("aria-expanded", "false");
+            wrapper.classList.remove("is-open");
+        }
+        function open() {
+            for (const other of all) other.close();
+            menu.classList.remove("hidden");
+            button.setAttribute("aria-expanded", "true");
+            wrapper.classList.add("is-open");
+        }
+        button.addEventListener("click", () => menu.classList.contains("hidden") ? open() : close());
+        button.addEventListener("keydown", (event) => {
+            if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+                event.preventDefault();
+                open();
+                const index = Math.max(0, options.findIndex(item => item.dataset.value === select.value));
+                options[event.key === "ArrowDown" ? index : Math.max(0, index - 1)].focus();
+            }
+        });
+        menu.addEventListener("keydown", (event) => {
+            const index = options.indexOf(document.activeElement);
+            if (event.key === "Escape") {
+                event.preventDefault(); close(); button.focus();
+            } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+                event.preventDefault();
+                const next = (index + (event.key === "ArrowDown" ? 1 : -1) + options.length) % options.length;
+                options[next].focus();
+            } else if (event.key === "Home" || event.key === "End") {
+                event.preventDefault(); options[event.key === "Home" ? 0 : options.length - 1].focus();
+            } else if (event.key === "Tab") {
+                close();
+            }
+        });
+        select.addEventListener("change", update);
+        all.push({ wrapper, close });
+        update();
+    }
+    document.addEventListener("pointerdown", event => {
+        for (const entry of all) if (!entry.wrapper.contains(event.target)) entry.close();
+    });
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape") for (const entry of all) entry.close();
+    });
+})();

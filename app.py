@@ -3,10 +3,11 @@ app.py
 ------
 NetworkIDS - Flask Dashboard Backend.
 
-Single-page FYP prototype for offline PCAP analysis.
+Flask FYP prototype for offline PCAP analysis and timed live capture.
 
-Supported runtime mode:
+Supported runtime modes:
     Upload a PCAP / PCAPNG file.
+    Capture traffic from the default active interface for a fixed duration.
 
 Runtime pipeline:
     PCAP
@@ -138,6 +139,11 @@ DEFAULT_PAGE_SIZE = 25
 MAX_PAGE_SIZE = 100
 
 RELATED_PACKET_LIMIT = 100
+
+# Live capture is intentionally bounded for the FYP prototype.
+MIN_CAPTURE_SECONDS = 10
+MAX_CAPTURE_SECONDS = 300
+MAX_CAPTURE_PACKETS = 100_000
 
 
 # ============================================================
@@ -416,6 +422,8 @@ ANALYSIS_STATUS = {
     "stage_message": "No analysis in progress.",
     "started_at": None,
     "elapsed_final": 0.0,
+    "capture_duration": None,
+    "capture_started_at": None,
 }
 OVERVIEW_CACHE = None
 TIMELINE_CACHE = None
@@ -873,6 +881,76 @@ def run_command(
 
 
     return completed
+
+
+# ============================================================
+# Timed live capture (default network interface, no UI selection)
+# ============================================================
+
+def get_active_capture_interface():
+    """Use Scapy's default IPv4 route; never capture across all adapters."""
+    try:
+        from scapy.all import conf
+        # Route lookup does not send traffic. It identifies the default route.
+        iface, source_ip, _gateway = conf.route.route("1.1.1.1")
+        if iface is None or str(iface).strip() in ("", "None", "0.0.0.0"):
+            raise RuntimeError("No default IPv4 network interface was found.")
+        if source_ip in (None, "", "0.0.0.0"):
+            raise RuntimeError("The default network interface has no usable IPv4 address.")
+        return iface
+    except ImportError as exc:
+        raise RuntimeError("Scapy is required for live capture. Install it in the project virtual environment.") from exc
+    except RuntimeError:
+        raise
+    except Exception as exc:
+        raise RuntimeError(f"Unable to identify the active network interface: {exc}") from exc
+
+
+def capture_live_traffic(duration_seconds, output_path):
+    """Capture packets, write PCAP incrementally, and enforce safety limits."""
+    from scapy.all import PcapWriter, sniff
+
+    iface = get_active_capture_interface()
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    captured_packets = 0
+    captured_bytes = 0
+    writer = None
+
+    with STATE_LOCK:
+        ANALYSIS_STATUS["capture_started_at"] = time.monotonic()
+        ANALYSIS_STATUS["stage_message"] = (
+            f"Capturing on the default network interface for {duration_seconds} seconds..."
+        )
+
+    def save_packet(packet):
+        nonlocal captured_packets, captured_bytes, writer
+        packet_length = len(bytes(packet))
+        if captured_bytes + packet_length > MAX_UPLOAD_BYTES:
+            raise RuntimeError("Live capture reached the 512 MB limit.")
+        if writer is None:
+            writer = PcapWriter(str(output_path), append=False, sync=False)
+        writer.write(packet)
+        captured_packets += 1
+        captured_bytes += packet_length
+
+    try:
+        # No restrictive port filter: let the existing parser handle protocols.
+        # store=False prevents unbounded Scapy packet retention in memory.
+        sniff(iface=iface, prn=save_packet, store=False,
+              timeout=duration_seconds, count=MAX_CAPTURE_PACKETS)
+    except PermissionError as exc:
+        raise RuntimeError("Packet capture permission denied. Check Npcap and run with adequate privileges.") from exc
+    except OSError as exc:
+        raise RuntimeError(f"Live capture failed. Check Npcap and the network adapter: {exc}") from exc
+    finally:
+        if writer is not None:
+            writer.close()
+
+    if captured_packets == 0 or not output_path.is_file():
+        raise RuntimeError("No packets were captured. Check the active connection, Npcap and capture permissions.")
+
+    return {"packets": captured_packets, "bytes": captured_bytes, "interface": str(iface)}
 
 
 # ============================================================
@@ -3441,6 +3519,7 @@ def analyze_upload():
                 "analyzing": True, "ready": False, "error": None,
                 "stage": "extract", "stage_message": "Preparing uploaded capture...",
                 "started_at": time.monotonic(), "elapsed_final": 0.0,
+                "capture_duration": None, "capture_started_at": None,
             })
 
         try:
@@ -3488,6 +3567,59 @@ def analyze_upload():
                 ),
 
         }), 500
+
+
+# ============================================================
+# Start live capture and run the existing offline analysis pipeline
+# ============================================================
+
+@app.route("/api/analyze/live", methods=["POST"])
+def analyze_live():
+    # Accept either JSON or form data from the upcoming Live Capture tab.
+    payload = request.get_json(silent=True) if request.is_json else request.form
+    payload = payload or {}
+    raw_seconds = str(payload.get("seconds", "60")).strip()
+    try:
+        duration = int(raw_seconds)
+    except (TypeError, ValueError):
+        return jsonify({"success": False, "error": "Capture duration must be a whole number of seconds."}), 400
+    if not MIN_CAPTURE_SECONDS <= duration <= MAX_CAPTURE_SECONDS:
+        return jsonify({"success": False, "error": "Capture duration must be between 10 and 300 seconds."}), 400
+
+    with STATE_LOCK:
+        if ANALYSIS_STATUS["analyzing"]:
+            return jsonify({"success": False, "error": "An analysis or capture is already running."}), 409
+        ANALYSIS_STATUS.update({
+            "analyzing": True, "ready": False, "error": None,
+            "stage": "capture", "stage_message": "Preparing live capture...",
+            "started_at": time.monotonic(), "elapsed_final": 0.0,
+            "capture_duration": duration, "capture_started_at": None,
+        })
+
+    def worker():
+        try:
+            reset_application_state()
+            reset_runtime_directory()
+            runtime_input = CURRENT_RUNTIME_DIR / "input.pcap"
+            result = capture_live_traffic(duration, runtime_input)
+            mark_stage("extract", f"Captured {result['packets']:,} packets. Extracting features...")
+            analyze_runtime_capture(runtime_input, source_name="capture_live.pcap")
+            with STATE_LOCK:
+                ANALYSIS_STATUS.update({
+                    "analyzing": False, "ready": True,
+                    "elapsed_final": time.monotonic() - ANALYSIS_STATUS["started_at"],
+                    "stage_message": "Live capture and analysis completed.",
+                })
+        except Exception as exc:
+            app.logger.exception("Live capture or analysis failed")
+            with STATE_LOCK:
+                ANALYSIS_STATUS.update({
+                    "analyzing": False, "ready": False, "error": str(exc),
+                    "elapsed_final": time.monotonic() - ANALYSIS_STATUS["started_at"],
+                })
+
+    threading.Thread(target=worker, daemon=True).start()
+    return jsonify({"success": True, "analyzing": True, "stage": "capture"}), 202
 
 
 # ============================================================
@@ -3542,6 +3674,14 @@ def get_analysis_status():
             else result["elapsed_final"]
         )
         result["ready"] = bool(APP_STATE["ready"]) and not result["analyzing"]
+        capture_started = result.pop("capture_started_at", None)
+        capture_duration = result.get("capture_duration")
+        result["capture_remaining_seconds"] = (
+            max(0, math.ceil(capture_duration - (time.monotonic() - capture_started)))
+            if result["analyzing"] and result["stage"] == "capture"
+            and capture_started is not None and capture_duration is not None
+            else None
+        )
     result["success"] = True
     return jsonify(result)
 
@@ -3640,6 +3780,9 @@ def export_pdf_report():
 
 @app.route("/events", methods=["GET"])
 def events_page():
+    if not APP_STATE["ready"]:
+        return redirect(url_for("index"))
+
     return render_template("events.html")
 
 

@@ -78,3 +78,97 @@
 .integrity-reason-label.tampered { color: var(--tampered); background: color-mix(in srgb,var(--tampered) 12%,transparent); border-color: color-mix(in srgb,var(--tampered) 28%,var(--border)); }
 .integrity-reason-label.indicator { color: var(--primary); background: color-mix(in srgb,var(--primary) 12%,transparent); border-color: color-mix(in srgb,var(--primary) 28%,var(--border)); }
 .integrity-reason-label.unknown { color: var(--muted); background: var(--panel-soft); }
+
+/* dropdowns. */
+.recordable-select {
+    position: relative;
+    flex: 0 0 170px;
+    min-width: 155px;
+    z-index: 1;
+}
+.recordable-select.is-open { z-index: 30; }
+.recordable-native-select {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    opacity: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+.recordable-select-trigger {
+    width: 100%;
+    min-height: 43px;
+    padding: 10px 13px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--text);
+    background: var(--panel-light);
+    border: 1px solid var(--border-strong);
+    border-radius: 9px;
+    text-align: left;
+    font-size: 13px;
+    cursor: pointer;
+    transition: border-color .15s, background .15s, box-shadow .15s;
+}
+.recordable-select-trigger:hover,
+.recordable-select.is-open .recordable-select-trigger {
+    border-color: var(--primary);
+    background: var(--panel-soft);
+}
+.recordable-select-trigger:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+.recordable-select-chevron {
+    color: var(--muted-strong);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 14px;
+    height: 14px;
+    line-height: 1;
+    transition: transform .15s;
+}
+.recordable-select.is-open .recordable-select-chevron { transform: rotate(180deg); }
+.recordable-select-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    padding: 5px;
+    background: var(--panel);
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    max-height: 220px;
+    overflow-y: auto;
+}
+.recordable-select-option {
+    display: block;
+    width: 100%;
+    padding: 10px 12px;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--text);
+    text-align: left;
+    font-size: 13px;
+    cursor: pointer;
+}
+.recordable-select-option:hover,
+.recordable-select-option:focus-visible {
+    background: color-mix(in srgb, var(--primary) 15%, var(--panel));
+    outline: none;
+}
+.recordable-select-option.is-selected {
+    background: color-mix(in srgb, var(--primary) 19%, var(--panel));
+    color: var(--primary);
+    font-weight: 700;
+}
+@media (max-width: 760px) {
+    .recordable-select { flex: 1 1 155px; }
+}

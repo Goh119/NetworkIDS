@@ -2161,6 +2161,13 @@ tbody tr:hover {
 .hbar-fill { height:100%; border-radius:99px; min-width:2px; }
 .chart-note { font-size:11px; color:var(--muted); margin-top:12px; }
 .chart-content .chart-empty { margin:auto; }
+.vbar-list { display:flex; align-items:flex-start; justify-content:center; gap:18px; width:100%; }
+.vbar-col { flex:1 1 0; min-width:0; max-width:88px; display:flex; flex-direction:column; align-items:center; gap:6px; }
+.vbar-track { width:100%; max-width:56px; height:150px; display:flex; align-items:flex-end; background:var(--track); border-radius:8px 8px 4px 4px; overflow:hidden; }
+.vbar-fill { width:100%; min-height:3px; border-radius:8px 8px 0 0; }
+.vbar-count { font-size:12px; font-weight:700; font-variant-numeric:tabular-nums; }
+.vbar-name { font-size:11.5px; line-height:1.25; color:var(--muted-strong); text-align:center; overflow-wrap:anywhere; }
+@media(max-width:760px) { .vbar-list { gap:10px; } }
 @media(max-width:1100px) { .overview-kpis { grid-template-columns:repeat(3,minmax(0,1fr)); } }
 @media(max-width:760px) { .overview-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); } .chart-grid { grid-template-columns:1fr; } .chart-card-wide { grid-column:auto; } .stage-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:22px 18px; } .analysis-progress-footer { align-items:flex-start; flex-direction:column; } .donut-layout { gap:20px; } .results-actions { width:100%; } }
 
@@ -2169,3 +2176,100 @@ tbody tr:hover {
 /* PDF Export action: added without changing existing dashboard layout. */
 .export-pdf-button { display:inline-flex; align-items:center; justify-content:center; gap:8px; white-space:nowrap; font-size:13px; font-weight:650; }
 .export-pdf-button span { font-size:18px; line-height:1; }
+
+
+/* Upload page: input mode tabs and timed live capture. */
+.capture-mode-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    padding: 5px;
+    margin-bottom: 24px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--panel-light);
+}
+.capture-mode-tab {
+    padding: 11px 9px;
+    border: 0;
+    border-radius: 9px;
+    color: var(--muted-strong);
+    background: transparent;
+    font-size: 13px;
+    font-weight: 650;
+    cursor: pointer;
+}
+.capture-mode-tab:hover:not(:disabled) { color: var(--text); }
+.capture-mode-tab.is-selected { color: white; background: var(--primary); }
+.capture-mode-tab:disabled { cursor: not-allowed; opacity: .6; }
+.capture-warning {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 13px;
+    padding: 12px 14px;
+    border: 1px solid color-mix(in srgb, var(--warning) 55%, var(--border));
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--warning) 9%, var(--panel));
+    color: var(--text);
+    font-size: 12px;
+    line-height: 1.6;
+}
+.capture-warning strong { color: var(--warning); }
+.capture-warning span { color: var(--muted-strong); }
+.live-capture-settings { display: flex; flex-direction: column; gap: 9px; }
+.live-capture-settings label { font-size: 13px; font-weight: 650; }
+.live-capture-settings input {
+    width: 100%;
+    padding: 13px 14px;
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    outline: none;
+    background: var(--panel-light);
+    color: var(--text);
+}
+.live-capture-settings input:focus { border-color: var(--primary); }
+.live-capture-settings small, .live-capture-note { color: var(--muted); font-size: 12px; line-height: 1.6; }
+.live-output-name {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    padding: 14px;
+    margin-top: 8px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--panel-light);
+    font-size: 12px;
+}
+.live-output-name span { color: var(--muted); }
+.live-output-name strong { overflow-wrap: anywhere; }
+.live-capture-note { margin: 12px 0 0; }
+.stage-grid.has-capture { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 18px; }
+@media (max-width: 760px) {
+    .stage-grid.has-capture { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 18px; }
+}
+
+/* Dashboard only: count-based vertical charts for ports and integrity rules. */
+.count-chart { width: 100%; padding-top: 3px; }
+.count-chart-layout { display: grid; grid-template-columns: 39px minmax(0, 1fr); gap: 8px; }
+.count-chart-y-axis, .count-chart-plot { position: relative; height: 155px; }
+.count-chart-tick { position: absolute; right: 0; transform: translateY(50%); font-size: 10px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.count-chart-gridline { position: absolute; right: 0; left: 0; border-top: 1px solid var(--border); opacity: .75; }
+.count-chart-bars { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(var(--column-count), minmax(0, 1fr)); gap: clamp(8px, 2vw, 25px); padding: 0 15px; align-items: end; }
+.count-chart-bar-slot { height: 100%; min-width: 0; display: flex; justify-content: center; align-items: flex-end; }
+.count-chart-bar { width: min(100%, 49px); min-height: 3px; border-radius: 6px 6px 0 0; cursor: help; transition: filter .15s ease; }
+.count-chart-bar:hover, .count-chart-bar:focus-visible { filter: brightness(1.2); outline: 2px solid var(--muted-strong); outline-offset: 2px; }
+.count-chart-x-labels { margin: 8px 0 0 47px; display: grid; grid-template-columns: repeat(var(--column-count), minmax(0, 1fr)); gap: clamp(8px, 2vw, 25px); padding: 0 15px; }
+.count-chart-x-labels span { min-width: 0; overflow-wrap: anywhere; text-align: center; font-size: 11px; font-weight: 650; color: var(--muted-strong); }
+.count-chart-axis-titles { margin-top: 8px; display: flex; justify-content: space-between; gap: 10px; color: var(--muted); font-size: 10px; }
+.count-rule-legend { margin-top: 15px; padding-top: 12px; border-top: 1px solid var(--border); display: grid; gap: 9px; }
+.count-rule-legend-item { display: grid; grid-template-columns: 9px minmax(0, 1fr) auto; align-items: center; gap: 8px; color: var(--muted-strong); font-size: 11px; }
+.count-rule-legend-dot { width: 9px; height: 9px; border-radius: 3px; }
+.count-rule-legend-item strong { color: var(--text); font-variant-numeric: tabular-nums; }
+.count-chart-rules .count-chart-y-axis, .count-chart-rules .count-chart-plot { height: 130px; }
+@media (max-width: 760px) {
+    .count-chart-layout { grid-template-columns: 31px minmax(0, 1fr); }
+    .count-chart-x-labels { margin-left: 39px; }
+    .count-chart-bars, .count-chart-x-labels { gap: 7px; padding-left: 6px; padding-right: 6px; }
+}

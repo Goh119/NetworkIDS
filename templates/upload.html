@@ -90,7 +90,7 @@
             <div class="landing-intro">
 
                 <span class="eyebrow">
-                    Offline Network Traffic Analysis
+                    Offline & Live Network Traffic Analysis
                 </span>
 
 
@@ -101,131 +101,83 @@
 
 
                 <p>
-                    Upload a packet capture to classify network flows,
-                    review packet header integrity, and understand the
-                    features that influenced each prediction.
+                    Upload a PCAP or capture network traffic for a set duration.
+                    Then review network flow classifications, packet header
+                    integrity, and explainable results.
                 </p>
 
             </div>
 
 
+            <!-- Choose between an existing PCAP and a timed live capture. -->
             <section class="upload-card">
-
-                <div class="upload-heading">
-
-                    <div>
-
-                        <h3>
-                            Upload packet capture
-                        </h3>
-
-                        <p>
-                            Select a PCAP file to begin the analysis.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <label
-                    id="uploadDropZone"
-                    class="upload-drop-zone"
-                    for="pcapFile"
-                >
-
-                    <div class="upload-icon">
-                        ↑
-                    </div>
-
-
-                    <strong>
-                        Choose a PCAP file
-                    </strong>
-
-
-                    <span>
-                        or drag and drop it here
-                    </span>
-
-
-                    <small>
-                        Supported: .pcap, .pcapng · Maximum 512 MB
-                    </small>
-
-                </label>
-
-
-                <input
-                    id="pcapFile"
-                    type="file"
-                    accept=".pcap,.pcapng"
-                    hidden
-                >
-
-
-                <div
-                    id="selectedFilePanel"
-                    class="selected-file-panel hidden"
-                >
-
-                    <div>
-
-                        <span class="selected-file-label">
-                            Selected file
-                        </span>
-
-                        <strong id="selectedFile">
-                            -
-                        </strong>
-
-                        <span
-                            id="selectedFileSize"
-                            class="selected-file-size"
-                        >
-                            -
-                        </span>
-
-                    </div>
-
-
-                    <button
-                        id="clearSelectedFile"
-                        class="clear-file-button"
-                        type="button"
-                        aria-label="Clear selected file"
-                    >
-                        ×
+                <div class="capture-mode-tabs" role="group" aria-label="Traffic source">
+                    <button id="uploadModeButton" class="capture-mode-tab is-selected" type="button" aria-pressed="true">
+                        Upload PCAP
                     </button>
-
+                    <button id="liveModeButton" class="capture-mode-tab" type="button" aria-pressed="false">
+                        Live Capture
+                    </button>
                 </div>
 
+                <!-- Existing PCAP upload: unchanged backend endpoint. -->
+                <div id="uploadModePanel">
+                    <div class="upload-heading">
+                        <h3>Upload packet capture</h3>
+                        <p>Select a PCAP file to begin the analysis.</p>
+                    </div>
+                    <label id="uploadDropZone" class="upload-drop-zone" for="pcapFile">
+                        <div class="upload-icon">↑</div>
+                        <strong>Choose a PCAP file</strong>
+                        <span>or drag and drop it here</span>
+                        <small>Supported: .pcap, .pcapng · Maximum 512 MB</small>
+                    </label>
+                    <input id="pcapFile" type="file" accept=".pcap,.pcapng" hidden>
+                    <div id="selectedFilePanel" class="selected-file-panel hidden">
+                        <div>
+                            <span class="selected-file-label">Selected file</span>
+                            <strong id="selectedFile">-</strong>
+                            <span id="selectedFileSize" class="selected-file-size">-</span>
+                        </div>
+                        <button id="clearSelectedFile" class="clear-file-button" type="button" aria-label="Clear selected file">×</button>
+                    </div>
+                    <div id="largeFileWarning" class="capture-warning hidden" role="alert">
+                        <strong>Large PCAP — analysis may take a long time.</strong>
+                        <span>This file is 5 MB or larger. In previous tests, some files of this size took around an hour to process. Actual time can vary widely with packet count and computer performance. Keep this page open to monitor progress.</span>
+                    </div>
+                    <button id="analyzeUploadButton" class="button button-primary analyze-button" type="button" disabled>
+                        Analyze Network Traffic
+                    </button>
+                </div>
 
-                <button
-                    id="analyzeUploadButton"
-                    class="button button-primary analyze-button"
-                    type="button"
-                    disabled
-                >
-                    Analyze Network Traffic
-                </button>
-
-
-                <div
-                    id="errorBox"
-                    class="error-box hidden"
-                ></div>
-
+                <!-- Live traffic is saved to PCAP before the existing analysis starts. -->
+                <div id="liveModePanel" class="hidden">
+                    <div class="upload-heading">
+                        <h3>Capture network traffic</h3>
+                        <p>Capture traffic from the active network connection, then analyse the saved PCAP.</p>
+                    </div>
+                    <div class="live-capture-settings">
+                        <label for="captureSeconds">Capture duration (seconds)</label>
+                        <input id="captureSeconds" type="number" min="10" max="300" step="1" value="60" inputmode="numeric">
+                        <small>10–300 seconds. The network interface is selected automatically.</small>
+                        <div class="live-output-name"><span>Output PCAP</span><strong>capture_live.pcap</strong></div>
+                    </div>
+                    <button id="startCaptureButton" class="button button-primary analyze-button" type="button">
+                        Start Capture
+                    </button>
+                    <p class="live-capture-note">Analysis begins after capture finishes. This is not continuous real-time detection.</p>
+                </div>
+                <div id="errorBox" class="error-box hidden" role="alert"></div>
             </section>
-
 
             <!-- Analysis progress: shown only while processing -->
             <section id="analysisProgress" class="analysis-progress hidden" aria-live="polite">
-                <div class="stage-grid">
-                    <div id="step-extract" class="stage-step is-pending"><div class="stage-line"></div><div class="stage-title">1. Extract</div><div class="stage-state">Waiting</div></div>
-                    <div id="step-build" class="stage-step is-pending"><div class="stage-line"></div><div class="stage-title">2. Build flows</div><div class="stage-state">Waiting</div></div>
-                    <div id="step-headers" class="stage-step is-pending"><div class="stage-line"></div><div class="stage-title">3. Check headers</div><div class="stage-state">Waiting</div></div>
-                    <div id="step-classify" class="stage-step is-pending"><div class="stage-line"></div><div class="stage-title">4. Classify</div><div class="stage-state">Waiting</div></div>
+                <div id="analysisStageGrid" class="stage-grid">
+                    <div id="step-capture" class="stage-step is-pending hidden"><div class="stage-line"></div><div class="stage-title">1. Capture</div><div class="stage-state">Waiting</div></div>
+                    <div id="step-extract" class="stage-step is-pending"><div class="stage-line"></div><div class="stage-title" data-step-label="extract">1. Extract</div><div class="stage-state">Waiting</div></div>
+                    <div id="step-build" class="stage-step is-pending"><div class="stage-line"></div><div class="stage-title" data-step-label="build">2. Build flows</div><div class="stage-state">Waiting</div></div>
+                    <div id="step-headers" class="stage-step is-pending"><div class="stage-line"></div><div class="stage-title" data-step-label="headers">3. Check headers</div><div class="stage-state">Waiting</div></div>
+                    <div id="step-classify" class="stage-step is-pending"><div class="stage-line"></div><div class="stage-title" data-step-label="classify">4. Classify</div><div class="stage-state">Waiting</div></div>
                 </div>
                 <div class="analysis-progress-footer">
                     <div><strong id="analysisStatusTitle">Analyzing network traffic</strong><p id="analysisStatusText">Preparing analysis...</p></div>
@@ -233,9 +185,6 @@
                 </div>
             </section>
         </section>
-
-
-
 
     </main>
     <script src="{{ url_for('static', filename='upload.js') }}"></script>
