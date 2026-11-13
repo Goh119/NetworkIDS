@@ -2,112 +2,46 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>
-        NetworkIDS Upload
-    </title>
-
-    <link
-        rel="stylesheet"
-        href="{{ url_for('static', filename='dashboard.css') }}"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> NetworkIDS Upload </title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
 </head>
 
-
 <body>
-
-    <!-- ===================================================== -->
     <!-- Header -->
-    <!-- ===================================================== -->
-
     <header class="topbar">
-
         <div class="brand">
-
-            <div class="brand-mark">
-                N
-            </div>
-
-
+            <div class="brand-mark"> N </div>
             <div>
-
-                <h1>
-                    NetworkIDS
-                </h1>
-
-                <p>
-                    Explainable Header-Flow Network Traffic Analysis
-                </p>
-
+                <h1> NetworkIDS </h1>
+                <p> Explainable Header-Flow Network Traffic Analysis </p>
             </div>
-
         </div>
-
 
         <div class="topbar-actions">
-
-            <div class="model-badge">
-                Random Forest IDS
-            </div>
-
-
-            <button
-                id="themeToggle"
-                class="theme-toggle"
-                type="button"
-                aria-label="Toggle light and dark theme"
-                title="Toggle theme"
-            >
+            <div class="model-badge"> Random Forest IDS </div>
+            <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle light and dark theme" title="Toggle theme">
                 ☾
             </button>
-
         </div>
-
     </header>
 
-
-
     <main class="page-container">
-
-
-        <!-- ================================================= -->
         <!-- Initial upload view -->
-        <!-- ================================================= -->
-
-        <section
-            id="landingSection"
-            class="landing-section"
-        >
-
+        <section id="landingSection" class="landing-section">
             <div class="landing-intro">
-
-                <span class="eyebrow">
-                    Offline & Live Network Traffic Analysis
-                </span>
-
-
+                <span class="eyebrow"> Offline & Live Network Traffic Analysis </span>
                 <h2>
                     Analyse network traffic with
                     clear, explainable results.
                 </h2>
-
-
                 <p>
                     Upload a PCAP or capture network traffic for a set duration.
                     Then review network flow classifications, packet header
                     integrity, and explainable results.
                 </p>
-
             </div>
-
 
             <!-- Choose between an existing PCAP and a timed live capture. -->
             <section class="upload-card">
@@ -173,19 +107,41 @@
             <!-- Analysis progress: shown only while processing -->
             <section id="analysisProgress" class="analysis-progress hidden" aria-live="polite">
                 <div id="analysisStageGrid" class="stage-grid">
-                    <div id="step-capture" class="stage-step is-pending hidden"><div class="stage-line"></div><div class="stage-title">1. Capture</div><div class="stage-state">Waiting</div></div>
-                    <div id="step-extract" class="stage-step is-pending"><div class="stage-line"></div><div class="stage-title" data-step-label="extract">1. Extract</div><div class="stage-state">Waiting</div></div>
-                    <div id="step-build" class="stage-step is-pending"><div class="stage-line"></div><div class="stage-title" data-step-label="build">2. Build flows</div><div class="stage-state">Waiting</div></div>
-                    <div id="step-headers" class="stage-step is-pending"><div class="stage-line"></div><div class="stage-title" data-step-label="headers">3. Check headers</div><div class="stage-state">Waiting</div></div>
-                    <div id="step-classify" class="stage-step is-pending"><div class="stage-line"></div><div class="stage-title" data-step-label="classify">4. Classify</div><div class="stage-state">Waiting</div></div>
+                    <div id="step-capture" class="stage-step is-pending hidden">
+                        <div class="stage-line"></div>
+                        <div class="stage-title">1. Capture</div>
+                        <div class="stage-state">Waiting</div>
+                    </div>
+                    <div id="step-extract" class="stage-step is-pending">
+                        <div class="stage-line"></div>
+                        <div class="stage-title" data-step-label="extract">1. Extract</div>
+                        <div class="stage-state">Waiting</div>
+                    </div>
+                    <div id="step-build" class="stage-step is-pending">
+                        <div class="stage-line"></div>
+                        <div class="stage-title" data-step-label="build">2. Build flows</div>
+                        <div class="stage-state">Waiting</div>
+                    </div>
+                    <div id="step-headers" class="stage-step is-pending">
+                        <div class="stage-line"></div>
+                        <div class="stage-title" data-step-label="headers">3. Check headers</div>
+                        <div class="stage-state">Waiting</div>
+                    </div>
+                    <div id="step-classify" class="stage-step is-pending">
+                        <div class="stage-line"></div>
+                        <div class="stage-title" data-step-label="classify">4. Classify</div>
+                        <div class="stage-state">Waiting</div>
+                    </div>
                 </div>
                 <div class="analysis-progress-footer">
-                    <div><strong id="analysisStatusTitle">Analyzing network traffic</strong><p id="analysisStatusText">Preparing analysis...</p></div>
+                    <div>
+                        <strong id="analysisStatusTitle">Analyzing network traffic</strong>
+                        <p id="analysisStatusText">Preparing analysis...</p>
+                    </div>
                     <div id="analysisElapsed" class="analysis-elapsed">Elapsed: 00:00</div>
                 </div>
             </section>
         </section>
-
     </main>
     <script src="{{ url_for('static', filename='upload.js') }}"></script>
 </body>

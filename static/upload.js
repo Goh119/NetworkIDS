@@ -2,7 +2,10 @@
 const MAX_FILE_BYTES = 512 * 1024 * 1024;
 const LARGE_FILE_BYTES = 5 * 1024 * 1024;
 const ANALYSIS_STAGES = ["extract", "build", "headers", "classify"];
-const $ = id => document.getElementById(id);
+
+function getElement(id) {
+    return document.getElementById(id);
+}
 
 let currentMode = "upload";
 let busy = false;
@@ -20,23 +23,23 @@ function formatSize(bytes) {
 
 // Show errors without replacing the current page.
 function showError(message) {
-    $("errorBox").textContent = message;
-    $("errorBox").classList.remove("hidden");
+    getElement("errorBox").textContent = message;
+    getElement("errorBox").classList.remove("hidden");
 }
 function hideError() {
-    $("errorBox").textContent = "";
-    $("errorBox").classList.add("hidden");
+    getElement("errorBox").textContent = "";
+    getElement("errorBox").classList.add("hidden");
 }
 
 // Keep the same light/dark theme as Dashboard and Events.
 function applyTheme(theme) {
     document.documentElement.setAttribute("data-theme", theme);
-    $("themeToggle").textContent = theme === "light" ? "☀" : "☾";
+    getElement("themeToggle").textContent = theme === "light" ? "☀" : "☾";
     localStorage.setItem("networkids-theme", theme);
 }
 const savedTheme = localStorage.getItem("networkids-theme");
 applyTheme(["light", "dark"].includes(savedTheme) ? savedTheme : "dark");
-$("themeToggle").addEventListener("click", () => {
+getElement("themeToggle").addEventListener("click", () => {
     applyTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark");
 });
 
@@ -45,25 +48,25 @@ function switchMode(mode) {
     if (busy) return;
     currentMode = mode;
     const live = mode === "live";
-    $("uploadModePanel").classList.toggle("hidden", live);
-    $("liveModePanel").classList.toggle("hidden", !live);
-    $("uploadModeButton").classList.toggle("is-selected", !live);
-    $("liveModeButton").classList.toggle("is-selected", live);
-    $("uploadModeButton").setAttribute("aria-pressed", String(!live));
-    $("liveModeButton").setAttribute("aria-pressed", String(live));
-    $("analysisProgress").classList.add("hidden");
+    getElement("uploadModePanel").classList.toggle("hidden", live);
+    getElement("liveModePanel").classList.toggle("hidden", !live);
+    getElement("uploadModeButton").classList.toggle("is-selected", !live);
+    getElement("liveModeButton").classList.toggle("is-selected", live);
+    getElement("uploadModeButton").setAttribute("aria-pressed", String(!live));
+    getElement("liveModeButton").setAttribute("aria-pressed", String(live));
+    getElement("analysisProgress").classList.add("hidden");
     hideError();
 }
-$("uploadModeButton").addEventListener("click", () => switchMode("upload"));
-$("liveModeButton").addEventListener("click", () => switchMode("live"));
+getElement("uploadModeButton").addEventListener("click", () => switchMode("upload"));
+getElement("liveModeButton").addEventListener("click", () => switchMode("live"));
 
 // Validate files and show a non-blocking warning for PCAPs >= 5 MB.
 function resetFile() {
     if (busy) return;
-    $("pcapFile").value = "";
-    $("selectedFilePanel").classList.add("hidden");
-    $("largeFileWarning").classList.add("hidden");
-    $("analyzeUploadButton").disabled = true;
+    getElement("pcapFile").value = "";
+    getElement("selectedFilePanel").classList.add("hidden");
+    getElement("largeFileWarning").classList.add("hidden");
+    getElement("analyzeUploadButton").disabled = true;
     hideError();
 }
 function setFile(file) {
@@ -79,26 +82,26 @@ function setFile(file) {
         showError("The selected PCAP exceeds the 512 MB upload limit.");
         return;
     }
-    $("selectedFile").textContent = file.name;
-    $("selectedFileSize").textContent = formatSize(file.size);
-    $("selectedFilePanel").classList.remove("hidden");
-    $("largeFileWarning").classList.toggle("hidden", file.size < LARGE_FILE_BYTES);
-    $("analyzeUploadButton").disabled = busy;
+    getElement("selectedFile").textContent = file.name;
+    getElement("selectedFileSize").textContent = formatSize(file.size);
+    getElement("selectedFilePanel").classList.remove("hidden");
+    getElement("largeFileWarning").classList.toggle("hidden", file.size < LARGE_FILE_BYTES);
+    getElement("analyzeUploadButton").disabled = busy;
 }
-$("pcapFile").addEventListener("change", event => setFile(event.target.files[0]));
-$("clearSelectedFile").addEventListener("click", resetFile);
+getElement("pcapFile").addEventListener("change", event => setFile(event.target.files[0]));
+getElement("clearSelectedFile").addEventListener("click", resetFile);
 
 // Support drag-and-drop using the same file validation.
 for (const eventName of ["dragenter", "dragover", "dragleave", "drop"]) {
-    $("uploadDropZone").addEventListener(eventName, event => {
+    getElement("uploadDropZone").addEventListener(eventName, event => {
         event.preventDefault();
         event.stopPropagation();
         if (busy) return;
-        $("uploadDropZone").classList.toggle("drag-over", ["dragenter", "dragover"].includes(eventName));
+        getElement("uploadDropZone").classList.toggle("drag-over", ["dragenter", "dragover"].includes(eventName));
         if (eventName === "drop" && event.dataTransfer.files.length) {
             const transfer = new DataTransfer();
             transfer.items.add(event.dataTransfer.files[0]);
-            $("pcapFile").files = transfer.files;
+            getElement("pcapFile").files = transfer.files;
             setFile(transfer.files[0]);
         }
     });
@@ -107,30 +110,30 @@ for (const eventName of ["dragenter", "dragover", "dragleave", "drop"]) {
 // Disable both modes while capturing or processing.
 function setBusy(value) {
     busy = value;
-    $("pcapFile").disabled = value;
-    $("clearSelectedFile").disabled = value;
-    $("captureSeconds").disabled = value;
-    $("uploadModeButton").disabled = value;
-    $("liveModeButton").disabled = value;
-    $("analyzeUploadButton").disabled = value || !$("pcapFile").files.length;
-    $("startCaptureButton").disabled = value;
-    $("analyzeUploadButton").textContent = value ? "Analyzing..." : "Analyze Network Traffic";
-    $("startCaptureButton").textContent = value ? "Capturing / Analyzing..." : "Start Capture";
+    getElement("pcapFile").disabled = value;
+    getElement("clearSelectedFile").disabled = value;
+    getElement("captureSeconds").disabled = value;
+    getElement("uploadModeButton").disabled = value;
+    getElement("liveModeButton").disabled = value;
+    getElement("analyzeUploadButton").disabled = value || !getElement("pcapFile").files.length;
+    getElement("startCaptureButton").disabled = value;
+    getElement("analyzeUploadButton").textContent = value ? "Analyzing..." : "Analyze Network Traffic";
+    getElement("startCaptureButton").textContent = value ? "Capturing / Analyzing..." : "Start Capture";
 }
 
 // Render the capture stage (live only) and four existing analysis stages.
 function renderProgress(data) {
-    $("analysisProgress").classList.remove("hidden");
+    getElement("analysisProgress").classList.remove("hidden");
     const live = currentMode === "live";
     const stages = live ? ["capture", ...ANALYSIS_STAGES] : ANALYSIS_STAGES;
-    $("step-capture").classList.toggle("hidden", !live);
-    $("analysisStageGrid").classList.toggle("has-capture", live);
+    getElement("step-capture").classList.toggle("hidden", !live);
+    getElement("analysisStageGrid").classList.toggle("has-capture", live);
     ANALYSIS_STAGES.forEach((name, index) => {
-        $(`step-${name}`).querySelector(".stage-title").textContent = `${index + (live ? 2 : 1)}. ${["Extract", "Build flows", "Check headers", "Classify"][index]}`;
+        getElement(`step-${name}`).querySelector(".stage-title").textContent = `${index + (live ? 2 : 1)}. ${["Extract", "Build flows", "Check headers", "Classify"][index]}`;
     });
     const stageIndex = stages.indexOf(data.stage);
     stages.forEach((name, index) => {
-        const element = $(`step-${name}`);
+        const element = getElement(`step-${name}`);
         element.classList.remove("is-pending", "is-active", "is-complete", "is-error");
         let state = "Waiting", style = "is-pending";
         if (data.ready || data.stage === "prepare" || (stageIndex >= 0 && index < stageIndex)) {
@@ -144,14 +147,14 @@ function renderProgress(data) {
         element.querySelector(".stage-state").textContent = state;
     });
     const capturing = data.stage === "capture" && data.analyzing;
-    $("analysisStatusTitle").textContent = data.error ? "Analysis failed"
+    getElement("analysisStatusTitle").textContent = data.error ? "Analysis failed"
         : data.ready ? "Analysis completed" : capturing ? "Capturing network traffic" : "Analyzing network traffic";
     const remaining = data.capture_remaining_seconds;
     const countDown = capturing && Number.isFinite(Number(remaining)) && remaining !== null && remaining !== undefined
         ? ` (${formatSeconds(remaining)} remaining)` : "";
-    $("analysisStatusText").textContent = data.error || (data.ready
+    getElement("analysisStatusText").textContent = data.error || (data.ready
         ? "The traffic analysis is complete." : (data.stage_message || "Preparing analysis...") + countDown);
-    $("analysisElapsed").textContent = `Elapsed: ${formatSeconds(data.elapsed_seconds ?? (Date.now() - startedAt) / 1000)}`;
+    getElement("analysisElapsed").textContent = `Elapsed: ${formatSeconds(data.elapsed_seconds ?? (Date.now() - startedAt) / 1000)}`;
 }
 
 // Share one API helper for upload, live capture, and status polling.
@@ -212,8 +215,8 @@ async function startAnalysis(path, options, initialStage, initialMessage) {
 }
 
 // Upload an existing PCAP/PCAPNG.
-$("analyzeUploadButton").addEventListener("click", () => {
-    const file = $("pcapFile").files[0];
+getElement("analyzeUploadButton").addEventListener("click", () => {
+    const file = getElement("pcapFile").files[0];
     if (!file || busy) return;
     const body = new FormData();
     body.append("file", file);
@@ -221,9 +224,9 @@ $("analyzeUploadButton").addEventListener("click", () => {
 });
 
 // Capture for 10-300 seconds, then automatically analyse the saved PCAP.
-$("startCaptureButton").addEventListener("click", () => {
+getElement("startCaptureButton").addEventListener("click", () => {
     if (busy) return;
-    const raw = $("captureSeconds").value.trim();
+    const raw = getElement("captureSeconds").value.trim();
     const duration = Number(raw);
     if (!raw || !Number.isInteger(duration) || duration < 10 || duration > 300) {
         showError("Capture duration must be a whole number between 10 and 300 seconds.");

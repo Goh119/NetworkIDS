@@ -1,32 +1,125 @@
 /* Events-specific styles. dashboard.css supplies the shared NetworkIDS theme. */
-.events-page { padding-top: 44px; }
-.events-page .result-title { align-items: center; }
-.events-page .results-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 14px; }
-.events-page .results-nav { display: flex; gap: 5px; background: var(--panel-light); border: 1px solid var(--border); border-radius: 10px; padding: 4px; }
-.events-page .results-nav-link { text-decoration: none; color: var(--muted); border-radius: 7px; padding: 9px 15px; font-size: 12px; font-weight: 650; }
-.events-page .results-nav-link:hover { color: var(--text); }
-.events-page .results-nav-link.is-current { background: var(--primary); color: white; }
-.new-analysis-link { display: inline-flex; align-items: center; text-decoration: none; }
-.events-timeline { height: 240px; width: 100%; overflow: hidden; }
-.events-timeline svg { width: 100%; height: 100%; display: block; }
-.events-timeline .timeline-bar { cursor: pointer; }
-.events-timeline .timeline-bar:hover { opacity: .78; }
-.events-timeline .timeline-bar.selected { stroke: var(--text); stroke-width: 1.5; }
-.events-timeline .timeline-axis { fill: var(--muted); font: 11px Inter, 'Segoe UI', sans-serif; }
-.events-timeline .timeline-grid { stroke: var(--border); stroke-width: 1; }
-.events-legend { display: flex; align-items: center; flex-wrap: wrap; gap: 18px; margin-top: 8px; color: var(--muted); font-size: 12px; }
-.time-filter-info { margin-left: auto; }
-.events-page .filter-row { flex-wrap: wrap; }
-.events-page th:last-child, .events-page td:last-child { text-align: center; }
-.integrity-inline { display: inline-block; padding: 5px 9px; border-radius: 999px; font-size: 10px; font-weight: 700; }
-.integrity-inline.intact { background: color-mix(in srgb,var(--benign) 12%,transparent); color: var(--benign); }
-.integrity-inline.suspicious { background: color-mix(in srgb,var(--warning) 12%,transparent); color: var(--warning); }
-.integrity-inline.tampered { background: color-mix(in srgb,var(--tampered) 12%,transparent); color: var(--tampered); }
-.events-page .table-wrapper { overflow-x: auto; }
-.events-page table { min-width: 1300px; }
-.modal-panel .table-wrapper table { min-width: 850px; }
-.shap-axis, .shap-row { grid-template-columns: 180px 110px 1fr 80px; }
-.shap-row { display: grid; gap: 12px; }
+.events-page { 
+    padding-top: 44px; 
+}
+.events-page .result-title { 
+    align-items: center; 
+}
+.events-page .results-actions { 
+    display: flex; 
+    align-items: center; 
+    flex-wrap: wrap; 
+    gap: 14px; 
+}
+.events-page .results-nav { 
+    display: flex; 
+    gap: 5px; 
+    background: var(--panel-light); 
+    border: 1px solid var(--border); 
+    border-radius: 10px; 
+    padding: 4px; 
+}
+.events-page .results-nav-link { 
+    text-decoration: none; 
+    color: var(--muted); 
+    border-radius: 7px; 
+    padding: 9px 15px; 
+    font-size: 12px; 
+    font-weight: 650; 
+}
+.events-page .results-nav-link:hover { 
+    color: var(--text); 
+}
+.events-page .results-nav-link.is-current { 
+    background: var(--primary); 
+    color: white; 
+}
+.new-analysis-link { 
+    display: inline-flex; 
+    align-items: center; 
+    text-decoration: none; 
+}
+.events-timeline { 
+    height: 240px; 
+    width: 100%; 
+    overflow: hidden; 
+}
+.events-timeline svg { 
+    width: 100%; 
+    height: 100%; 
+    display: block; 
+}
+.events-timeline .timeline-bar { 
+    cursor: pointer; 
+}
+.events-timeline .timeline-bar:hover { 
+    opacity: .78; 
+}
+.events-timeline .timeline-bar.selected { 
+    stroke: var(--text); 
+    stroke-width: 1.5; 
+}
+.events-timeline .timeline-axis { 
+    fill: var(--muted); 
+    font: 11px Inter, 'Segoe UI', sans-serif; 
+}
+.events-timeline .timeline-grid { 
+    stroke: var(--border); 
+    stroke-width: 1; 
+}
+.events-legend { 
+    display: flex; 
+    align-items: center; 
+    flex-wrap: wrap; 
+    gap: 18px; 
+    margin-top: 8px; 
+    color: var(--muted); 
+    font-size: 12px; 
+}
+.time-filter-info { 
+    margin-left: auto; 
+}
+.events-page .filter-row { 
+    flex-wrap: wrap; 
+}
+.events-page th:last-child, .events-page td:last-child { 
+    text-align: center; 
+}
+.integrity-inline { 
+    display: inline-block; 
+    padding: 5px 9px; 
+    border-radius: 999px; 
+    font-size: 10px; 
+    font-weight: 700; 
+}
+.integrity-inline.intact { 
+    background: color-mix(in srgb,var(--benign) 12%,transparent); 
+    color: var(--benign); 
+}
+.integrity-inline.suspicious { 
+    background: color-mix(in srgb,var(--warning) 12%,transparent); 
+    color: var(--warning); 
+}
+.integrity-inline.tampered { 
+    background: color-mix(in srgb,var(--tampered) 12%,transparent); 
+    color: var(--tampered); 
+}
+.events-page .table-wrapper { 
+    overflow-x: auto; 
+}
+.events-page table { 
+    min-width: 1300px; 
+}
+.modal-panel .table-wrapper table { 
+    min-width: 850px; 
+}
+.shap-axis, .shap-row { 
+    grid-template-columns: 180px 110px 1fr 80px; 
+}
+.shap-row { 
+    display: grid; 
+    gap: 12px; 
+}
 @media(max-width:760px) {
     .events-page { padding-top: 24px; }
     .events-page .result-title { align-items: flex-start; }
@@ -35,9 +128,7 @@
     .shap-row { grid-template-columns: 1fr; }
 }
 
-/* ==========================================================
-   Packet integrity explanation — original theme
-   ========================================================== */
+/* Packet integrity explanation — original theme */
 .integrity-explanation {
     margin-top: 18px;
     padding: 16px 18px;
@@ -50,11 +141,20 @@
     font-size: 13px;
     color: var(--text);
 }
-#additionalIndicatorsSection:not(.hidden) { margin-top: 20px; }
-.integrity-rules-table { width: 100%; min-width: 0 !important; }
+#additionalIndicatorsSection:not(.hidden) { 
+    margin-top: 20px; 
+}
+.integrity-rules-table { 
+    width: 100%; 
+    min-width: 0 !important; 
+}
 .integrity-rules-table th:last-child,
-.integrity-rules-table td:last-child { text-align: right; }
-.integrity-rules-table td:nth-child(2) { white-space: normal; }
+.integrity-rules-table td:last-child { 
+    text-align: right; 
+}
+.integrity-rules-table td:nth-child(2) { 
+    white-space: normal; 
+}
 .integrity-note {
     margin: 16px 0 0;
     font-size: 11px;
@@ -62,24 +162,52 @@
     color: var(--muted);
 }
 
-/* ==========================================================
-   Compact packet integrity findings (status + actual rule)
-   ========================================================== */
-.integrity-labels { display: flex; align-items: flex-start; flex-wrap: wrap; gap: 9px; }
+/* Compact packet integrity findings (status + actual rule) */
+.integrity-labels { 
+    display: flex; 
+    align-items: flex-start; 
+    flex-wrap: wrap; 
+    gap: 9px; 
+}
 .integrity-reason-label {
-    display: inline-flex; align-items: center; max-width: 100%;
-    padding: 8px 12px; border-radius: 9px;
-    font-size: 12px; font-weight: 650; line-height: 1.5;
-    white-space: normal; overflow-wrap: anywhere;
+    display: inline-flex; 
+    align-items: center; 
+    max-width: 100%;
+    padding: 8px 12px; 
+    border-radius: 9px;
+    font-size: 12px; 
+    font-weight: 650; 
+    line-height: 1.5;
+    white-space: normal; 
+    overflow-wrap: anywhere;
     border: 1px solid var(--border);
 }
-.integrity-reason-label.intact { color: var(--benign); background: color-mix(in srgb,var(--benign) 12%,transparent); border-color: color-mix(in srgb,var(--benign) 28%,var(--border)); }
-.integrity-reason-label.suspicious { color: var(--warning); background: color-mix(in srgb,var(--warning) 12%,transparent); border-color: color-mix(in srgb,var(--warning) 28%,var(--border)); }
-.integrity-reason-label.tampered { color: var(--tampered); background: color-mix(in srgb,var(--tampered) 12%,transparent); border-color: color-mix(in srgb,var(--tampered) 28%,var(--border)); }
-.integrity-reason-label.indicator { color: var(--primary); background: color-mix(in srgb,var(--primary) 12%,transparent); border-color: color-mix(in srgb,var(--primary) 28%,var(--border)); }
-.integrity-reason-label.unknown { color: var(--muted); background: var(--panel-soft); }
+.integrity-reason-label.intact { 
+    color: var(--benign); 
+    background: color-mix(in srgb,var(--benign) 12%,transparent); 
+    border-color: color-mix(in srgb,var(--benign) 28%,var(--border)); 
+}
+.integrity-reason-label.suspicious { 
+    color: var(--warning); 
+    background: color-mix(in srgb,var(--warning) 12%,transparent); 
+    border-color: color-mix(in srgb,var(--warning) 28%,var(--border)); 
+}
+.integrity-reason-label.tampered { 
+    color: var(--tampered); 
+    background: color-mix(in srgb,var(--tampered) 12%,transparent); 
+    border-color: color-mix(in srgb,var(--tampered) 28%,var(--border)); 
+}
+.integrity-reason-label.indicator { 
+    color: var(--primary); 
+    background: color-mix(in srgb,var(--primary) 12%,transparent); 
+    border-color: color-mix(in srgb,var(--primary) 28%,var(--border)); 
+}
+.integrity-reason-label.unknown { 
+    color: var(--muted); 
+    background: var(--panel-soft); 
+}
 
-/* dropdowns. */
+/* dropdowns */
 .recordable-select {
     position: relative;
     flex: 0 0 170px;
