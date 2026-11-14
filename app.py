@@ -220,7 +220,7 @@ def json_safe(value):
     if isinstance(value, (np.integer, np.int8, np.int16, np.int32, np.int64)):
         return int(value)
 
-    if isinstance(value( np.floating, np.float16, np.float32, np.float64)):
+    if isinstance(value, ( np.floating, np.float16, np.float32, np.float64)):
         if np.isnan(value):
             return None
 
@@ -1799,6 +1799,7 @@ def analyze_upload():
                     ANALYSIS_STATUS["elapsed_final"] = time.monotonic() - ANALYSIS_STATUS["started_at"]
                     ANALYSIS_STATUS["stage_message"] = "Analysis completed."
             except Exception as exc:
+                app.logger.exception("PCAP analysis failed")
                 with STATE_LOCK:
                     ANALYSIS_STATUS["analyzing"] = False
                     ANALYSIS_STATUS["ready"] = False
