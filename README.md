@@ -1,6 +1,24 @@
 # NetworkIDS
 
-**Explainable and Robust Header-Flow Based Network Traffic Analysis for Threat Classification and Frame Integrity**
+An Explainable and Robust L2-L4 Header and Flow-Based Intrusion Detection System.
+
+## Project Objectives
+
+1. Extract L2-L4 header and flow features from network traffic.
+2. Train a machine learning model for traffic classification.
+3. Provide explainable predictions using SHAP.
+4. Validate packet header integrity using rule-based checks.
+5. Evaluate model robustness under controlled L2-L4 header perturbations.
+
+## Technologies
+
+- Python
+- Scapy
+- Pandas
+- NumPy
+- Scikit-learn
+- SHAP
+- Matplotlib
 
 ## 1. System Overview
 
