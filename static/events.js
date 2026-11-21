@@ -565,7 +565,7 @@ async function openFlowModal(flowId, tableBadge) {
 
     } catch (err) {
         if (activeFlowId === id) {
-            getElement("integrityLoading").textContent = err.message;
+            getElement("integrityLabels").textContent = err.message;
 
             if (getElement("flowInformation").textContent === "Loading...") {
                 getElement("flowInformation").textContent = err.message;
@@ -869,11 +869,7 @@ document.addEventListener("keydown", function(e) {
 
 // Create custom dropdowns that remain visible in screen recordings.
 (function setupRecordedDropdowns() {
-    const css = document.createElement("link");
-    css.rel = "stylesheet";
-    css.href = "/static/events-dropdown.css";
-    document.head.appendChild(css);
-
+    // Dropdown styles are already included in events.css.
     const all = [];
 
     for (const id of ["predictionFilter", "protocolFilter"]) {

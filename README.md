@@ -1,3 +1,4 @@
+
 # NetworkIDS
 
 An Explainable and Robust L2-L4 Header and Flow-Based Intrusion Detection System.
@@ -13,6 +14,7 @@ An Explainable and Robust L2-L4 Header and Flow-Based Intrusion Detection System
 ## Technologies
 
 - Python
+- Flask
 - Scapy
 - Pandas
 - NumPy
@@ -26,7 +28,7 @@ NetworkIDS is a Final Year Project (FYP) prototype of a Network Intrusion Detect
 
 The system extracts Layer 2–Layer 4 packet header and flow features from uploaded PCAP/PCAPNG files or timed live network captures. It uses a trained Random Forest model to classify network flows as Attack or Benign, SHAP (SHapley Additive exPlanations) to explain model predictions, and independent rule-based checks to assess packet header integrity.
 
-NetworkIDS provides a Flask-based web interface for reviewing analysis results, investigating individual flows and exporting security analysis reports. It supports Windows native deployment and Linux Docker deployment.
+NetworkIDS provides a Flask-based web interface for reviewing analysis results, investigating individual flows and exporting security analysis reports. The application supports Windows and macOS native deployment and Linux Docker deployment.
 
 ## 2. Main Features
 
@@ -62,10 +64,11 @@ flowchart TD
 
 | Component | Requirement |
 | --- | --- |
-| Operating system | Windows or Linux (Ubuntu recommended for Docker deployment) |
+| Operating system | Windows, macOS or Linux |
 | Python | A version compatible with the project dependencies and trained model |
 | Python dependencies | Listed in `requirements.txt` |
 | Windows live capture | Npcap |
+| macOS live capture | Network capture permissions |
 | Linux Docker deployment | Docker Engine and Docker Compose plugin |
 | Machine learning model | Pre-trained Random Forest model configured in `src/config.py` |
 | Web browser | A modern browser such as Chrome, Edge or Firefox |
@@ -74,7 +77,9 @@ Main Python libraries: Flask, Scapy, NumPy, pandas, scikit-learn, joblib, SHAP a
 
 ## 5. Setup and Installation
 
-Download or clone the NetworkIDS project and make sure the trained Random Forest model is available before starting the application. Run the following commands from the project root (the directory containing `app.py`).
+Download or clone the NetworkIDS project and make sure the trained Random Forest model is available before starting the application.
+
+All commands should be executed from the project root directory containing `app.py`.
 
 ### 5.1 Windows — Native Deployment
 
@@ -83,7 +88,9 @@ Download or clone the NetworkIDS project and make sure the trained Random Forest
 - Python: <https://www.python.org/downloads/>
 - Npcap: <https://npcap.com/#download>
 
-Npcap is required for live packet capture on Windows. If it is already installed and working, reinstallation is unnecessary. Use an Administrator PowerShell session if capture permissions require it.
+Npcap is required for live packet capture on Windows. If it is already installed and working, reinstallation is unnecessary.
+
+Use an Administrator PowerShell session if capture permissions require it.
 
 #### Step 2: Open the project directory
 
@@ -91,7 +98,7 @@ Npcap is required for live packet capture on Windows. If it is already installed
 cd C:\NetworkIDS
 ```
 
-Replace the path with your actual project location if necessary.
+Replace the path with the actual project location if necessary.
 
 #### Step 3: Create and activate a virtual environment
 
@@ -120,7 +127,82 @@ Open the following address in a web browser:
 
 To stop the application, press `Ctrl+C` in the terminal.
 
-### 5.2 Ubuntu — Docker Deployment
+### 5.2 macOS — Native Deployment
+
+#### Step 1: Install Python
+
+Download and install Python from:
+
+<https://www.python.org/downloads/macos/>
+
+Ensure Python 3 and pip are available.
+
+macOS provides native packet capture interfaces through BPF (Berkeley Packet Filter). Unlike Windows, Npcap is not required.
+
+However, live capture requires appropriate permissions to access network interfaces.
+
+#### Step 2: Open Terminal and navigate to the project
+
+```bash
+cd ~/NetworkIDS
+```
+
+Replace the path with the actual project location if necessary.
+
+#### Step 3: Create and activate a virtual environment
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+If the virtual environment already exists, only run:
+
+```bash
+source .venv/bin/activate
+```
+
+#### Step 4: Install the Python dependencies
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+Ensure the trained Random Forest model is compatible with the installed Python and scikit-learn versions.
+
+#### Step 5: Start the application
+
+For PCAP Upload and offline analysis, run:
+
+```bash
+python app.py
+```
+
+Open the following address in a web browser:
+
+<http://127.0.0.1:5000>
+
+#### Step 6: Enable Live Capture
+
+Live packet capture on macOS may require elevated privileges to access the network interface.
+
+If live capture fails due to insufficient permissions, stop the application and restart it using:
+
+```bash
+sudo "$(pwd)/.venv/bin/python" app.py
+```
+
+This command uses the Python executable from the project's virtual environment.
+
+Enter the macOS administrator password when prompted.
+
+**Security Note:** Running the entire Flask application with elevated privileges is intended only for local development and testing. It is not recommended for public deployment.
+
+#### Step 7: Stop the application
+
+Press `Ctrl+C` in Terminal.
+
+### 5.3 Ubuntu — Docker Deployment
 
 #### Step 1: Install Docker
 
@@ -156,7 +238,11 @@ From a browser on a machine that can reach the Ubuntu host, open:
 http://<Ubuntu-IP>:5000
 ```
 
-For example, the IDS VM in the project test environment used `http://192.168.72.133:5000`.
+For example, the IDS VM in the project test environment used:
+
+```text
+http://192.168.72.133:5000
+```
 
 To stop the container:
 
@@ -186,6 +272,8 @@ sudo docker compose up -d --build
 3. Click **Start Capture**.
 4. Review the Dashboard after capture and analysis complete.
 
+**Note:** Live capture requires Npcap on Windows and appropriate capture permissions on macOS or Linux.
+
 ### Reviewing Results
 
 1. Review the Dashboard statistics and global SHAP feature importance.
@@ -202,5 +290,5 @@ sudo docker compose up -d --build
 - Live capture is time-bounded rather than continuous real-time intrusion monitoring. It is also limited to 100,000 packets or the configured capture byte limit.
 - The capture interface is selected automatically. NetworkIDS can only analyse traffic visible to that interface.
 - Use compatible dependency versions when loading the supplied trained model.
+- Running live capture may require additional permissions depending on the operating system.
 - Perform traffic capture and security testing only on systems and networks where you have permission.
-
